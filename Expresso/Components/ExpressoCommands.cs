@@ -10,13 +10,13 @@ namespace Expresso.Components
     public static class ExpressoCommands
     {
         #region UI Commands
-        public static readonly RoutedUICommand Statistics = 
+        public static readonly RoutedUICommand OpenSettingsCommand = 
             new(
-                "Show PDF statistics", 
-                "Statistics", 
+                "Open application settings", 
+                "Settings", 
                 typeof(ExpressoCommands), 
                 new InputGestureCollection { 
-                    new KeyGesture(Key.S, ModifierKeys.Control | ModifierKeys.Shift, "Ctrl+Shift+S") 
+                    new KeyGesture(Key.O, ModifierKeys.Control | ModifierKeys.Shift, "Ctrl+Shift+O") 
                 });
         #endregion
     }

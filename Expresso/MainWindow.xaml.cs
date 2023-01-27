@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Expresso.Components;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Highlighting;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -26,6 +29,18 @@ namespace Expresso
         #region Constructor
         public MainWindow()
         {
+            // Support SQL syntax highlight
+            using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Expresso.Resources.sql.xshd.xml"))
+            {
+                using System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(stream);
+                SQLSyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
+                    HighlightingManager.Instance);
+            }
+
+            // Initialize Commands
+            OpenSettingsCommand = new DelegateCommand(() => OpenSettings(), () => true);
+
+            // Initialize window
             InitializeComponent();
         }
         #endregion
@@ -36,6 +51,59 @@ namespace Expresso
 
         private string _BackgroundText = "Open or Create A File to Get Started.";
         public string BackgroundText { get => _BackgroundText; set => SetField(ref _BackgroundText, value); }
+        private string _WindowTitle = "Expressor (Idle)";
+        public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
+        #endregion
+
+        #region Syntax Highlighter
+
+        private IHighlightingDefinition _SQLSyntaxHighlighting;
+        public IHighlightingDefinition SQLSyntaxHighlighting
+        {
+            get => _SQLSyntaxHighlighting;
+            set => SetField(ref _SQLSyntaxHighlighting, value);
+        }
+        #endregion
+
+        #region Custom Commands
+        public ICommand OpenSettingsCommand { get; }
+        #endregion
+
+        #region Delegate Commands
+        public void OpenSettings()
+        {
+
+        }
+        #endregion
+
+        #region Routed UI Commands (Supports Shortcuts)
+        private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+
+        }
+        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+
+        }
+        private void OpenSettingsCommand_Click(object sender, ExecutedRoutedEventArgs e)
+        {
+
+        }
+        private void OpenSettingsCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region Events
+        private void AvalonEditor_OnInitialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+        }
+        private void AvalonEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+        }
         #endregion
 
         #region Data Binding

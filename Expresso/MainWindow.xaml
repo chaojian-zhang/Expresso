@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
         mc:Ignorable="d"
-        Title="Expressor (Idle)" Height="450" Width="800"
+        Title="{Binding WindowTitle}" Height="450" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource self}}">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Gray" />
+            <Setter Property="FontSize" Value="24" />
+        </Style>
+    </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -39,7 +45,7 @@
                 <MenuItem Header="Schedules Stack..."/>
             </MenuItem>
             <MenuItem Header="_Settings">
-                <MenuItem Header="Configure..."/>
+                <MenuItem Header="Configure..." Command="{Binding OpenSettingsCommand}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
@@ -47,6 +53,32 @@
         </Menu>
         <Grid>
             <Label Content="{Binding BackgroundText}" FontSize="64" Foreground="LightGray"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" />
+                    <avalonEdit:TextEditor
+                        Grid.Row="2"
+                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                        Name="textEditor"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting}" 
+                        FontSize="10pt"
+                        FontFamily="Consolas" MinHeight="250" Margin="5"
+                        Initialized="AvalonEditor_OnInitialized" TextChanged="AvalonEditor_OnTextChanged"/>
+                </Grid>
+                <Grid Grid.Column="2">
+
+                </Grid>
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>
