@@ -1,0 +1,52 @@
+﻿<Window x:Class="Expresso.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Expresso"
+        mc:Ignorable="d"
+        Title="Expressor (Idle)" Height="450" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource self}}">
+    <DockPanel LastChildFill="True">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Create..."/>
+                <MenuItem Header="_Open..."/>
+                <MenuItem Header="Save" IsEnabled="False"/>
+                <MenuItem Header="Save As..." IsEnabled="False"/>
+                <Separator/>
+                <MenuItem Header="Export..."/>
+                <Separator/>
+                <MenuItem Header="Close"/>
+                <MenuItem Header="Exit"/>
+            </MenuItem>
+            <MenuItem Header="_Create" IsEnabled="False">
+                <MenuItem Header="_Trigger..."/>
+                <MenuItem Header="_Reader..."/>
+                <MenuItem Header="_Writer..."/>
+                <MenuItem Header="_Variable..."/>
+            </MenuItem>
+            <MenuItem Header="_View" IsEnabled="False">
+                <MenuItem Header="Data Pane"/>
+                <MenuItem Header="Property Pane"/>
+                <MenuItem Header="Readers Pane"/>
+                <MenuItem Header="Variables Pane"/>
+            </MenuItem>
+            <MenuItem Header="_Engine">
+                <MenuItem Header="Submit" IsEnabled="False"/>
+                <Separator/>
+                <MenuItem Header="Create Workflow..."/>
+                <MenuItem Header="Schedules Stack..."/>
+            </MenuItem>
+            <MenuItem Header="_Settings">
+                <MenuItem Header="Configure..."/>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="_About"/>
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Label Content="{Binding BackgroundText}" FontSize="64" Foreground="LightGray"/>
+        </Grid>
+    </DockPanel>
+</Window>
