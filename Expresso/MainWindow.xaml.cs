@@ -4,6 +4,8 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.Odbc;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -18,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using YamlDotNet.Core.Tokens;
+using Expresso.Services;
 
 namespace Expresso
 {
@@ -53,6 +56,8 @@ namespace Expresso
         public string BackgroundText { get => _BackgroundText; set => SetField(ref _BackgroundText, value); }
         private string _WindowTitle = "Expressor (Idle)";
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
+        private string _ResultPreview;
+        public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
         #endregion
 
         #region Syntax Highlighter
@@ -76,6 +81,24 @@ namespace Expresso
         }
         #endregion
 
+        #region Actions
+        public string ExecuteQuery(string query)
+        {
+            try
+            {
+                var oracleConnection = new OdbcConnection($"DSN={ConfigurationHelper.GetConfiguration("ODBC")}");
+                oracleConnection.Open();
+                var dt = new DataTable();
+                dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
+                return dt.ToConsoleTable();
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+        }
+        #endregion
+
         #region Routed UI Commands (Supports Shortcuts)
         private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -96,6 +119,10 @@ namespace Expresso
         #endregion
 
         #region Events
+        private void QueryExitBoxSubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResultPreview = ExecuteQuery(AvalonTextEditor.Text);
+        }
         private void AvalonEditor_OnInitialized(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;

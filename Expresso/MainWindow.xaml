@@ -65,15 +65,23 @@
                         <RowDefinition Height="5" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
+                    <TextBox Text="{Binding ResultPreview}" IsReadOnly="True"
+                        HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                     <GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" />
-                    <avalonEdit:TextEditor
-                        Grid.Row="2"
-                        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-                        Name="textEditor"
-                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting}" 
-                        FontSize="10pt"
-                        FontFamily="Consolas" MinHeight="250" Margin="5"
-                        Initialized="AvalonEditor_OnInitialized" TextChanged="AvalonEditor_OnTextChanged"/>
+                    <DockPanel Grid.Row="2" LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft"
+                                    Margin="2">
+                            <Button Content="Submit" Click="QueryExitBoxSubmitButton_Click"/>
+                        </StackPanel>
+                        <avalonEdit:TextEditor
+                            DockPanel.Dock="Top"
+                            xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                            x:Name="AvalonTextEditor"
+                            SyntaxHighlighting="{Binding SQLSyntaxHighlighting}" 
+                            FontSize="10pt"
+                            FontFamily="Consolas" Margin="5"
+                            Initialized="AvalonEditor_OnInitialized" TextChanged="AvalonEditor_OnTextChanged"/>
+                    </DockPanel>
                 </Grid>
                 <Grid Grid.Column="2">
 
