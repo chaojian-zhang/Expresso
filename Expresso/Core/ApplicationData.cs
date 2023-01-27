@@ -16,7 +16,13 @@ namespace Expresso.Core
     }
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
+        private string _ServiceProvider = "ODBC";
+        private string _DataSourceString = string.Empty;
+        private string _Query = string.Empty;
 
+        public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
+        public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
+        public string Query { get => _Query; set => SetField(ref _Query, value); }
     }
     public class ApplicationSequentialWorkflow : BaseNotifyPropertyChanged
     {
@@ -36,7 +42,7 @@ namespace Expresso.Core
         public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
         public string Query { get => _Query; set => SetField(ref _Query, value); }
     }
-    public class ApplicationDataSource : BaseNotifyPropertyChanged
+    public class ApplicationDataReader : BaseNotifyPropertyChanged
     {
         private ObservableCollection<ApplicationDataQuery> _DataQueries = new();
         private ObservableCollection<ApplicationDataTransform> _Transforms = new();
@@ -60,7 +66,8 @@ namespace Expresso.Core
         #endregion
 
         #region Data Sources
-        private ObservableCollection<ApplicationDataSource> _DataSources = new();
+        private ObservableCollection<ApplicationDataReader> _DataReaders = new();
+        private ObservableCollection<ApplicationOutputWriter> _OutputWriters = new();
         #endregion
 
         #region Data Bindings
@@ -69,8 +76,8 @@ namespace Expresso.Core
         public long Iteration { get => _Iteration; set => SetField(ref _Iteration, value); }
         public DateTime CreationTime { get => _CreationTime; set => SetField(ref _CreationTime, value); }
         public DateTime LastModifiedTime { get => _LastModifiedTime; set => SetField(ref _LastModifiedTime, value); }
-        public ObservableCollection<ApplicationDataSource> DataSources { get => _DataSources; set => SetField(ref _DataSources, value);
+        public ObservableCollection<ApplicationDataReader> DataReaders { get => _DataReaders; set => SetField(ref _DataReaders, value); }
+        public ObservableCollection<ApplicationOutputWriter> OutputWriters { get => _OutputWriters; set => SetField(ref _OutputWriters, value); }
+        #endregion
     }
-    #endregion
-}
 }

@@ -52,14 +52,21 @@ namespace Expresso
             Writer = 3,
             Workflow = 4
         };
-        private Dictionary<string, Func<string, string, string>> DataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        private Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
             { "ODBC", ExecuteODBCQuery },
             { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
             { "CSV", ExecuteCSVQuery },
             { "Excel", ExecuteExcelQuery },
             { "SQLite", ExecuteSQLiteQuery },
-            { "File/Workflow~~", ExecuteThisQuery }
+            { "Expresso", ExecuteThisQuery }
+        };
+        private Dictionary<string, Func<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        {
+            { "ODBC", ExecuteODBCNonQuery },
+            { "CSV", ExecuteCSVNonQuery },
+            { "Text", ExecuteTextNonQuery },
+            { "SQLite", ExecuteSQLiteNonQuery },
         };
         #endregion
 
@@ -72,7 +79,7 @@ namespace Expresso
             set
             {
                 SetField(ref _CurrentEditItemIndex, value);
-                TabControlEditItemChangedEvent(value);
+                ReaderTabControlEditItemChangedEvent(value);
             }
         }
 
@@ -84,16 +91,17 @@ namespace Expresso
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
-        public string[] DataServiceProviderNames => DataServiceProviders.Keys.ToArray();
+        public string[] ReaderDataServiceProviderNames => ReaderDataServiceProviders.Keys.ToArray();
+        public string[] WriterDataServiceProviderNames => WriterDataServiceProviders.Keys.ToArray();
 
         private ApplicationData _ApplicationData;
         public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
-        private ApplicationDataSource _CurrentEditingDataSource;
-        public ApplicationDataSource CurrentEditingDataSource { get => _CurrentEditingDataSource; set => SetField(ref _CurrentEditingDataSource, value); }
+        private ApplicationDataReader _CurrentEditingDataReader;
+        public ApplicationDataReader CurrentEditingDataReader { get => _CurrentEditingDataReader; set => SetField(ref _CurrentEditingDataReader, value); }
         private ApplicationExecutionTrigger _CurrentEditingTrigger;
         public ApplicationExecutionTrigger CurrentEditingTrigger { get => _CurrentEditingTrigger; set => SetField(ref _CurrentEditingTrigger, value); }
         private ApplicationOutputWriter _CurrentEditingWriter;
-        public ApplicationOutputWriter CurrentEditingWriter { get => _CurrentEditingWriter; set => SetField(ref _CurrentEditingWriter, value); }
+        public ApplicationOutputWriter CurrentEditingOutputWriter { get => _CurrentEditingWriter; set => SetField(ref _CurrentEditingWriter, value); }
         private ApplicationSequentialWorkflow _CurrentEditingWorkflow;
         public ApplicationSequentialWorkflow CurrentEditingWorkflow { get => _CurrentEditingWorkflow; set => SetField(ref _CurrentEditingWorkflow, value); }
         #endregion
@@ -119,10 +127,10 @@ namespace Expresso
         #region Actions
         public string ExecuteQuery(string dataSource, string connectionString, string query)
         {
-            if (!DataServiceProviders.ContainsKey(dataSource))
+            if (!ReaderDataServiceProviders.ContainsKey(dataSource))
                 return "Invalid service provider";
             else
-                return DataServiceProviders[dataSource](connectionString, query);
+                return ReaderDataServiceProviders[dataSource](connectionString, query);
         }
         #endregion
 
@@ -144,25 +152,23 @@ namespace Expresso
         }
         private void AddQueryButton_Click(object sender, RoutedEventArgs e)
         {
-            CurrentEditingDataSource.DataQueries.Add(new ApplicationDataQuery());
-            CurrentEditingDataSource.NotifyPropertyChanged(nameof(CurrentEditingDataSource.DataQueries));
+            CurrentEditingDataReader.DataQueries.Add(new ApplicationDataQuery());
+            CurrentEditingDataReader.NotifyPropertyChanged(nameof(CurrentEditingDataReader.DataQueries));
         }
-        private void QueryExitBoxSubmitButton_Click(object sender, RoutedEventArgs e)
+        private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (ApplicationDataQuery query in CurrentEditingDataSource.DataQueries)
-            {
-                ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, AvalonTextEditor.Text);
-            }
+            var query = CurrentEditingDataReader.DataQueries[CurrentEditItemIndex];
+            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, ReaderAvalonTextEditor.Text);
         }
         private void AvalonEditor_OnTextChanged(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
 
-            CurrentEditingDataSource.DataQueries[CurrentEditItemIndex].Query = editor.Text;
+            CurrentEditingDataReader.DataQueries[CurrentEditItemIndex].Query = editor.Text;
         }
-        private void TabControlEditItemChangedEvent(int value)
+        private void ReaderTabControlEditItemChangedEvent(int value)
         {
-            AvalonTextEditor.Text = CurrentEditingDataSource.DataQueries[value].Query;
+            ReaderAvalonTextEditor.Text = CurrentEditingDataReader.DataQueries[value].Query;
         }
         #endregion
 
@@ -204,8 +210,14 @@ namespace Expresso
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Reader;
 
-            ApplicationData.DataSources.Add(new ApplicationDataSource());
-            CurrentEditingDataSource = ApplicationData.DataSources.Last();
+            ApplicationData.DataReaders.Add(new ApplicationDataReader());
+            CurrentEditingDataReader = ApplicationData.DataReaders.Last();
+        }
+        private void MenuItemCreateWriter_Click(object sender, RoutedEventArgs e)
+        {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Writer;
+            ApplicationData.OutputWriters.Add(new ApplicationOutputWriter());
+            CurrentEditingOutputWriter = ApplicationData.OutputWriters.Last();
         }
         #endregion
 

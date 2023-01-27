@@ -33,22 +33,30 @@ namespace Expresso.Core
             writer.Write(data.CreationTime.ToString("yyyy-MM-dd"));
             writer.Write(DateTime.Now.ToString("yyyy-MM-dd"));
 
-            writer.Write(data.DataSources.Count);
-            foreach (ApplicationDataSource dataSource in data.DataSources)
+            writer.Write(data.DataReaders.Count);
+            foreach (ApplicationDataReader dataReader in data.DataReaders)
             {
-                writer.Write(dataSource.DataQueries.Count);
-                foreach (ApplicationDataQuery dataQuery in dataSource.DataQueries)
+                writer.Write(dataReader.DataQueries.Count);
+                foreach (ApplicationDataQuery dataQuery in dataReader.DataQueries)
                 {
                     writer.Write(dataQuery.ServiceProvider);
                     writer.Write(dataQuery.DataSourceString);
                     writer.Write(dataQuery.Query);
                 }
 
-                writer.Write(dataSource.Transforms.Count);
-                foreach (ApplicationDataTransform transform in dataSource.Transforms)
+                writer.Write(dataReader.Transforms.Count);
+                foreach (ApplicationDataTransform transform in dataReader.Transforms)
                 {
 
                 }
+            }
+
+            writer.Write(data.OutputWriters.Count);
+            foreach (ApplicationOutputWriter outputWriter in data.OutputWriters)
+            {
+                writer.Write(outputWriter.ServiceProvider);
+                writer.Write(outputWriter.DataSourceString);
+                writer.Write(outputWriter.Query);
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -62,10 +70,10 @@ namespace Expresso.Core
                 LastModifiedTime = DateTime.Parse(reader.ReadString())
             };
 
-            var dataSourcesCount = reader.ReadInt32();
-            for (int i = 0; i < dataSourcesCount; i++)
+            var dataReadersCount = reader.ReadInt32();
+            for (int i = 0; i < dataReadersCount; i++)
             {
-                ApplicationDataSource source = new();
+                ApplicationDataReader source = new();
 
                 var queriesCount = reader.ReadInt32();
                 for (int j = 0; j < queriesCount; j++)
@@ -80,7 +88,19 @@ namespace Expresso.Core
 
                 var transformsCount = reader.ReadInt32();
 
-                applicationData.DataSources.Add(source);
+                applicationData.DataReaders.Add(source);
+            }
+
+            var outputWritersCount = reader.ReadInt32();
+            for (int i = 0; i < outputWritersCount; i++)
+            {
+                ApplicationOutputWriter writer = new ApplicationOutputWriter()
+                {
+                    ServiceProvider = reader.ReadString(),
+                    DataSourceString = reader.ReadString(),
+                    Query = reader.ReadString()
+                };
+                applicationData.OutputWriters.Add(writer);
             }
 
             return applicationData;

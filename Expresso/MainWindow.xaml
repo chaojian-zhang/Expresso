@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
         xmlns:conv="clr-namespace:Expresso.Converters"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Width="1024" Height="768"
         DataContext="{Binding RelativeSource={RelativeSource self}}">
@@ -40,7 +41,7 @@
             <MenuItem Header="_Create" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
                 <MenuItem Header="_Trigger..."/>
                 <MenuItem Header="_Reader..." Click="MenuItemCreateReader_Click"/>
-                <MenuItem Header="_Writer..."/>
+                <MenuItem Header="_Writer..." Click="MenuItemCreateWriter_Click"/>
             </MenuItem>
             <MenuItem Header="_View" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
                 <MenuItem Header="Data Pane"/>
@@ -85,7 +86,7 @@
                 <TabItem Header="Trigger" Visibility="{Binding CurrentEditingTrigger, Converter={StaticResource ObjectToVisibilityConverter}}">
 
                 </TabItem>
-                <TabItem Header="Reader" Visibility="{Binding CurrentEditingDataSource, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Reader" Visibility="{Binding CurrentEditingDataReader, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -108,11 +109,11 @@
                                                Content="Add A Query to Get Started." 
                                                FontSize="16" 
                                                Foreground="LightGray" 
-                                               Visibility="{Binding CurrentEditingDataSource.DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                                               Visibility="{Binding CurrentEditingDataReader.DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
                                         <TabControl DockPanel.Dock="Top" 
-                                                    Visibility="{Binding CurrentEditingDataSource.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}"
+                                                    Visibility="{Binding CurrentEditingDataReader.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}"
                                                     SelectedIndex="{Binding CurrentEditItemIndex}"
-                                                    ItemsSource="{Binding CurrentEditingDataSource.DataQueries}">
+                                                    ItemsSource="{Binding CurrentEditingDataReader.DataQueries}">
                                             <TabControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Label Content="{Binding ServiceProvider}"/>
@@ -123,7 +124,7 @@
                                                     <StackPanel Orientation="Vertical">
                                                         <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
                                                             <Label Content="Data Service Provider"/>
-                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding DataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                                             </ComboBox>
                                                         </StackPanel>
                                                         <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
@@ -135,21 +136,21 @@
                                             </TabControl.ContentTemplate>
                                         </TabControl>
                                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
-                                            <Button Margin="2 0" Content="Submit" Click="QueryExitBoxSubmitButton_Click"/>
+                                            <Button Margin="2 0" Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
                                             <Button Margin="2 0" Content="Add Query" Click="AddQueryButton_Click"/>
                                             <Button Margin="2 0" Content="Add Expression" Click="AddExpressionButton_Click"/>
                                         </StackPanel>
                                         <DockPanel DockPanel.Dock="Bottom"
-                                                   Visibility="{Binding CurrentEditingDataSource.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                   Visibility="{Binding CurrentEditingDataReader.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}">
                                             <Label DockPanel.Dock="Top" Content="Query"/>
                                             <avalonEdit:TextEditor
-                                            DockPanel.Dock="Bottom" Margin="5"
-                                            BorderThickness="2" BorderBrush="Beige"
-                                            xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-                                            x:Name="AvalonTextEditor"
-                                            SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                                            FontSize="10pt" FontFamily="Consolas" 
-                                            TextChanged="AvalonEditor_OnTextChanged"/>
+                                                DockPanel.Dock="Bottom" Margin="5"
+                                                BorderThickness="2" BorderBrush="Beige"
+                                                x:Name="ReaderAvalonTextEditor"
+                                                ShowLineNumbers="True"
+                                                SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                FontSize="10pt" FontFamily="Consolas" 
+                                                TextChanged="AvalonEditor_OnTextChanged"/>
                                         </DockPanel>
                                     </DockPanel>
                                 </TabItem>
@@ -163,8 +164,34 @@
                         </Grid>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Writer" Visibility="{Binding CurrentEditingWriter, Converter={StaticResource ObjectToVisibilityConverter}}">
-
+                <TabItem Header="Writer" Visibility="{Binding CurrentEditingOutputWriter, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <DockPanel>
+                        <Label DockPanel.Dock="Top" Content="Writer 1" FontWeight="Bold" FontStyle="Italic"/>
+                        <DockPanel DockPanel.Dock="Top">
+                            <StackPanel Orientation="Vertical" DataContext="{Binding CurrentEditingOutputWriter}">
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <Label Content="Data Service Provider"/>
+                                    <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                    <Label Content="Data Source String"/>
+                                    <TextBox Text="{Binding DataSourceString}" MinWidth="250"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+                            <Label Content="Query"/>
+                            <avalonEdit:TextEditor
+                            Margin="5"
+                            BorderThickness="2" BorderBrush="Beige"
+                            x:Name="WriterAvalonTextEditor"
+                            ShowLineNumbers="True"
+                            SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                            FontSize="10pt" FontFamily="Consolas" 
+                            TextChanged="AvalonEditor_OnTextChanged"/>
+                        </DockPanel>
+                    </DockPanel>
                 </TabItem>
                 <TabItem Header="Workflow" Visibility="{Binding CurrentEditingWorkflow, Converter={StaticResource ObjectToVisibilityConverter}}">
 
