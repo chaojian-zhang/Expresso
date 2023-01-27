@@ -21,6 +21,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using YamlDotNet.Core.Tokens;
 using Expresso.Services;
+using Microsoft.AnalysisServices.AdomdClient;
 
 namespace Expresso
 {
@@ -41,11 +42,24 @@ namespace Expresso
             }
 
             // Initialize Commands
-            OpenSettingsCommand = new DelegateCommand(() => OpenSettings(), () => true);
+            CreateVariableCommand = new DelegateCommand(() => { }, () => true);
+            EditVariablesCommand = new DelegateCommand(() => { }, () => true);
 
             // Initialize window
             InitializeComponent();
         }
+        #endregion
+
+        #region Handlers
+        private Dictionary<string, Func<string, string, string>> DataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        {
+            { "ODBC", ExecuteODBCQuery },
+            { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
+            { "CSV", ExecuteCSVQuery },
+            { "Excel", ExecuteExcelQuery },
+            { "SQLite", ExecuteSQLiteQuery },
+            { "File/Workflow~~", ExecuteThisQuery }
+        };
         #endregion
 
         #region Data Binding Properties
@@ -58,6 +72,11 @@ namespace Expresso
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
+        private string _DataServiceProvider = "ODBC";
+        public string DataServiceProvider { get => _DataServiceProvider; set => SetField(ref _DataServiceProvider, value); }
+        private string _DataSourceString;
+        public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
+        public string[] DataServiceProviderNames => DataServiceProviders.Keys.ToArray();
         #endregion
 
         #region Syntax Highlighter
@@ -71,31 +90,20 @@ namespace Expresso
         #endregion
 
         #region Custom Commands
-        public ICommand OpenSettingsCommand { get; }
+        public ICommand CreateVariableCommand { get; }
+        public ICommand EditVariablesCommand { get; }
         #endregion
 
         #region Delegate Commands
-        public void OpenSettings()
-        {
-
-        }
         #endregion
 
         #region Actions
-        public string ExecuteQuery(string query)
+        public string ExecuteQuery(string dataSource, string connectionString, string query)
         {
-            try
-            {
-                var oracleConnection = new OdbcConnection($"DSN={ConfigurationHelper.GetConfiguration("ODBC")}");
-                oracleConnection.Open();
-                var dt = new DataTable();
-                dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
-                return dt.ToConsoleTable();
-            }
-            catch (Exception e)
-            {
-                return $"Result,Message\nError,\"{e.Message}\"";
-            }
+            if (!DataServiceProviders.ContainsKey(dataSource))
+                return "Invalid service provider";
+            else
+                return DataServiceProviders[dataSource](connectionString, query);
         }
         #endregion
 
@@ -108,20 +116,16 @@ namespace Expresso
         {
 
         }
-        private void OpenSettingsCommand_Click(object sender, ExecutedRoutedEventArgs e)
-        {
-
-        }
-        private void OpenSettingsCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-
-        }
         #endregion
 
         #region Events
+        private void AddQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         private void QueryExitBoxSubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            ResultPreview = ExecuteQuery(AvalonTextEditor.Text);
+            ResultPreview = ExecuteQuery(DataServiceProvider, DataSourceString, AvalonTextEditor.Text);
         }
         private void AvalonEditor_OnInitialized(object sender, EventArgs e)
         {
@@ -143,6 +147,58 @@ namespace Expresso
             field = value;
             NotifyPropertyChanged(propertyName);
             return true;
+        }
+        #endregion
+
+        #region Routines
+        public static string ExecuteAnalysisServiceQuery(string connection, string query)
+        {
+            try
+            {
+                using AdomdConnection conn = new AdomdConnection(connection);
+                conn.Open();
+                using AdomdCommand cmd = new AdomdCommand(query.TrimEnd(';'), conn);
+                CellSet result = cmd.ExecuteCellSet();
+                return result.CellSetToTable().ToCSV();
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+        }
+        public static string ExecuteODBCQuery(string connection, string query)
+        {
+            try
+            {
+                var oracleConnection = new OdbcConnection($"DSN={connection}");
+                oracleConnection.Open();
+                var dt = new DataTable();
+                dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
+                return dt.ToConsoleTable();
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+        }
+        private static string ExecuteThisQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string ExecuteSQLiteQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string ExecuteExcelQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string ExecuteCSVQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

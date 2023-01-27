@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="450" Width="800"
+        Title="{Binding WindowTitle}" Width="1024" Height="768"
         DataContext="{Binding RelativeSource={RelativeSource self}}">
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -30,7 +30,6 @@
                 <MenuItem Header="_Trigger..."/>
                 <MenuItem Header="_Reader..."/>
                 <MenuItem Header="_Writer..."/>
-                <MenuItem Header="_Variable..."/>
             </MenuItem>
             <MenuItem Header="_View" IsEnabled="False">
                 <MenuItem Header="Data Pane"/>
@@ -44,8 +43,9 @@
                 <MenuItem Header="Create Workflow..."/>
                 <MenuItem Header="Schedules Stack..."/>
             </MenuItem>
-            <MenuItem Header="_Settings">
-                <MenuItem Header="Configure..." Command="{Binding OpenSettingsCommand}"/>
+            <MenuItem Header="_Variables" IsEnabled="False">
+                <MenuItem Header="Create Variable..." Command="{Binding CreateVariableCommand}"/>
+                <MenuItem Header="Edit Variables..." Command="{Binding EditVariablesCommand}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
@@ -69,17 +69,28 @@
                         HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                     <GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" />
                     <DockPanel Grid.Row="2" LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" FlowDirection="LeftToRight">
+                            <Label Content="Data Service Provider"/>
+                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding DataServiceProvider}" ItemsSource="{Binding DataServiceProviders}">
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" FlowDirection="LeftToRight">
+                            <Label Content="Data Source String"/>
+                            <TextBox Text="" MinWidth="250"/>
+                        </StackPanel>
                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft"
                                     Margin="2">
-                            <Button Content="Submit" Click="QueryExitBoxSubmitButton_Click"/>
+                            <Button Margin="2 0" Content="Submit" Click="QueryExitBoxSubmitButton_Click"/>
+                            <Button Margin="2 0" Content="Add Query" Click="AddQueryButton_Click"/>
                         </StackPanel>
+                        <Label DockPanel.Dock="Top" Content="Query"/>
                         <avalonEdit:TextEditor
-                            DockPanel.Dock="Top"
+                            DockPanel.Dock="Top" Margin="5"
+                            BorderThickness="2" BorderBrush="Beige"
                             xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                             x:Name="AvalonTextEditor"
                             SyntaxHighlighting="{Binding SQLSyntaxHighlighting}" 
-                            FontSize="10pt"
-                            FontFamily="Consolas" Margin="5"
+                            FontSize="10pt" FontFamily="Consolas" 
                             Initialized="AvalonEditor_OnInitialized" TextChanged="AvalonEditor_OnTextChanged"/>
                     </DockPanel>
                 </Grid>

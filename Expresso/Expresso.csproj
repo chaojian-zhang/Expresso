@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="Core\" />
+    <Folder Include="NewFolder\" />
     <Folder Include="PopUps\" />
     <Folder Include="UserControls\" />
   </ItemGroup>
