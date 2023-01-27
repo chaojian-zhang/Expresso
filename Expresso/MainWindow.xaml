@@ -20,12 +20,15 @@
             <Setter Property="Foreground" Value="Gray" />
             <Setter Property="FontSize" Value="24" />
         </Style>
+        <Style TargetType="GridSplitter">
+            <Setter Property="Background" Value="LightBlue" />
+        </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Create..." Click="MenuItemFileCreate_Click"/>
-                <MenuItem Header="_Open..."/>
+                <MenuItem Header="_Open..." Click="MenuItemFileOpen_Click"/>
                 <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
                 <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <Separator/>
@@ -95,8 +98,8 @@
                                 <RowDefinition Height="5" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <TextBox Text="{Binding ResultPreview}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
-                            <GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" />
+                            <TextBox Grid.Row="0" Text="{Binding ResultPreview}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                             <TabControl Grid.Row="2">
                                 <TabItem Header="Data Source">
                                     <DockPanel LastChildFill="True">
@@ -108,6 +111,7 @@
                                                Visibility="{Binding CurrentEditingDataSource.DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
                                         <TabControl DockPanel.Dock="Top" 
                                                     Visibility="{Binding CurrentEditingDataSource.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}"
+                                                    SelectedIndex="{Binding CurrentEditItemIndex}"
                                                     ItemsSource="{Binding CurrentEditingDataSource.DataQueries}">
                                             <TabControl.ItemTemplate>
                                                 <DataTemplate>
@@ -124,7 +128,7 @@
                                                         </StackPanel>
                                                         <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
                                                             <Label Content="Data Source String"/>
-                                                            <TextBox Text="" MinWidth="250"/>
+                                                            <TextBox Text="{Binding DataSourceString}" MinWidth="250"/>
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </DataTemplate>
@@ -145,7 +149,7 @@
                                             x:Name="AvalonTextEditor"
                                             SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                                             FontSize="10pt" FontFamily="Consolas" 
-                                            Initialized="AvalonEditor_OnInitialized" TextChanged="AvalonEditor_OnTextChanged"/>
+                                            TextChanged="AvalonEditor_OnTextChanged"/>
                                         </DockPanel>
                                     </DockPanel>
                                 </TabItem>
@@ -153,6 +157,7 @@
                                 </TabItem>
                             </TabControl>
                         </Grid>
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="10 "/>
                         <Grid Grid.Column="2">
 
                         </Grid>

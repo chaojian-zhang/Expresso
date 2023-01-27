@@ -27,11 +27,63 @@ namespace Expresso.Core
         #region Routines
         private static void WriteToStream(BinaryWriter writer, ApplicationData data)
         {
+            writer.Write(data.Name);
+            writer.Write(data.Description);
+            writer.Write(++data.Iteration);
+            writer.Write(data.CreationTime.ToString("yyyy-MM-dd"));
+            writer.Write(DateTime.Now.ToString("yyyy-MM-dd"));
 
+            writer.Write(data.DataSources.Count);
+            foreach (ApplicationDataSource dataSource in data.DataSources)
+            {
+                writer.Write(dataSource.DataQueries.Count);
+                foreach (ApplicationDataQuery dataQuery in dataSource.DataQueries)
+                {
+                    writer.Write(dataQuery.ServiceProvider);
+                    writer.Write(dataQuery.DataSourceString);
+                    writer.Write(dataQuery.Query);
+                }
+
+                writer.Write(dataSource.Transforms.Count);
+                foreach (ApplicationDataTransform transform in dataSource.Transforms)
+                {
+
+                }
+            }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
         {
-            return new ApplicationData();
+            ApplicationData applicationData = new()
+            {
+                Name = reader.ReadString(),
+                Description = reader.ReadString(),
+                Iteration = reader.ReadInt64(),
+                CreationTime = DateTime.Parse(reader.ReadString()),
+                LastModifiedTime = DateTime.Parse(reader.ReadString())
+            };
+
+            var dataSourcesCount = reader.ReadInt32();
+            for (int i = 0; i < dataSourcesCount; i++)
+            {
+                ApplicationDataSource source = new();
+
+                var queriesCount = reader.ReadInt32();
+                for (int j = 0; j < queriesCount; j++)
+                {
+                    source.DataQueries.Add(new ApplicationDataQuery()
+                    {
+                        ServiceProvider = reader.ReadString(),
+                        DataSourceString = reader.ReadString(),
+                        Query = reader.ReadString()
+                    });
+                }
+
+                var transformsCount = reader.ReadInt32();
+
+                applicationData.DataSources.Add(source);
+            }
+
+            return applicationData;
         }
         #endregion
     }

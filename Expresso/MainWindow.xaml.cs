@@ -67,6 +67,14 @@ namespace Expresso
 
         private int _MainTabControlTabIndex = 0;
         public int MainTabControlTabIndex { get => _MainTabControlTabIndex; set => SetField(ref _MainTabControlTabIndex, value); }
+        private int _CurrentEditItemIndex = 0;
+        public int CurrentEditItemIndex { get => _CurrentEditItemIndex; 
+            set
+            {
+                SetField(ref _CurrentEditItemIndex, value);
+                TabControlEditItemChangedEvent(value);
+            }
+        }
 
         private string _CurrentFilePath;
         public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
@@ -136,9 +144,6 @@ namespace Expresso
         }
         private void AddQueryButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentEditingDataSource.DataQueries == null)
-                CurrentEditingDataSource.DataQueries = new System.Collections.ObjectModel.ObservableCollection<ApplicationDataQuery>();
-
             CurrentEditingDataSource.DataQueries.Add(new ApplicationDataQuery());
             CurrentEditingDataSource.NotifyPropertyChanged(nameof(CurrentEditingDataSource.DataQueries));
         }
@@ -149,13 +154,15 @@ namespace Expresso
                 ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, AvalonTextEditor.Text);
             }
         }
-        private void AvalonEditor_OnInitialized(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-        }
         private void AvalonEditor_OnTextChanged(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
+
+            CurrentEditingDataSource.DataQueries[CurrentEditItemIndex].Query = editor.Text;
+        }
+        private void TabControlEditItemChangedEvent(int value)
+        {
+            AvalonTextEditor.Text = CurrentEditingDataSource.DataQueries[value].Query;
         }
         #endregion
 
@@ -175,6 +182,19 @@ namespace Expresso
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
         }
+        private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                CurrentFilePath = openFileDialog.FileName;
+                ApplicationData = ApplicationDataSerializer.Load(CurrentFilePath);
+                WindowTitle = $"Expresso - {CurrentFilePath}";
+            }
+        }
         private void MenuItemFileSave_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentFilePath != null)
@@ -184,8 +204,6 @@ namespace Expresso
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Reader;
 
-            if (ApplicationData.DataSources == null)
-                ApplicationData.DataSources = new System.Collections.ObjectModel.ObservableCollection<ApplicationDataSource>();
             ApplicationData.DataSources.Add(new ApplicationDataSource());
             CurrentEditingDataSource = ApplicationData.DataSources.Last();
         }
