@@ -8,20 +8,13 @@ using System.Data.Odbc;
 using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using YamlDotNet.Core.Tokens;
 using Expresso.Services;
 using Microsoft.AnalysisServices.AdomdClient;
+using Microsoft.Win32;
+using Expresso.Core;
+using System.IO;
 
 namespace Expresso
 {
@@ -51,6 +44,14 @@ namespace Expresso
         #endregion
 
         #region Handlers
+        private enum MainTabControlTabIndexMapping
+        {
+            Welcome = 0,
+            Trigger = 1,
+            Reader = 2,
+            Writer = 3,
+            Workflow = 4
+        };
         private Dictionary<string, Func<string, string, string>> DataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
             { "ODBC", ExecuteODBCQuery },
@@ -63,20 +64,30 @@ namespace Expresso
         #endregion
 
         #region Data Binding Properties
-        private bool _IsFileOpen = false;
-        public bool IsFileOpen { get => _IsFileOpen; set => SetField(ref _IsFileOpen, value); }
 
+        private int _MainTabControlTabIndex = 0;
+        public int MainTabControlTabIndex { get => _MainTabControlTabIndex; set => SetField(ref _MainTabControlTabIndex, value); }
+
+        private string _CurrentFilePath;
+        public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
         private string _BackgroundText = "Open or Create A File to Get Started.";
         public string BackgroundText { get => _BackgroundText; set => SetField(ref _BackgroundText, value); }
         private string _WindowTitle = "Expressor (Idle)";
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
-        private string _DataServiceProvider = "ODBC";
-        public string DataServiceProvider { get => _DataServiceProvider; set => SetField(ref _DataServiceProvider, value); }
-        private string _DataSourceString;
-        public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
         public string[] DataServiceProviderNames => DataServiceProviders.Keys.ToArray();
+
+        private ApplicationData _ApplicationData;
+        public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
+        private ApplicationDataSource _CurrentEditingDataSource;
+        public ApplicationDataSource CurrentEditingDataSource { get => _CurrentEditingDataSource; set => SetField(ref _CurrentEditingDataSource, value); }
+        private ApplicationExecutionTrigger _CurrentEditingTrigger;
+        public ApplicationExecutionTrigger CurrentEditingTrigger { get => _CurrentEditingTrigger; set => SetField(ref _CurrentEditingTrigger, value); }
+        private ApplicationOutputWriter _CurrentEditingWriter;
+        public ApplicationOutputWriter CurrentEditingWriter { get => _CurrentEditingWriter; set => SetField(ref _CurrentEditingWriter, value); }
+        private ApplicationSequentialWorkflow _CurrentEditingWorkflow;
+        public ApplicationSequentialWorkflow CurrentEditingWorkflow { get => _CurrentEditingWorkflow; set => SetField(ref _CurrentEditingWorkflow, value); }
         #endregion
 
         #region Syntax Highlighter
@@ -119,13 +130,24 @@ namespace Expresso
         #endregion
 
         #region Events
-        private void AddQueryButton_Click(object sender, RoutedEventArgs e)
+        private void AddExpressionButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
+        private void AddQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentEditingDataSource.DataQueries == null)
+                CurrentEditingDataSource.DataQueries = new System.Collections.ObjectModel.ObservableCollection<ApplicationDataQuery>();
+
+            CurrentEditingDataSource.DataQueries.Add(new ApplicationDataQuery());
+            CurrentEditingDataSource.NotifyPropertyChanged(nameof(CurrentEditingDataSource.DataQueries));
+        }
         private void QueryExitBoxSubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            ResultPreview = ExecuteQuery(DataServiceProvider, DataSourceString, AvalonTextEditor.Text);
+            foreach (ApplicationDataQuery query in CurrentEditingDataSource.DataQueries)
+            {
+                ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, AvalonTextEditor.Text);
+            }
         }
         private void AvalonEditor_OnInitialized(object sender, EventArgs e)
         {
@@ -134,6 +156,38 @@ namespace Expresso
         private void AvalonEditor_OnTextChanged(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
+        }
+        #endregion
+
+        #region Menu Items
+        private void MenuItemFileCreate_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new()
+            {
+                Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*",
+                AddExtension = true,
+            };
+            if(saveFileDialog.ShowDialog() == true)
+            {
+                CurrentFilePath = saveFileDialog.FileName;
+                ApplicationData = new ApplicationData();
+                ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
+                WindowTitle = $"Expresso - {CurrentFilePath}";
+            }
+        }
+        private void MenuItemFileSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentFilePath != null)
+                ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
+        }
+        private void MenuItemCreateReader_Click(object sender, RoutedEventArgs e)
+        {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Reader;
+
+            if (ApplicationData.DataSources == null)
+                ApplicationData.DataSources = new System.Collections.ObjectModel.ObservableCollection<ApplicationDataSource>();
+            ApplicationData.DataSources.Add(new ApplicationDataSource());
+            CurrentEditingDataSource = ApplicationData.DataSources.Last();
         }
         #endregion
 
