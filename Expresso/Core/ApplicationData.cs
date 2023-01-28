@@ -29,7 +29,7 @@ namespace Expresso.Core
     }
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
-        private string _ServiceProvider = "ODBC";
+        private string _ServiceProvider = MainWindow.WriterDataServiceProviderNames.First();
         private string _DataSourceString = string.Empty;
         private string _Query = string.Empty;
 
@@ -43,7 +43,7 @@ namespace Expresso.Core
     }
     public class ApplicationDataQuery : BaseNotifyPropertyChanged
     {
-        private string _ServiceProvider = "ODBC";
+        private string _ServiceProvider = MainWindow.ReaderDataServiceProviderNames.First();
         private string _DataSourceString = string.Empty;
         private string _Query = string.Empty;
 
@@ -53,8 +53,8 @@ namespace Expresso.Core
     }
     public class ApplicationDataReader : BaseNotifyPropertyChanged
     {
-        private string _Name;
-        private string _Description;
+        private string _Name = "Table";
+        private string _Description = string.Empty;
 
         private ObservableCollection<ApplicationDataQuery> _DataQueries = new();
         private string _Transform = string.Empty;
@@ -95,6 +95,7 @@ namespace Expresso.Core
         private ObservableCollection<ApplicationDataReader> _DataReaders = new();
         private ObservableCollection<ApplicationOutputWriter> _OutputWriters = new();
         private ObservableCollection<ApplicationVariable> _Variables = new();
+        private ObservableCollection<ApplicationWorkflow> _Workflows = new();
         #endregion
 
         #region Data Bindings
@@ -107,6 +108,7 @@ namespace Expresso.Core
         public ObservableCollection<ApplicationDataReader> DataReaders { get => _DataReaders; set => SetField(ref _DataReaders, value); }
         public ObservableCollection<ApplicationOutputWriter> OutputWriters { get => _OutputWriters; set => SetField(ref _OutputWriters, value); }
         public ObservableCollection<ApplicationVariable> Variables { get => _Variables; set => SetField(ref _Variables, value); }
+        public ObservableCollection<ApplicationWorkflow> Workflows { get => _Workflows; set => SetField(ref _Workflows, value); }
         #endregion
     }
 }
