@@ -35,7 +35,7 @@ namespace Expresso.Core
 
         public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
         public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
-        public string Query { get => _Query; set => SetField(ref _Query, value); }
+        public string Command { get => _Query; set => SetField(ref _Query, value); }
     }
     public class ApplicationWorkflow : BaseNotifyPropertyChanged
     {
@@ -53,9 +53,14 @@ namespace Expresso.Core
     }
     public class ApplicationDataReader : BaseNotifyPropertyChanged
     {
+        private string _Name;
+        private string _Description;
+
         private ObservableCollection<ApplicationDataQuery> _DataQueries = new();
         private string _Transform = string.Empty;
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
+        public string Description { get => _Description; set => SetField(ref _Description, value); }
         public ObservableCollection<ApplicationDataQuery> DataQueries { get => _DataQueries; set => SetField(ref _DataQueries, value); }
         public string Transform { get => _Transform; set => SetField(ref _Transform, value); }
     }

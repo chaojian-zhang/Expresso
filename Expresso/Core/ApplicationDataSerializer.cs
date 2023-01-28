@@ -44,6 +44,8 @@ namespace Expresso.Core
             writer.Write(data.DataReaders.Count);
             foreach (ApplicationDataReader dataReader in data.DataReaders)
             {
+                writer.Write(dataReader.Name); 
+                writer.Write(dataReader.Description);
                 writer.Write(dataReader.DataQueries.Count);
                 foreach (ApplicationDataQuery dataQuery in dataReader.DataQueries)
                 {
@@ -59,7 +61,7 @@ namespace Expresso.Core
             {
                 writer.Write(outputWriter.ServiceProvider);
                 writer.Write(outputWriter.DataSourceString);
-                writer.Write(outputWriter.Query);
+                writer.Write(outputWriter.Command);
             }
 
             writer.Write(data.Variables.Count);
@@ -99,7 +101,11 @@ namespace Expresso.Core
                 var dataReadersCount = reader.ReadInt32();
                 for (int i = 0; i < dataReadersCount; i++)
                 {
-                    ApplicationDataReader dataReader = new();
+                    ApplicationDataReader dataReader = new()
+                    {
+                        Name = reader.ReadString(),
+                        Description = reader.ReadString(),
+                    };
 
                     var queriesCount = reader.ReadInt32();
                     for (int j = 0; j < queriesCount; j++)
@@ -125,7 +131,7 @@ namespace Expresso.Core
                     {
                         ServiceProvider = reader.ReadString(),
                         DataSourceString = reader.ReadString(),
-                        Query = reader.ReadString()
+                        Command = reader.ReadString()
                     };
                     applicationData.OutputWriters.Add(writer);
                 }

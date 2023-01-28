@@ -15,6 +15,8 @@ using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Win32;
 using Expresso.Core;
 using System.IO;
+using System.Collections.ObjectModel;
+using System.Collections;
 
 namespace Expresso
 {
@@ -49,7 +51,7 @@ namespace Expresso
             Variable = 4,
             Workflow = 5
         };
-        private Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        private readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
             { "ODBC", ExecuteODBCQuery },
             { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
@@ -58,12 +60,14 @@ namespace Expresso
             { "SQLite", ExecuteSQLiteQuery },
             { "Expresso", ExecuteReaderQuery }
         };
-        private Dictionary<string, Func<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        private readonly Dictionary<string, Func<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
-            { "ODBC", ExecuteODBCNonQuery },
-            { "CSV", ExecuteCSVNonQuery },
-            { "Text", ExecuteTextNonQuery },
-            { "SQLite", ExecuteSQLiteNonQuery },
+            { "Execute ODBC Command", ExecuteODBCNonQuery },
+            { "Execute SQLite Command", ExecuteSQLiteNonQuery },
+            { "Output Arbitrary Text", WriteArbitraryText },
+            { "Write Reader to ODBC", WriteReaderToODBC },
+            { "Write Reader to CSV", WriteReaderToCSV },
+            { "Write Reader to SQLite", WriteReaderToSQLite },
         };
         #endregion
 
@@ -126,7 +130,6 @@ namespace Expresso
         #region Events
         private void AddExpressionButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
         private void AddQueryButton_Click(object sender, RoutedEventArgs e)
         {
@@ -136,22 +139,39 @@ namespace Expresso
         private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
             var query = CurrentEditingDataReader.DataQueries[CurrentEditItemIndex];
-            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, ReaderAvalonTextEditor.Text);
+            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, DataReaderAvalonTextEditor.Text);
         }
-        private void AvalonEditor_OnTextChanged(object sender, EventArgs e)
+        private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            TextEditor editor = sender as TextEditor;
+            if (!WriterDataServiceProviders.ContainsKey(CurrentEditingOutputWriter.ServiceProvider))
+                throw new ArgumentException("Invalid service provider");
+            else
+                WriterDataServiceProviders[CurrentEditingOutputWriter.ServiceProvider](CurrentEditingOutputWriter.DataSourceString, CurrentEditingOutputWriter.Command);
+        }
+        private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
+        {
 
-            CurrentEditingDataReader.DataQueries[CurrentEditItemIndex].Query = editor.Text;
         }
         private void ReaderTabControlEditItemChangedEvent(int value)
         {
-            ReaderAvalonTextEditor.Text = CurrentEditingDataReader.DataQueries[value].Query;
+            DataReaderAvalonTextEditor.Text = CurrentEditingDataReader.DataQueries[value].Query;
+        }
+        private void ReaderAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            CurrentEditingDataReader.DataQueries[CurrentEditItemIndex].Query = DataReaderAvalonTextEditor.Text;
+        }
+        private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            CurrentEditingDataReader.Transform = ReanderTransformAvalonTextEditor.Text;
+        }
+        private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            CurrentEditingOutputWriter.Command = WriterAvalonTextEditor.Text;
         }
         #endregion
 
         #region Menu Items
-        private void MenuItemFileCreate_Click(object sender, RoutedEventArgs e)
+        private void MenuItemFileNew_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new()
             {
@@ -209,6 +229,14 @@ namespace Expresso
             ApplicationData.OutputWriters.Add(new ApplicationOutputWriter());
             CurrentEditingOutputWriter = ApplicationData.OutputWriters.Last();
         }
+        #endregion
+
+        #region UI Commands
+        private void FileNewCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e) 
+            => e.CanExecute = true;
+
+        private void FileNewCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemFileNew_Click(null, null);
         #endregion
 
         #region Data Binding
@@ -272,7 +300,7 @@ namespace Expresso
             throw new NotImplementedException();
         }
 
-        private static string ExecuteTextNonQuery(string connection, string query)
+        private static string WriteArbitraryText(string connection, string query)
         {
             throw new NotImplementedException();
         }
@@ -284,7 +312,15 @@ namespace Expresso
         {
             throw new NotImplementedException();
         }
-        private static string ExecuteCSVNonQuery(string connection, string query)
+        private static string WriteReaderToODBC(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+        private static string WriteReaderToSQLite(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+        private static string WriteReaderToCSV(string connection, string query)
         {
             throw new NotImplementedException();
         }

@@ -17,6 +17,11 @@
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
 
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="2 0"/>
+            <Setter Property="Padding" Value="2 0"/>
+            <Setter Property="MinHeight" Value="20"/>
+        </Style>
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="Gray" />
             <Setter Property="FontSize" Value="24" />
@@ -25,6 +30,10 @@
             <Setter Property="Background" Value="LightBlue" />
         </Style>
 
+        <Style TargetType="Label" x:Key="ContextKey">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
         <Style TargetType="Button" x:Key="WelcomeButton">
             <Style.Resources>
                 <Style TargetType="Border">
@@ -39,10 +48,16 @@
             <Setter Property="Background" Value="LightCyan"/>
         </Style>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="New" Key="N" Modifiers="Ctrl"/>
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="New" CanExecute="FileNewCommand_CanExecute" Executed="FileNewCommand_Executed" />
+    </Window.CommandBindings>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Create..." Click="MenuItemFileCreate_Click"/>
+                <MenuItem Header="_New..." Click="MenuItemFileNew_Click"/>
                 <MenuItem Header="_Open..." Click="MenuItemFileOpen_Click"/>
                 <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
                 <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
@@ -140,23 +155,22 @@
                                             <TabControl.ContentTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Vertical">
-                                                        <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                                        <DockPanel LastChildFill="False">
                                                             <Label Content="Data Service Provider"/>
-                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                                            </ComboBox>
-                                                        </StackPanel>
-                                                        <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                        </DockPanel>
+                                                        <DockPanel LastChildFill="True">
                                                             <Label Content="Data Source String"/>
                                                             <TextBox Text="{Binding DataSourceString}" MinWidth="250"/>
-                                                        </StackPanel>
+                                                        </DockPanel>
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </TabControl.ContentTemplate>
                                         </TabControl>
                                         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
-                                            <Button Margin="2 0" Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
-                                            <Button Margin="2 0" Content="Add Query" Click="AddQueryButton_Click"/>
-                                            <Button Margin="2 0" Content="Add Expression" Click="AddExpressionButton_Click"/>
+                                            <Button Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
+                                            <Button Content="Add Query" Click="AddQueryButton_Click"/>
+                                            <Button Content="Add Expression" Click="AddExpressionButton_Click"/>
                                         </StackPanel>
                                         <DockPanel DockPanel.Dock="Bottom"
                                                    Visibility="{Binding CurrentEditingDataReader.DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -164,21 +178,44 @@
                                             <avalonEdit:TextEditor
                                                 DockPanel.Dock="Bottom" Margin="5"
                                                 BorderThickness="2" BorderBrush="Beige"
-                                                x:Name="ReaderAvalonTextEditor"
+                                                x:Name="DataReaderAvalonTextEditor"
                                                 ShowLineNumbers="True"
                                                 SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                                                 FontSize="10pt" FontFamily="Consolas" 
-                                                TextChanged="AvalonEditor_OnTextChanged"/>
+                                                TextChanged="ReaderAvalonTextEditor_OnTextChanged"/>
                                         </DockPanel>
                                     </DockPanel>
                                 </TabItem>
                                 <TabItem Header="Transform">
+                                    <DockPanel LastChildFill="True">
+                                        <Label DockPanel.Dock="Top" Content="Transformation SQL"/>
+                                        <TextBlock DockPanel.Dock="Top" 
+                                                   Text="Using SQLite style SQL to perform transformation on data sources. Refer to data sources using names." 
+                                                   TextWrapping="WrapWithOverflow" FontSize="12" Margin="4" Padding="4"/>
+                                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
+                                            <Button Content="Submit" Click="ReaderTransformSubmitButton_Click"/>
+                                        </StackPanel>
+                                        <avalonEdit:TextEditor
+                                                DockPanel.Dock="Bottom" Margin="5"
+                                                BorderThickness="2" BorderBrush="Beige"
+                                                x:Name="ReanderTransformAvalonTextEditor"
+                                                ShowLineNumbers="True"
+                                                SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                FontSize="10pt" FontFamily="Consolas" 
+                                                TextChanged="ReaderTransformAvalonTextEditor_OnTextChanged"/>
+                                    </DockPanel>
                                 </TabItem>
                             </TabControl>
                         </Grid>
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="10 "/>
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
                         <Grid Grid.Column="2">
-
+                            <Label Content="Reader" Style="{StaticResource ContextKey}"/>
+                            <StackPanel>
+                                <DockPanel LastChildFill="True">
+                                    <Label Content="Name"/>
+                                    <TextBox Text="{Binding CurrentEditingDataReader}"/>
+                                </DockPanel>
+                            </StackPanel>
                         </Grid>
                     </Grid>
                 </TabItem>
@@ -198,6 +235,9 @@
                                 </StackPanel>
                             </StackPanel>
                         </DockPanel>
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft">
+                            <Button Content="Execute" Click="WriterExecuteButton_Click"/>
+                        </StackPanel>
                         <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
                             <Label Content="Query"/>
                             <avalonEdit:TextEditor
@@ -207,7 +247,7 @@
                             ShowLineNumbers="True"
                             SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                             FontSize="10pt" FontFamily="Consolas" 
-                            TextChanged="AvalonEditor_OnTextChanged"/>
+                            TextChanged="WriterAvalonTextEditor_OnTextChanged"/>
                         </DockPanel>
                     </DockPanel>
                 </TabItem>
