@@ -146,7 +146,6 @@ namespace Expresso
 
             ApplicationProcessorStep step = new ApplicationProcessorStep()
             {
-                IsStartingStep = true,
                 Name = "Root"
             };
             processor.StartingSteps.Add(step);

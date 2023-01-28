@@ -82,8 +82,9 @@ namespace Expresso.Core
         public static Dictionary<string, string> Pack(this ObservableCollection<ParameterMapping> parameterMappings, Dictionary<string, string> valuesToGather)
         {
             Dictionary<string, string> remappedValues = new Dictionary<string, string>();
-            Dictionary<string, string> nameMapping = parameterMappings.ToDictionary(o => o.FromName, o => o.AsName);
+            if (valuesToGather == null) return remappedValues;
 
+            Dictionary<string, string> nameMapping = parameterMappings.ToDictionary(o => o.FromName, o => o.AsName);
             foreach (KeyValuePair<string, string> value in valuesToGather)
                 if (nameMapping.TryGetValue(value.Key, out string newName))
                     remappedValues.Add(newName, value.Value);

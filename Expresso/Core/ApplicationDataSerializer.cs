@@ -115,7 +115,6 @@ namespace Expresso.Core
             void WriteProcessorStep(BinaryWriter writer, ApplicationProcessorStep step)
             {
                 writer.Write(step.Name);
-                writer.Write(step.IsStartingStep);
                 writer.Write(step.Inputs.Count);
                 foreach (var input in step.Inputs)
                 {
@@ -259,7 +258,6 @@ namespace Expresso.Core
 
                 {
                     step.Name = reader.ReadString();
-                    step.IsStartingStep = reader.ReadBoolean();
                 }
                 {
                     int inputsCount = reader.ReadInt32();
