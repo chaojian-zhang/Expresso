@@ -50,9 +50,11 @@
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Command="New" Key="N" Modifiers="Ctrl"/>
+        <KeyBinding Command="Open" Key="O" Modifiers="Ctrl"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="New" CanExecute="FileNewCommand_CanExecute" Executed="FileNewCommand_Executed" />
+        <CommandBinding Command="Open" CanExecute="FileOpenCommand_CanExecute" Executed="FileOpenCommand_Executed" />
     </Window.CommandBindings>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
@@ -104,7 +106,10 @@
                 <TabItem Header="Welcome">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Vertical">
-                            <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
+                                <Button Content="Create Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
                                 <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
@@ -120,7 +125,7 @@
 
                 </TabItem>
                 <TabItem Header="Reader" Visibility="{Binding ApplicationData.DataReaders, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <TabControl SelectedIndex="{Binding CurrentReaderTabIndex}" ItemsSource="{Binding ApplicationData.DataReaders}">
+                    <TabControl ItemsSource="{Binding ApplicationData.DataReaders}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="Reader"/>
@@ -145,14 +150,9 @@
                                         <TabControl Grid.Row="2">
                                             <TabItem Header="Data Source">
                                                 <DockPanel LastChildFill="True">
-                                                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
-                                                        <Button Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
-                                                        <Button Content="Add Query" Click="AddDataQueryButton_Click"/>
-                                                        <Button Content="Add Expression" Click="AddExpressionButton_Click"/>
-                                                    </StackPanel>
                                                     <TabControl DockPanel.Dock="Top" 
                                                     Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}"
-                                                    SelectedIndex="{Binding CurrentReaderQueryItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                    SelectedIndex="{Binding CurrentReaderDataSourceQueryItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                     ItemsSource="{Binding DataQueries}">
                                                         <TabControl.ItemTemplate>
                                                             <DataTemplate>
@@ -162,6 +162,10 @@
                                                         <TabControl.ContentTemplate>
                                                             <DataTemplate>
                                                                 <DockPanel LastChildFill="True">
+                                                                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
+                                                                        <Button Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
+                                                                        <Button Content="Add Query" Click="AddDataQueryButton_Click"/>
+                                                                    </StackPanel>
                                                                     <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                                                         <DockPanel LastChildFill="False">
                                                                             <Label Content="Data Service Provider"/>
@@ -190,12 +194,16 @@
                                                             </DataTemplate>
                                                         </TabControl.ContentTemplate>
                                                     </TabControl>
-                                                    <Label DockPanel.Dock="Top" 
-                                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                                       Content="Add A Query to Get Started." 
-                                                       FontSize="16" 
-                                                       Foreground="LightGray" 
-                                                       Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                                                    <Grid DockPanel.Dock="Top" >
+                                                        <Label 
+                                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                            Content="Add A Query to Get Started." 
+                                                            FontSize="16" 
+                                                            Foreground="LightGray" 
+                                                            Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                                                        <Button Content="Add Query" Click="AddDataQueryButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                                                    </Grid>
+                                                    
                                                 </DockPanel>
                                             </TabItem>
                                             <TabItem Header="Transform">
@@ -241,7 +249,7 @@
                     </TabControl>
                 </TabItem>
                 <TabItem Header="Writer" Visibility="{Binding ApplicationData.OutputWriters, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.OutputWriters}" SelectedIndex="{Binding CurrentWriterTabIndex}">
+                    <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.OutputWriters}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="Writer"/>
@@ -283,6 +291,109 @@
                     </TabControl>
                 </TabItem>
                 <TabItem Header="Processor"  Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <TabControl ItemsSource="{Binding ApplicationData.Processors}">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="Processor"/>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <StackPanel 
+                                HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                Orientation="Horizontal">
+                                            <Button Content="Add Input" Click="AddProcessorInputStepButton_Click"/>
+                                        </StackPanel>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="5" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Canvas Grid.Column="0">
+
+                                            </Canvas>
+                                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                                            <DockPanel Grid.Column="2">
+                                                <Label DockPanel.Dock="Top" Content="Processor"/>
+                                                <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
+                                                    <Label Content="Name"/>
+                                                    <TextBox Text="{Binding Name}"/>
+                                                </DockPanel>
+                                                <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="2">
+                                                    <Label DockPanel.Dock="Top" Content="Description"/>
+                                                    <TextBox Text="{Binding Description}"
+                                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                                         SpellCheck.IsEnabled="True"/>
+                                                </DockPanel>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Grid>
+                                    <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                                    <TabControl Grid.Row="2" ItemsSource="{Binding ListingOfAllSteps}">
+                                        <TabControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Label Content="Step" />
+                                            </DataTemplate>
+                                        </TabControl.ItemTemplate>
+                                        <TabControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                        <Button Content="Add Step" Click="AddProcessorExecutionStepButton_Click"/>
+                                                        <ToggleButton Content="Is Final Output" IsChecked="{Binding IsFinalOutput}"/>
+                                                    </StackPanel>
+                                                    <DockPanel LastChildFill="True">
+                                                        <DockPanel DockPanel.Dock="Left">
+                                                            <ListView ItemsSource="{Binding Inputs}">
+                                                                <ListView.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBox Text="{Binding FromName}" MinWidth="128"/>
+                                                                            <Label Content="As"/>
+                                                                            <TextBox Text="{Binding AsName}" MinWidth="128"/>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ListView.ItemTemplate>
+                                                            </ListView>
+                                                        </DockPanel>
+                                                        <DockPanel DockPanel.Dock="Right">
+                                                            <ListView ItemsSource="{Binding Outputs}">
+                                                                <ListView.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBox Text="{Binding FromName}" MinWidth="128"/>
+                                                                            <Label Content="As"/>
+                                                                            <TextBox Text="{Binding AsName}" MinWidth="128"/>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ListView.ItemTemplate>
+                                                            </ListView>
+                                                        </DockPanel>
+                                                        <DockPanel DockPanel.Dock="Right">
+                                                            <Grid>
+                                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                    <TextBox Text="{Binding Action}" MinWidth="128"/>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </DockPanel>
+                                                    </DockPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </TabControl.ContentTemplate>
+                                    </TabControl>
+                                </Grid>
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
                 </TabItem>
                 <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
 

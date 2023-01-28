@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -100,8 +101,8 @@ namespace Expresso.Core
             {
                 writer.Write(processor.Name);
                 writer.Write(processor.Description);
-                writer.Write(processor.Steps.Count);
-                foreach (ApplicationProcessorStep step in processor.Steps)
+                writer.Write(processor.StartingSteps.Count);
+                foreach (ApplicationProcessorStep step in processor.StartingSteps)
                     WriteProcessorStep(writer, step);
             }
 
@@ -128,6 +129,7 @@ namespace Expresso.Core
                 writer.Write(step.NextSteps.Count);
                 foreach (var next in step.NextSteps)
                     WriteProcessorStep(writer, next);
+                writer.Write(step.IsFinalOutput);
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -224,7 +226,7 @@ namespace Expresso.Core
 
                     int processorSteps = reader.ReadInt32();
                     for (int j = 0; j < processorSteps; j++)
-                        processor.Steps.Add(ReadProcessorStep(reader));
+                        processor.StartingSteps.Add(ReadProcessorStep(reader));
 
                     applicationData.Processors.Add(processor);
                 }
@@ -267,6 +269,9 @@ namespace Expresso.Core
                     int subStepsCount = reader.ReadInt32();
                     for (int i = 0; i < subStepsCount; i++)
                         step.NextSteps.Add(ReadProcessorStep(reader));
+                }
+                {
+                    step.IsFinalOutput = reader.ReadBoolean();
                 }
                 return step;
             }

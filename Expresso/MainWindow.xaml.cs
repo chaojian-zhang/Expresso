@@ -17,6 +17,7 @@ using Expresso.Core;
 using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Windows.Controls;
 
 namespace Expresso
 {
@@ -48,8 +49,9 @@ namespace Expresso
             Condition = 1,
             Reader = 2,
             Writer = 3,
-            Variable = 4,
-            Workflow = 5
+            Processor = 4,
+            Variable = 5,
+            Workflow = 6
         };
         private static readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
@@ -76,20 +78,6 @@ namespace Expresso
 
         private int _MainTabControlTabIndex = 0;
         public int MainTabControlTabIndex { get => _MainTabControlTabIndex; set => SetField(ref _MainTabControlTabIndex, value); }
-        private int _CurrentReaderQueryItemIndex = 0;
-        public int CurrentReaderQueryItemIndex { get => _CurrentReaderQueryItemIndex; set => SetField(ref _CurrentReaderQueryItemIndex, value); }
-        private int _CurrentReaderTabIndex = 0;
-        public int CurrentReaderTabIndex
-        {
-            get => _CurrentReaderTabIndex;
-            set => SetField(ref _CurrentReaderTabIndex, value);
-        }
-        private int _CurrentWriterTabIndex= 0;
-        public int CurrentWriterTabIndex
-        {
-            get => _CurrentWriterTabIndex;
-            set => SetField(ref _CurrentWriterTabIndex, value);
-        }
 
         private string _CurrentFilePath;
         public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
@@ -127,45 +115,73 @@ namespace Expresso
         #endregion
 
         #region Events
-        private void AddExpressionButton_Click(object sender, RoutedEventArgs e)
+
+        private void AddProcessorInputStepButton_Click(object sender, RoutedEventArgs e)
         {
+            Button button = sender as Button;
+            ApplicationProcessor processor = button.DataContext as ApplicationProcessor;
+
+            ApplicationProcessorStep step = new ApplicationProcessorStep();
+            processor.StartingSteps.Add(step);
+            processor.ListingOfAllSteps.Add(step);
+            processor.NotifyPropertyChanged(nameof(processor.ListingOfAllSteps));
+        }
+        private void AddProcessorExecutionStepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessorStep step = button.DataContext as ApplicationProcessorStep;
         }
         private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
         {
-            ApplicationData.DataReaders[CurrentReaderTabIndex].DataQueries.Add(new ApplicationDataQuery());
-            ApplicationData.DataReaders[CurrentReaderTabIndex].NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            reader.DataQueries.Add(new ApplicationDataQuery());
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
         }
         private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            var query = ApplicationData.DataReaders[CurrentReaderTabIndex].DataQueries[CurrentReaderQueryItemIndex];
+            Button button = sender as Button;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
             ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Query);
         }
         private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!WriterDataServiceProviders.ContainsKey(ApplicationData.OutputWriters[CurrentReaderTabIndex].ServiceProvider))
-                throw new ArgumentException("Invalid service provider");
-            else
-                WriterDataServiceProviders[ApplicationData.OutputWriters[CurrentReaderTabIndex].ServiceProvider](ApplicationData.OutputWriters[CurrentReaderTabIndex].DataSourceString, ApplicationData.OutputWriters[CurrentReaderTabIndex].Command);
+            
         }
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
         {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
 
+            if (!WriterDataServiceProviders.ContainsKey(writer.ServiceProvider))
+                throw new ArgumentException("Invalid service provider");
+            else
+                WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.Command);
         }
         private void ReaderAvalonTextEditor_Initialized(object sender, EventArgs e)
         {
-            (sender as TextEditor).Text = ApplicationData.DataReaders[CurrentReaderTabIndex].DataQueries[CurrentReaderQueryItemIndex].Query;
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataQuery query = editor.DataContext as ApplicationDataQuery;
+            editor.Text = query.Query;
         }
         private void ReaderAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
-            ApplicationData.DataReaders[CurrentReaderTabIndex].DataQueries[CurrentReaderQueryItemIndex].Query = (sender as TextEditor).Text;
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataQuery query = editor.DataContext as ApplicationDataQuery;
+            query.Query = editor.Text;
         }
         private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
-            ApplicationData.DataReaders[CurrentReaderTabIndex].Transform = (sender as TextEditor).Text;
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            reader.Transform = editor.Text;
         }
         private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
-            ApplicationData.OutputWriters[CurrentReaderTabIndex].Command = (sender as TextEditor).Text;
+            TextEditor editor = sender as TextEditor;
+            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
+            writer.Command = editor.Text;
         }
         #endregion
 
@@ -203,6 +219,13 @@ namespace Expresso
             if (CurrentFilePath != null)
                 ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
         }
+        private void MenuItemCreateProcessor_Click(object sender, RoutedEventArgs e)
+        {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Processor;
+
+            ApplicationData.Processors.Add(new ApplicationProcessor());
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
+        }
         private void MenuItemCreateWorkflow_Click(object sender, RoutedEventArgs e)
         {
 
@@ -233,9 +256,12 @@ namespace Expresso
         #region UI Commands
         private void FileNewCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e) 
             => e.CanExecute = true;
-
         private void FileNewCommand_Executed(object sender, ExecutedRoutedEventArgs e)
             => MenuItemFileNew_Click(null, null);
+        private void FileOpenCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemFileOpen_Click(null, null);
+        private void FileOpenCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = true;
         #endregion
 
         #region Data Binding

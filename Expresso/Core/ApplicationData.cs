@@ -38,21 +38,28 @@ namespace Expresso.Core
         private string _Action = string.Empty;
         private ObservableCollection<ParameterMapping> _Outputs = new();
         private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
+        private bool _IsFinalOutput = false;
 
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
         public string Action { get => _Action; set => SetField(ref _Action, value); }
         public ObservableCollection<ParameterMapping> Outputs { get => _Outputs; set => SetField(ref _Outputs, value); }
         public ObservableCollection<ApplicationProcessorStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
+        public bool IsFinalOutput { get => _IsFinalOutput; set => SetField(ref _IsFinalOutput, value); }
     }
     public class ApplicationProcessor: BaseNotifyPropertyChanged
     {
         private string _Name;
         private string _Description;
-        private ObservableCollection<ApplicationProcessorStep> _Steps = new ObservableCollection<ApplicationProcessorStep>();
+        private ObservableCollection<ApplicationProcessorStep> _StartingSteps = new ObservableCollection<ApplicationProcessorStep>();
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public string Description { get => _Description; set => SetField(ref _Description, value); }
-        public ObservableCollection<ApplicationProcessorStep> Steps { get => _Steps; set => SetField(ref _Steps, value); }
+        public ObservableCollection<ApplicationProcessorStep> StartingSteps { get => _StartingSteps; set => SetField(ref _StartingSteps, value); }
+
+        #region View Use
+        private ObservableCollection<ApplicationProcessorStep> _ListingOfAllSteps = new ObservableCollection<ApplicationProcessorStep>();
+        public ObservableCollection<ApplicationProcessorStep> ListingOfAllSteps { get => _ListingOfAllSteps; set => SetField(ref _ListingOfAllSteps, value); }
+        #endregion
     }
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
