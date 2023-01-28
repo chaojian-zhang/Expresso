@@ -34,10 +34,6 @@ namespace Expresso
                     HighlightingManager.Instance);
             }
 
-            // Initialize Commands
-            CreateVariableCommand = new DelegateCommand(() => { }, () => true);
-            EditVariablesCommand = new DelegateCommand(() => { }, () => true);
-
             // Initialize window
             InitializeComponent();
         }
@@ -47,10 +43,11 @@ namespace Expresso
         private enum MainTabControlTabIndexMapping
         {
             Welcome = 0,
-            Trigger = 1,
+            Condition = 1,
             Reader = 2,
             Writer = 3,
-            Workflow = 4
+            Variable = 4,
+            Workflow = 5
         };
         private Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
@@ -59,7 +56,7 @@ namespace Expresso
             { "CSV", ExecuteCSVQuery },
             { "Excel", ExecuteExcelQuery },
             { "SQLite", ExecuteSQLiteQuery },
-            { "Expresso", ExecuteThisQuery }
+            { "Expresso", ExecuteReaderQuery }
         };
         private Dictionary<string, Func<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
@@ -98,12 +95,12 @@ namespace Expresso
         public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
         private ApplicationDataReader _CurrentEditingDataReader;
         public ApplicationDataReader CurrentEditingDataReader { get => _CurrentEditingDataReader; set => SetField(ref _CurrentEditingDataReader, value); }
-        private ApplicationExecutionTrigger _CurrentEditingTrigger;
-        public ApplicationExecutionTrigger CurrentEditingTrigger { get => _CurrentEditingTrigger; set => SetField(ref _CurrentEditingTrigger, value); }
+        private ApplicationExecutionConditional _CurrentEditingConditional;
+        public ApplicationExecutionConditional CurrentEditingConditional { get => _CurrentEditingConditional; set => SetField(ref _CurrentEditingConditional, value); }
         private ApplicationOutputWriter _CurrentEditingWriter;
         public ApplicationOutputWriter CurrentEditingOutputWriter { get => _CurrentEditingWriter; set => SetField(ref _CurrentEditingWriter, value); }
-        private ApplicationSequentialWorkflow _CurrentEditingWorkflow;
-        public ApplicationSequentialWorkflow CurrentEditingWorkflow { get => _CurrentEditingWorkflow; set => SetField(ref _CurrentEditingWorkflow, value); }
+        private ApplicationWorkflow _CurrentEditingWorkflow;
+        public ApplicationWorkflow CurrentEditingWorkflow { get => _CurrentEditingWorkflow; set => SetField(ref _CurrentEditingWorkflow, value); }
         #endregion
 
         #region Syntax Highlighter
@@ -116,14 +113,6 @@ namespace Expresso
         }
         #endregion
 
-        #region Custom Commands
-        public ICommand CreateVariableCommand { get; }
-        public ICommand EditVariablesCommand { get; }
-        #endregion
-
-        #region Delegate Commands
-        #endregion
-
         #region Actions
         public string ExecuteQuery(string dataSource, string connectionString, string query)
         {
@@ -131,17 +120,6 @@ namespace Expresso
                 return "Invalid service provider";
             else
                 return ReaderDataServiceProviders[dataSource](connectionString, query);
-        }
-        #endregion
-
-        #region Routed UI Commands (Supports Shortcuts)
-        private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-
-        }
-        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-
         }
         #endregion
 
@@ -206,6 +184,18 @@ namespace Expresso
             if (CurrentFilePath != null)
                 ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
         }
+        private void MenuItemCreateWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void MenuItemCreateVariable_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void MenuItemCreateCondition_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         private void MenuItemCreateReader_Click(object sender, RoutedEventArgs e)
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Reader;
@@ -265,22 +255,36 @@ namespace Expresso
                 return $"Result,Message\nError,\"{e.Message}\"";
             }
         }
-        private static string ExecuteThisQuery(string connection, string query)
+        private static string ExecuteReaderQuery(string connection, string query)
         {
             throw new NotImplementedException();
         }
-
         private static string ExecuteSQLiteQuery(string connection, string query)
         {
             throw new NotImplementedException();
         }
-
         private static string ExecuteExcelQuery(string connection, string query)
         {
             throw new NotImplementedException();
         }
-
         private static string ExecuteCSVQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string ExecuteTextNonQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+        private static string ExecuteODBCNonQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+        private static string ExecuteSQLiteNonQuery(string connection, string query)
+        {
+            throw new NotImplementedException();
+        }
+        private static string ExecuteCSVNonQuery(string connection, string query)
         {
             throw new NotImplementedException();
         }

@@ -24,6 +24,20 @@
         <Style TargetType="GridSplitter">
             <Setter Property="Background" Value="LightBlue" />
         </Style>
+
+        <Style TargetType="Button" x:Key="WelcomeButton">
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5" />
+                </Style>
+            </Style.Resources>
+            
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Height" Value="160"/>
+            <Setter Property="Margin" Value="16"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Background" Value="LightCyan"/>
+        </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
@@ -39,25 +53,17 @@
                 <MenuItem Header="Exit"/>
             </MenuItem>
             <MenuItem Header="_Create" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
-                <MenuItem Header="_Trigger..."/>
+                <MenuItem Header="_Condition..." Click="MenuItemCreateCondition_Click"/>
                 <MenuItem Header="_Reader..." Click="MenuItemCreateReader_Click"/>
                 <MenuItem Header="_Writer..." Click="MenuItemCreateWriter_Click"/>
-            </MenuItem>
-            <MenuItem Header="_View" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
-                <MenuItem Header="Data Pane"/>
-                <MenuItem Header="Property Pane"/>
-                <MenuItem Header="Readers Pane"/>
-                <MenuItem Header="Variables Pane"/>
+                <MenuItem Header="_Variable..." Click="MenuItemCreateVariable_Click"/>
+                <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
             </MenuItem>
             <MenuItem Header="_Engine">
                 <MenuItem Header="Submit" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <Separator/>
                 <MenuItem Header="Create Workflow..."/>
                 <MenuItem Header="Schedules Stack..."/>
-            </MenuItem>
-            <MenuItem Header="_Variables" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
-                <MenuItem Header="Create Variable..." Command="{Binding CreateVariableCommand}"/>
-                <MenuItem Header="Edit Variables..." Command="{Binding EditVariablesCommand}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
@@ -81,9 +87,21 @@
                     </Style>
                 </TabControl.ItemContainerStyle>
                 <TabItem Header="Welcome">
-
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Orientation="Vertical">
+                            <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
+                                <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Create Reader" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateReader_Click"/>
+                                <Button Content="Create Writer" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWriter_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </TabItem>
-                <TabItem Header="Trigger" Visibility="{Binding CurrentEditingTrigger, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Condition" Visibility="{Binding CurrentEditingConditional, Converter={StaticResource ObjectToVisibilityConverter}}">
 
                 </TabItem>
                 <TabItem Header="Reader" Visibility="{Binding CurrentEditingDataReader, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -192,6 +210,9 @@
                             TextChanged="AvalonEditor_OnTextChanged"/>
                         </DockPanel>
                     </DockPanel>
+                </TabItem>
+                <TabItem Header="Variable" Visibility="{Binding CurrentEditingConditional, Converter={StaticResource ObjectToVisibilityConverter}}">
+
                 </TabItem>
                 <TabItem Header="Workflow" Visibility="{Binding CurrentEditingWorkflow, Converter={StaticResource ObjectToVisibilityConverter}}">
 

@@ -33,6 +33,14 @@ namespace Expresso.Core
             writer.Write(data.CreationTime.ToString("yyyy-MM-dd"));
             writer.Write(DateTime.Now.ToString("yyyy-MM-dd"));
 
+            writer.Write(data.Conditionals.Count);
+            foreach (var condition in data.Conditionals)
+            {
+                writer.Write((byte)condition.Type);
+                writer.Write(condition.Specification);
+                writer.Write(condition.Parameter);
+            }
+
             writer.Write(data.DataReaders.Count);
             foreach (ApplicationDataReader dataReader in data.DataReaders)
             {
@@ -43,12 +51,7 @@ namespace Expresso.Core
                     writer.Write(dataQuery.DataSourceString);
                     writer.Write(dataQuery.Query);
                 }
-
-                writer.Write(dataReader.Transforms.Count);
-                foreach (ApplicationDataTransform transform in dataReader.Transforms)
-                {
-
-                }
+                writer.Write(dataReader.Transform);
             }
 
             writer.Write(data.OutputWriters.Count);
@@ -57,6 +60,13 @@ namespace Expresso.Core
                 writer.Write(outputWriter.ServiceProvider);
                 writer.Write(outputWriter.DataSourceString);
                 writer.Write(outputWriter.Query);
+            }
+
+            writer.Write(data.Variables.Count);
+            foreach (ApplicationVariable variable in data.Variables)
+            {
+                writer.Write((byte)variable.Type);
+                writer.Write(variable.Value);
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -70,37 +80,69 @@ namespace Expresso.Core
                 LastModifiedTime = DateTime.Parse(reader.ReadString())
             };
 
-            var dataReadersCount = reader.ReadInt32();
-            for (int i = 0; i < dataReadersCount; i++)
             {
-                ApplicationDataReader source = new();
-
-                var queriesCount = reader.ReadInt32();
-                for (int j = 0; j < queriesCount; j++)
+                var conditionalCount = reader.ReadInt32();
+                for (int i = 0; i < conditionalCount; i++)
                 {
-                    source.DataQueries.Add(new ApplicationDataQuery()
+                    ApplicationExecutionConditional conditional = new()
+                    {
+                        Type = (ApplicationExecutionConditional.ConditionType)reader.ReadByte(),
+                        Specification = reader.ReadString(),
+                        Parameter = reader.ReadString(),
+                    };
+
+                    applicationData.Conditionals.Add(conditional);
+                }
+            }
+
+            {
+                var dataReadersCount = reader.ReadInt32();
+                for (int i = 0; i < dataReadersCount; i++)
+                {
+                    ApplicationDataReader dataReader = new();
+
+                    var queriesCount = reader.ReadInt32();
+                    for (int j = 0; j < queriesCount; j++)
+                    {
+                        dataReader.DataQueries.Add(new ApplicationDataQuery()
+                        {
+                            ServiceProvider = reader.ReadString(),
+                            DataSourceString = reader.ReadString(),
+                            Query = reader.ReadString()
+                        });
+                    }
+                    dataReader.Transform = reader.ReadString();
+
+                    applicationData.DataReaders.Add(dataReader);
+                }
+            }
+
+            {
+                var outputWritersCount = reader.ReadInt32();
+                for (int i = 0; i < outputWritersCount; i++)
+                {
+                    ApplicationOutputWriter writer = new ApplicationOutputWriter()
                     {
                         ServiceProvider = reader.ReadString(),
                         DataSourceString = reader.ReadString(),
                         Query = reader.ReadString()
-                    });
+                    };
+                    applicationData.OutputWriters.Add(writer);
                 }
-
-                var transformsCount = reader.ReadInt32();
-
-                applicationData.DataReaders.Add(source);
             }
 
-            var outputWritersCount = reader.ReadInt32();
-            for (int i = 0; i < outputWritersCount; i++)
             {
-                ApplicationOutputWriter writer = new ApplicationOutputWriter()
+                var variableCount = reader.ReadInt32();
+                for (int i = 0; i < variableCount; i++)
                 {
-                    ServiceProvider = reader.ReadString(),
-                    DataSourceString = reader.ReadString(),
-                    Query = reader.ReadString()
-                };
-                applicationData.OutputWriters.Add(writer);
+                    ApplicationVariable variable = new()
+                    {
+                        Type = (ApplicationVariable.VariableType)reader.ReadByte(),
+                        Value= reader.ReadString()
+                    };
+
+                    applicationData.Variables.Add(variable);
+                }
             }
 
             return applicationData;

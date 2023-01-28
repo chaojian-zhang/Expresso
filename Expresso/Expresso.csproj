@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="USerControls\" />
+    <Folder Include="PopUps\" />
     <Folder Include="PopUps\" />
     <Folder Include="UserControls\" />
   </ItemGroup>
