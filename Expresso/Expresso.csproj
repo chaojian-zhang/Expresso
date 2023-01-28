@@ -6,10 +6,15 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
 	<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+	<ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\sql.xshd.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
