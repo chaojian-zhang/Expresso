@@ -3,12 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expresso", "Expresso\Expresso.csproj", "{5B7FDFE1-9EFA-4ED0-99CC-888A9ABCB7DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Expresso", "Expresso\Expresso.csproj", "{5B7FDFE1-9EFA-4ED0-99CC-888A9ABCB7DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D7D837B-D26F-493C-AD2A-4012668BE7C4}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experiments", "Experiments", "{4994262D-FECD-43B4-96E9-5873C0474625}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamedFunctionCall", "NamedFunctionCall\NamedFunctionCall.csproj", "{DC569F8B-AB40-4689-B877-E4524FFF22CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +24,16 @@ Global
 		{5B7FDFE1-9EFA-4ED0-99CC-888A9ABCB7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B7FDFE1-9EFA-4ED0-99CC-888A9ABCB7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B7FDFE1-9EFA-4ED0-99CC-888A9ABCB7DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC569F8B-AB40-4689-B877-E4524FFF22CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC569F8B-AB40-4689-B877-E4524FFF22CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC569F8B-AB40-4689-B877-E4524FFF22CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC569F8B-AB40-4689-B877-E4524FFF22CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DC569F8B-AB40-4689-B877-E4524FFF22CC} = {4994262D-FECD-43B4-96E9-5873C0474625}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C99036C-6924-426C-9DFA-3483B8DF5A2E}
