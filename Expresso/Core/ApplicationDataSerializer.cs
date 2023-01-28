@@ -1,26 +1,48 @@
-﻿using System;
+﻿using K4os.Compression.LZ4.Streams;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace Expresso.Core
 {
     public static class ApplicationDataSerializer
     {
         #region Methods
-        public static void Save(string filepath, ApplicationData data)
+        public static void Save(string filepath, ApplicationData data, bool compressed = true)
         {
-            using FileStream stream = File.Open(filepath, FileMode.Create);
-            using BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, false);
-            WriteToStream(writer, data);
+            if (compressed)
+            {
+                using LZ4EncoderStream stream = LZ4Stream.Encode(File.Create(filepath));
+                using BinaryWriter writer = new(stream, Encoding.UTF8, false);
+                WriteToStream(writer, data);
+            }
+            else
+            {
+                using FileStream stream = File.Open(filepath, FileMode.Create);
+                using BinaryWriter writer = new(stream, Encoding.UTF8, false);
+                WriteToStream(writer, data);
+            }
         }
-        public static ApplicationData Load(string filepath)
+        public static ApplicationData Load(string filepath, bool compressed = true)
         {
-            using FileStream stream = File.Open(filepath, FileMode.Open);
-            using BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, false);
-            return ReadFromStream(reader);
+            if (compressed)
+            {
+                using LZ4DecoderStream source = LZ4Stream.Decode(File.OpenRead(filepath));
+                using BinaryReader reader = new(source, Encoding.UTF8, false);
+                return ReadFromStream(reader);
+            }
+            else
+            {
+                using FileStream stream = File.Open(filepath, FileMode.Open);
+                using BinaryReader reader = new(stream, Encoding.UTF8, false);
+                return ReadFromStream(reader);
+            }
         }
         #endregion
 
@@ -71,6 +93,41 @@ namespace Expresso.Core
             {
                 writer.Write((byte)variable.Type);
                 writer.Write(variable.Value);
+            }
+
+            writer.Write(data.Processors.Count);
+            foreach (ApplicationProcessor processor in data.Processors)
+            {
+                writer.Write(processor.Name);
+                writer.Write(processor.Description);
+                writer.Write(processor.Steps.Count);
+                foreach (ApplicationProcessorStep step in processor.Steps)
+                    WriteProcessorStep(writer, step);
+            }
+
+            writer.Write(data.Workflows.Count);
+            foreach (ApplicationWorkflow workflow in data.Workflows)
+            {
+            }
+
+            void WriteProcessorStep(BinaryWriter writer, ApplicationProcessorStep step)
+            {
+                writer.Write(step.Inputs.Count);
+                foreach (var input in step.Inputs)
+                {
+                    writer.Write(input.FromName);
+                    writer.Write(input.AsName);
+                }
+                writer.Write(step.Action);
+                writer.Write(step.Outputs.Count);
+                foreach (var output in step.Outputs)
+                {
+                    writer.Write(output.FromName);
+                    writer.Write(output.AsName);
+                }
+                writer.Write(step.NextSteps.Count);
+                foreach (var next in step.NextSteps)
+                    WriteProcessorStep(writer, next);
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -155,7 +212,64 @@ namespace Expresso.Core
                 }
             }
 
+            {
+                var processorsCount = reader.ReadInt32();
+                for (int i = 0; i < processorsCount; i++)
+                {
+                    ApplicationProcessor processor = new()
+                    {
+                        Name = reader.ReadString(),
+                        Description = reader.ReadString(),
+                    };
+
+                    int processorSteps = reader.ReadInt32();
+                    for (int j = 0; j < processorSteps; j++)
+                        processor.Steps.Add(ReadProcessorStep(reader));
+
+                    applicationData.Processors.Add(processor);
+                }
+            }
+
+            {
+                var workflowCount = reader.ReadInt32();
+                for (int i = 0; i < workflowCount; i++)
+                {
+                    ApplicationWorkflow workflow = new()
+                    {
+                    };
+
+                    applicationData.Workflows.Add(workflow);
+                }
+            }
+
             return applicationData;
+
+            ApplicationProcessorStep ReadProcessorStep(BinaryReader reader)
+            {
+                ApplicationProcessorStep step = new ApplicationProcessorStep();
+
+                {
+                    int inputsCount = reader.ReadInt32();
+                    for (int i = 0; i < inputsCount; i++)
+                        step.Inputs.Add(new ApplicationProcessorStep.ParameterMapping(reader.ReadString(), reader.ReadString()));
+                }
+                {
+                    step.Action = reader.ReadString();
+                }
+                {
+                    int outputsCount = reader.ReadInt32();
+                    for (int i = 0; i < outputsCount; i++)
+                    {
+                        step.Outputs.Add(new ApplicationProcessorStep.ParameterMapping(reader.ReadString(), reader.ReadString()));
+                    }
+                }
+                {
+                    int subStepsCount = reader.ReadInt32();
+                    for (int i = 0; i < subStepsCount; i++)
+                        step.NextSteps.Add(ReadProcessorStep(reader));
+                }
+                return step;
+            }
         }
         #endregion
     }

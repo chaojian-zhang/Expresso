@@ -27,6 +27,33 @@ namespace Expresso.Core
         public string Specification { get => _Specification; set => SetField(ref _Specification, value); }
         public string Parameter { get => _Parameter; set => SetField(ref _Parameter, value); }
     }
+    /// <remarks>
+    /// Root level step takes only a single input and has a bypass action that just passes the input to output
+    /// </remarks>
+    public class ApplicationProcessorStep : BaseNotifyPropertyChanged
+    {
+        public record struct ParameterMapping(string FromName, string AsName);
+
+        private ObservableCollection<ParameterMapping> _Inputs = new();
+        private string _Action = string.Empty;
+        private ObservableCollection<ParameterMapping> _Outputs = new();
+        private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
+
+        public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
+        public string Action { get => _Action; set => SetField(ref _Action, value); }
+        public ObservableCollection<ParameterMapping> Outputs { get => _Outputs; set => SetField(ref _Outputs, value); }
+        public ObservableCollection<ApplicationProcessorStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
+    }
+    public class ApplicationProcessor: BaseNotifyPropertyChanged
+    {
+        private string _Name;
+        private string _Description;
+        private ObservableCollection<ApplicationProcessorStep> _Steps = new ObservableCollection<ApplicationProcessorStep>();
+
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
+        public string Description { get => _Description; set => SetField(ref _Description, value); }
+        public ObservableCollection<ApplicationProcessorStep> Steps { get => _Steps; set => SetField(ref _Steps, value); }
+    }
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
         private string _ServiceProvider = MainWindow.WriterDataServiceProviderNames.First();
@@ -99,6 +126,7 @@ namespace Expresso.Core
         private ObservableCollection<ApplicationDataReader> _DataReaders = new();
         private ObservableCollection<ApplicationOutputWriter> _OutputWriters = new();
         private ObservableCollection<ApplicationVariable> _Variables = new();
+        private ObservableCollection<ApplicationProcessor> _Processors = new();
         private ObservableCollection<ApplicationWorkflow> _Workflows = new();
         #endregion
 
@@ -112,6 +140,7 @@ namespace Expresso.Core
         public ObservableCollection<ApplicationDataReader> DataReaders { get => _DataReaders; set => SetField(ref _DataReaders, value); }
         public ObservableCollection<ApplicationOutputWriter> OutputWriters { get => _OutputWriters; set => SetField(ref _OutputWriters, value); }
         public ObservableCollection<ApplicationVariable> Variables { get => _Variables; set => SetField(ref _Variables, value); }
+        public ObservableCollection<ApplicationProcessor> Processors { get => _Processors; set => SetField(ref _Processors, value); }
         public ObservableCollection<ApplicationWorkflow> Workflows { get => _Workflows; set => SetField(ref _Workflows, value); }
         #endregion
     }

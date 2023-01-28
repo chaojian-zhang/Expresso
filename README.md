@@ -14,6 +14,16 @@ Has three launch modes:
 2. Launch executable with a workflow file; This mode allow interactive input specification.
 3. Launch executable with a workflow file and all variable names and values. This executes the workflow in headless mode.
 
+### Application Workflow Architectures
+
+#### Readers-Variables-Conditions-Writers
+
+Standard ETL without using processors.
+
+#### Readers-Processors-Conditions
+
+Use processors exclusively to chain operations.
+
 ## Remarks
 
 * Components: SQLite

@@ -282,6 +282,8 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
+                <TabItem Header="Processor"  Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
+                </TabItem>
                 <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
 
                 </TabItem>
