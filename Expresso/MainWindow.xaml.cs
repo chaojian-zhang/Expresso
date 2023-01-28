@@ -95,6 +95,8 @@ namespace Expresso
 
         private ApplicationData _ApplicationData;
         public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
+        private ApplicationVariable _CurrentSelectedVariable;
+        public ApplicationVariable CurrentSelectedVariable { get => _CurrentSelectedVariable; set => SetField(ref _CurrentSelectedVariable, value); }
         #endregion
 
         #region Syntax Highlighter
@@ -210,6 +212,18 @@ namespace Expresso
             ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
             reader.Transform = editor.Text;
         }
+        private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentSelectedVariable = new ApplicationVariable();
+            ApplicationData.Variables.Add(CurrentSelectedVariable);
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
+        }
+        private void VariablesRemoveVariableButton_Click(object sender, RoutedEventArgs e)
+        {
+            ApplicationData.Variables.Remove(CurrentSelectedVariable);
+            CurrentSelectedVariable = null;
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
+        }
         private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
@@ -273,7 +287,11 @@ namespace Expresso
         }
         private void MenuItemCreateVariable_Click(object sender, RoutedEventArgs e)
         {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Variable;
 
+            CurrentSelectedVariable = new ApplicationVariable();
+            ApplicationData.Variables.Add(CurrentSelectedVariable);
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
         }
         private void MenuItemCreateCondition_Click(object sender, RoutedEventArgs e)
         {

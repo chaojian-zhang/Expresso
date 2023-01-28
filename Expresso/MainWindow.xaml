@@ -416,10 +416,53 @@
                     </TabControl>
                 </TabItem>
                 <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
-
+                    <DockPanel LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                                <Button Content="Add" Click="VariablesAddVariableButton_Click"/>
+                                <Button Content="Remove" Click="VariablesRemoveVariableButton_Click"/>
+                            </StackPanel>
+                            <TextBlock >
+                                <Span FontSize="32" FontWeight="Bold">Variables</Span>
+                                <LineBreak/>
+                                <Span>Use variables at anywhere strings are evaluated, e.g. queries.</Span>
+                            </TextBlock>
+                        </StackPanel>
+                        <Grid DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="5" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <DockPanel Grid.Column="0">
+                                <Label DockPanel.Dock="Top" Content="Current Variables"/>
+                                <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding ApplicationData.Variables}" SelectedItem="{Binding CurrentSelectedVariable}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Label Content="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </DockPanel>
+                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                            <DockPanel Grid.Column="2">
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Name"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Type"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Type}"/>
+                                </DockPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Value"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Value, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                            </DockPanel>
+                        </Grid>
+                    </DockPanel>
                 </TabItem>
                 <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
-
                 </TabItem>
             </TabControl>
         </Grid>

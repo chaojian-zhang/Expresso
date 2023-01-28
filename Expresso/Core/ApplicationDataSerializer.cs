@@ -92,6 +92,7 @@ namespace Expresso.Core
             writer.Write(data.Variables.Count);
             foreach (ApplicationVariable variable in data.Variables)
             {
+                writer.Write(variable.Name);
                 writer.Write((byte)variable.Type);
                 writer.Write(variable.Value);
             }
@@ -207,6 +208,7 @@ namespace Expresso.Core
                 {
                     ApplicationVariable variable = new()
                     {
+                        Name = reader.ReadString(),
                         Type = (ApplicationVariable.VariableType)reader.ReadByte(),
                         Value= reader.ReadString()
                     };

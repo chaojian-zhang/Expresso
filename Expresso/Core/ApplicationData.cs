@@ -121,9 +121,11 @@ namespace Expresso.Core
             PickFromReaderQuery
         }
 
+        private string _Name = string.Empty;
         private VariableType _Type;
-        private string _Value;
+        private string _Value = string.Empty;
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
         public VariableType Type { get => _Type; set => SetField(ref _Type, value); }
         public string Value { get => _Value; set => SetField(ref _Value, value); }
     }
