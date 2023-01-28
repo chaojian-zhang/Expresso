@@ -41,6 +41,7 @@ namespace Expresso.Core
             public string AsName { get => _AsName; set => SetField(ref _AsName, value); }
         };
 
+        private string _Name = string.Empty;
         private bool _IsStartingStep = false;
         private ObservableCollection<ParameterMapping> _Inputs = new();
         private string _Action = string.Empty;
@@ -48,6 +49,7 @@ namespace Expresso.Core
         private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
         private bool _IsFinalOutput = false;
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
         public bool IsStartingStep { get => _IsStartingStep; set => SetField(ref _IsStartingStep, value); }
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
         public string Action { get => _Action; set => SetField(ref _Action, value); }

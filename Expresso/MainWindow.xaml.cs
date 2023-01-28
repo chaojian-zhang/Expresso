@@ -19,6 +19,8 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows.Controls;
 using System.Diagnostics;
+using System.Text;
+using Expresso.PopUps;
 
 namespace Expresso
 {
@@ -76,6 +78,8 @@ namespace Expresso
         #endregion
 
         #region Data Binding Properties
+        private bool _ShowResultAsDataGrid = false;
+        public bool ShowResultAsDataGrid { get => _ShowResultAsDataGrid; set => SetField(ref _ShowResultAsDataGrid, value); }
 
         private int _MainTabControlTabIndex = 0;
         public int MainTabControlTabIndex { get => _MainTabControlTabIndex; set => SetField(ref _MainTabControlTabIndex, value); }
@@ -93,6 +97,8 @@ namespace Expresso
         public static string[] ReaderDataServiceProviderNames => ReaderDataServiceProviders.Keys.ToArray();
         public static string[] WriterDataServiceProviderNames => WriterDataServiceProviders.Keys.ToArray();
 
+        private ICollection _ReaderResultsView;
+        public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
         private ApplicationData _ApplicationData;
         public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
         private ApplicationVariable _CurrentSelectedVariable;
@@ -110,7 +116,7 @@ namespace Expresso
         #endregion
 
         #region Actions
-        public string ExecuteQuery(string dataSource, string connectionString, string query)
+        public static string ExecuteQuery(string dataSource, string connectionString, string query)
         {
             if (!ReaderDataServiceProviders.ContainsKey(dataSource))
                 return "Invalid service provider";
@@ -120,7 +126,17 @@ namespace Expresso
         #endregion
 
         #region Events
+        private void DeleteProcessorButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessor processor = button.DataContext as ApplicationProcessor;
 
+            if (ApplicationData.Processors.Remove(processor))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
+
+            if (ApplicationData.Processors.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
         private void AddProcessorInputStepButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -129,7 +145,7 @@ namespace Expresso
             ApplicationProcessorStep step = new ApplicationProcessorStep()
             {
                 IsStartingStep = true,
-                Action = "Root"
+                Name = "Root"
             };
             processor.StartingSteps.Add(step);
             processor.ListingOfAllSteps.Add(step);
@@ -160,11 +176,53 @@ namespace Expresso
 
             ApplicationProcessorStep nextStep = new ApplicationProcessorStep()
             {
-                Action = "New"
+                Name = "New"
             };
             step.NextSteps.Add(nextStep);
             processor.ListingOfAllSteps.Add(nextStep);
             processor.NotifyPropertyChanged(nameof(processor.ListingOfAllSteps));
+        }
+        private void RemoveProcessorStepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessor processor = button.Tag as ApplicationProcessor;
+            ApplicationProcessorStep step = button.DataContext as ApplicationProcessorStep;
+
+            FindAndRemoveStep(processor.StartingSteps, step);
+            RemoveAllStepsFromList(processor.ListingOfAllSteps, step);
+            processor.NotifyPropertyChanged(nameof(processor.ListingOfAllSteps));
+
+            void FindAndRemoveStep(ObservableCollection<ApplicationProcessorStep> stepsCollection, ApplicationProcessorStep stepToRemove)
+            {
+                if (!stepsCollection.Remove(stepToRemove))
+                {
+                    foreach (ApplicationProcessorStep childStep in stepsCollection)
+                        FindAndRemoveStep(childStep.NextSteps, stepToRemove);
+                }
+            }
+            void RemoveAllStepsFromList(ObservableCollection<ApplicationProcessorStep> allStepsList, ApplicationProcessorStep step)
+            {
+                allStepsList.Remove(step);
+                foreach (var next in step.NextSteps)
+                    RemoveAllStepsFromList(allStepsList, next);
+            }
+        }
+        private void TestProcessorButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessor processor = button.DataContext as ApplicationProcessor;
+
+            Dictionary<ApplicationProcessorStep, string> inputs = new Dictionary<ApplicationProcessorStep, string>();
+            foreach (ApplicationProcessorStep item in processor.StartingSteps)
+            {
+                foreach (var input in item.Inputs)
+                {
+                    string response = PromptDialog.Prompt($"Enter value for {input.FromName}", $"Specify Processor Step Inputs: {item.Name}");
+                    if (response == null)
+                        return;
+                    inputs.Add(item, response);
+                }
+            }
         }
         private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
         {
@@ -178,11 +236,28 @@ namespace Expresso
         {
             Button button = sender as Button;
             ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Query);
+
+            string resultCSV = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Query);
+            ResultPreview = resultCSV.CSVToConsoleTable();
+            ReaderResultsView = resultCSV.CSVToDataTable();
         }
         private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
             
+        }
+        private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                query.DataSourceString = openFileDialog.FileName;
+            }
         }
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -236,7 +311,8 @@ namespace Expresso
             ApplicationProcessor processor = treeView.DataContext as ApplicationProcessor;
             ApplicationProcessorStep step = e.NewValue as ApplicationProcessorStep;
 
-            ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
+            if (step != null) 
+                ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
         }
         #endregion
 
@@ -358,7 +434,10 @@ namespace Expresso
         }
         public static string ExecuteFolderFilepathsQuery(string connection, string query)
         {
-            return "File Paths\n" + string.Join('\n', Directory.EnumerateFileSystemEntries(connection).ToArray());
+            StringBuilder csvBuilder = new StringBuilder("File Paths,File Names,Type/Extensions,Sizes");
+            foreach (FileSystemInfo item in new DirectoryInfo(connection).EnumerateFileSystemInfos())
+                csvBuilder.AppendLine($"{item.FullName},{item.Name},{(item is DirectoryInfo ? "Folder" : item.Extension)},{(item is FileInfo file ? file.Length : string.Empty)}");
+            return csvBuilder.ToString();
         }
         public static string ExecuteODBCQuery(string connection, string query)
         {
@@ -368,7 +447,7 @@ namespace Expresso
                 oracleConnection.Open();
                 var dt = new DataTable();
                 dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
-                return dt.ToConsoleTable();
+                return dt.ToCSV();
             }
             catch (Exception e)
             {
@@ -389,7 +468,7 @@ namespace Expresso
         }
         private static string ExecuteCSVQuery(string connection, string query)
         {
-            throw new NotImplementedException();
+            return File.ReadAllText(connection);
         }
 
         private static string WriteArbitraryText(string connection, string query)

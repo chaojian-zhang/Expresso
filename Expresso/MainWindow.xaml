@@ -12,13 +12,19 @@
         DataContext="{Binding RelativeSource={RelativeSource self}}">
     <Window.Resources>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></conv:BooleanToVisibilityConverter>
-        <conv:BooleanToVisibilityConverterInverted x:Key="BooleanToVisibilityConverterInverse"></conv:BooleanToVisibilityConverterInverted>
+        <conv:BooleanToVisibilityConverterInverted x:Key="BooleanToVisibilityConverterInverted"></conv:BooleanToVisibilityConverterInverted>
         <conv:ObjectToBooleanConverter x:Key="ObjectToBooleanConverter"></conv:ObjectToBooleanConverter>
         <conv:ObjectToBooleanConverterInverted x:Key="ObjectToBooleanConverterInverted"></conv:ObjectToBooleanConverterInverted>
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
 
         <Style TargetType="Button">
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="2" />
+                </Style>
+            </Style.Resources>
+
             <Setter Property="Margin" Value="2 0"/>
             <Setter Property="Padding" Value="2 0"/>
             <Setter Property="MinHeight" Value="20"/>
@@ -148,7 +154,20 @@
                                             <RowDefinition Height="5" />
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
-                                        <TextBox Grid.Row="0" Text="{Binding ResultPreview, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                                        <Grid Grid.Row="0" >
+                                            <DataGrid 
+                                                AutoGenerateColumns="True" ItemsSource="{Binding ReaderResultsView, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                                Visibility="{Binding ShowResultAsDataGrid, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            <TextBox 
+                                                Text="{Binding ResultPreview, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                                Visibility="{Binding ShowResultAsDataGrid, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource BooleanToVisibilityConverterInverted}}"/>
+                                            <ToggleButton 
+                                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="22 6"
+                                                Visibility="{Binding ResultPreview, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource ObjectToVisibilityConverter}}"
+                                                Content="Show Data Grid" IsChecked="{Binding ShowResultAsDataGrid, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                        </Grid>
                                         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                                         <TabControl Grid.Row="2">
                                             <TabItem Header="Data Source">
@@ -180,6 +199,18 @@
                                                                             <Label DockPanel.Dock="Right" Content="Additional Parameter"/>
                                                                             <TextBox DockPanel.Dock="Left" Text="{Binding DataSourceString}"/>
                                                                         </DockPanel>
+                                                                        <Button Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click">
+                                                                            <Button.Style>
+                                                                                <Style TargetType="Button">
+                                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding ServiceProvider}" Value="CSV">
+                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Button.Style>
+                                                                        </Button>
                                                                     </StackPanel>
                                                                     <DockPanel DockPanel.Dock="Bottom"
                                                    Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -297,7 +328,7 @@
                     <TabControl ItemsSource="{Binding ApplicationData.Processors}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
-                                <Label Content="Processor"/>
+                                <Label Content="{Binding Name}"/>
                             </DataTemplate>
                         </TabControl.ItemTemplate>
                         <TabControl.ContentTemplate>
@@ -319,14 +350,17 @@
                                                     HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                                     Orientation="Horizontal">
                                                 <Button Content="Add New Step" Click="AddProcessorInputStepButton_Click"/>
+                                                <Button Content="Delete Processor" Click="DeleteProcessorButton_Click"/>
+                                                <Button Content="Test" Click="TestProcessorButton_Click" 
+                                                        Background="SteelBlue" Foreground="White" BorderBrush="DarkBlue" BorderThickness="2" />
                                             </StackPanel>
-                                            <TreeView SelectedItemChanged="ProcessorTreeView_SelectedItemChanged">
+                                            <Label DockPanel.Dock="Top" Content="Processor Steps"/>
+                                            <TreeView SelectedItemChanged="ProcessorTreeView_SelectedItemChanged" ItemsSource="{Binding StartingSteps}">
                                                 <TreeView.Resources>
                                                     <HierarchicalDataTemplate DataType="{x:Type core:ApplicationProcessorStep}" ItemsSource="{Binding NextSteps}">
-                                                        <TextBlock Text="{Binding Action}" />
+                                                        <TextBlock Text="{Binding Name}" />
                                                     </HierarchicalDataTemplate>
                                                 </TreeView.Resources>
-                                                <TreeViewItem ItemsSource="{Binding StartingSteps}" Header="Processor Steps" />
                                             </TreeView>
                                         </DockPanel>
                                         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
@@ -334,11 +368,11 @@
                                             <Label DockPanel.Dock="Top" Content="Processor"/>
                                             <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
                                                 <Label Content="Name"/>
-                                                <TextBox Text="{Binding Name}"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DockPanel>
                                             <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="2">
                                                 <Label DockPanel.Dock="Top" Content="Description"/>
-                                                <TextBox Text="{Binding Description}"
+                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                                          TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                                          SpellCheck.IsEnabled="True"/>
                                             </DockPanel>
@@ -348,7 +382,7 @@
                                     <TabControl Grid.Row="2" ItemsSource="{Binding ListingOfAllSteps}" Tag="{Binding}" SelectedIndex="{Binding ProcessorStepTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                         <TabControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Label Content="{Binding Action}" />
+                                                <Label Content="{Binding Name}" />
                                             </DataTemplate>
                                         </TabControl.ItemTemplate>
                                         <TabControl.ContentTemplate>
@@ -356,16 +390,18 @@
                                                 <DockPanel LastChildFill="True">
                                                     <StackPanel DockPanel.Dock="Top">
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" 
-                                                                Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}">
+                                                                Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverted}}">
                                                             <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Add Output" Click="AddProcessorStepOutputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
-                                                            <CheckBox Content="Is Final Output" IsChecked="{Binding IsFinalOutput}"/>
+                                                            <CheckBox Content="Is Final Output" IsChecked="{Binding IsFinalOutput}" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" 
                                                                 Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                             <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                     </StackPanel>
                                                     <DockPanel LastChildFill="True">
@@ -383,7 +419,7 @@
                                                             </ListView>
                                                         </DockPanel>
                                                         <DockPanel DockPanel.Dock="Right"
-                                                                   Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}">
+                                                                   Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverted}}">
                                                             <ListView ItemsSource="{Binding Outputs}">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
@@ -399,9 +435,10 @@
                                                         <DockPanel DockPanel.Dock="Right">
                                                             <Grid>
                                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                    <Label Content="Action" Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}"/>
-                                                                    <Label Content="Name" Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                                                    <TextBox Text="{Binding Action, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
+                                                                    <Label Content="Name"/>
+                                                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
+                                                                    <Label Content="Action" Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverted}}"/>
+                                                                    <TextBox Text="{Binding Action, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"  Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverted}}"/>
                                                                 </StackPanel>
                                                             </Grid>
                                                         </DockPanel>

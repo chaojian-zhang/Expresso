@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace Expresso.Services
 {
@@ -33,6 +34,47 @@ namespace Expresso.Services
                 consoleTable.AddRow(fields);
             }
             return consoleTable.ToMinimalString();
+        }
+        public static string CSVToConsoleTable(this string csv)
+        {
+            try
+            {
+                var reader = Csv.CsvReader.ReadFromText(csv, new Csv.CsvOptions()
+                {
+                    HeaderMode = Csv.HeaderMode.HeaderPresent
+                }).ToArray();
+
+                string[] columnNames = reader.First().Headers;
+                var consoleTable = new ConsoleTable(columnNames);
+
+                foreach (var row in reader)
+                    consoleTable.AddRow(row.Values);
+                return consoleTable.ToMinimalString();
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+        public static DataView CSVToDataTable(this string csv)
+        {
+            var reader = Csv.CsvReader.ReadFromText(csv, new Csv.CsvOptions()
+            {
+                HeaderMode = Csv.HeaderMode.HeaderPresent
+            }).ToArray();
+
+            DataTable dataTable = new DataTable();
+            foreach (string header in reader.First().Headers)
+                dataTable.Columns.Add(new DataColumn(header, typeof(string)));
+
+            foreach (Csv.ICsvLine row in reader)
+            {
+                DataRow dataRow = dataTable.NewRow();
+                dataRow.ItemArray = row.Values;
+                dataTable.Rows.Add(dataRow);
+            }         
+
+            return new DataView(dataTable);
         }
     }
 }
