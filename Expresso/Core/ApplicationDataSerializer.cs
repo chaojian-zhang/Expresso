@@ -129,10 +129,13 @@ namespace Expresso.Core
                     writer.Write(output.FromName);
                     writer.Write(output.AsName);
                 }
-                writer.Write(step.NextSteps.Count);
-                foreach (var next in step.NextSteps)
-                    WriteProcessorStep(writer, next);
                 writer.Write(step.IsFinalOutput);
+                if (!step.IsFinalOutput)
+                {
+                    writer.Write(step.NextSteps.Count);
+                    foreach (var next in step.NextSteps)
+                        WriteProcessorStep(writer, next);
+                }
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -282,12 +285,15 @@ namespace Expresso.Core
                     }
                 }
                 {
-                    int subStepsCount = reader.ReadInt32();
-                    for (int i = 0; i < subStepsCount; i++)
-                        step.NextSteps.Add(ReadProcessorStep(reader));
+                    step.IsFinalOutput = reader.ReadBoolean();
                 }
                 {
-                    step.IsFinalOutput = reader.ReadBoolean();
+                    if (!step.IsFinalOutput)
+                    {
+                        int subStepsCount = reader.ReadInt32();
+                        for (int i = 0; i < subStepsCount; i++)
+                            step.NextSteps.Add(ReadProcessorStep(reader));
+                    }
                 }
                 return step;
             }

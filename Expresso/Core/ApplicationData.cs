@@ -54,8 +54,8 @@ namespace Expresso.Core
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
         public string Action { get => _Action; set => SetField(ref _Action, value); }
         public ObservableCollection<ParameterMapping> Outputs { get => _Outputs; set => SetField(ref _Outputs, value); }
-        public ObservableCollection<ApplicationProcessorStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
         public bool IsFinalOutput { get => _IsFinalOutput; set => SetField(ref _IsFinalOutput, value); }
+        public ObservableCollection<ApplicationProcessorStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
     }
     public class ApplicationProcessor: BaseNotifyPropertyChanged
     {

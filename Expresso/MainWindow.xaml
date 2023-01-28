@@ -97,6 +97,7 @@
         </Menu>
         <Grid>
             <Label Content="{Binding BackgroundText}" FontSize="32" Foreground="LightGray" 
+                   Background="Transparent" MouseDoubleClick="BackgroundLabel_MouseDoubleClick"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
@@ -393,14 +394,18 @@
                                                                 Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverted}}">
                                                             <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Add Output" Click="AddProcessorStepOutputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
-                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" 
+                                                                    Visibility="{Binding IsFinalOutput, Converter={StaticResource BooleanToVisibilityConverterInverted}}"
+                                                                    Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <CheckBox Content="Is Final Output" IsChecked="{Binding IsFinalOutput}" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" 
                                                                 Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                             <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
-                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" 
+                                                                    Visibility="{Binding IsFinalOutput, Converter={StaticResource BooleanToVisibilityConverterInverted}}"
+                                                                    Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                     </StackPanel>

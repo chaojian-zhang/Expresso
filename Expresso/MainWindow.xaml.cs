@@ -126,6 +126,8 @@ namespace Expresso
         #endregion
 
         #region Events
+        private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+            =>MenuItemFileOpen_Click(null, null);
         private void DeleteProcessorButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -212,17 +214,18 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationProcessor processor = button.DataContext as ApplicationProcessor;
 
-            Dictionary<ApplicationProcessorStep, string> inputs = new Dictionary<ApplicationProcessorStep, string>();
+            Dictionary<string, string> inputs = new();
             foreach (ApplicationProcessorStep item in processor.StartingSteps)
             {
-                foreach (var input in item.Inputs)
+                foreach (ApplicationProcessorStep.ParameterMapping input in item.Inputs)
                 {
                     string response = PromptDialog.Prompt($"Enter value for {input.FromName}", $"Specify Processor Step Inputs: {item.Name}");
                     if (response == null)
                         return;
-                    inputs.Add(item, response);
+                    inputs.Add(input.AsName, response);
                 }
             }
+            Evaluation.TestProcessor(processor.StartingSteps, inputs);
         }
         private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
         {
@@ -354,7 +357,10 @@ namespace Expresso
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Processor;
 
-            ApplicationData.Processors.Add(new ApplicationProcessor());
+            ApplicationData.Processors.Add(new ApplicationProcessor()
+            {
+                Name = "Processor"
+            });
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
         }
         private void MenuItemCreateWorkflow_Click(object sender, RoutedEventArgs e)
