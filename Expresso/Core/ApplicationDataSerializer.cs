@@ -52,6 +52,7 @@ namespace Expresso.Core
                     writer.Write(dataQuery.ServiceProvider);
                     writer.Write(dataQuery.DataSourceString);
                     writer.Write(dataQuery.Query);
+                    writer.Write(dataQuery.AdditionalParameter);
                 }
                 writer.Write(dataReader.Transform);
             }
@@ -62,6 +63,7 @@ namespace Expresso.Core
                 writer.Write(outputWriter.ServiceProvider);
                 writer.Write(outputWriter.DataSourceString);
                 writer.Write(outputWriter.Command);
+                writer.Write(outputWriter.AdditionalParameter);
             }
 
             writer.Write(data.Variables.Count);
@@ -114,7 +116,8 @@ namespace Expresso.Core
                         {
                             ServiceProvider = reader.ReadString(),
                             DataSourceString = reader.ReadString(),
-                            Query = reader.ReadString()
+                            Query = reader.ReadString(),
+                            AdditionalParameter = reader.ReadString()
                         });
                     }
                     dataReader.Transform = reader.ReadString();
@@ -131,7 +134,8 @@ namespace Expresso.Core
                     {
                         ServiceProvider = reader.ReadString(),
                         DataSourceString = reader.ReadString(),
-                        Command = reader.ReadString()
+                        Command = reader.ReadString(),
+                        AdditionalParameter = reader.ReadString()
                     };
                     applicationData.OutputWriters.Add(writer);
                 }

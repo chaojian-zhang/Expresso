@@ -53,6 +53,7 @@ namespace Expresso
         };
         private static readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
         {
+            { "Folder Filepaths", ExecuteFolderFilepathsQuery },
             { "ODBC", ExecuteODBCQuery },
             { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
             { "CSV", ExecuteCSVQuery },
@@ -137,7 +138,7 @@ namespace Expresso
         private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
             var query = ApplicationData.DataReaders[CurrentReaderTabIndex].DataQueries[CurrentReaderQueryItemIndex];
-            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, (sender as TextEditor).Text);
+            ResultPreview = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Query);
         }
         private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -265,6 +266,10 @@ namespace Expresso
             {
                 return $"Result,Message\nError,\"{e.Message}\"";
             }
+        }
+        public static string ExecuteFolderFilepathsQuery(string connection, string query)
+        {
+            return "File Paths\n" + string.Join('\n', Directory.EnumerateFileSystemEntries(connection).ToArray());
         }
         public static string ExecuteODBCQuery(string connection, string query)
         {
