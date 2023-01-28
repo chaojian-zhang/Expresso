@@ -43,9 +43,9 @@ namespace Expresso.Components
         private readonly Action<T> _action;
         private readonly Func<T, bool> _condition;
 
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler CanExecuteChanged;
 
-        public DelegateCommand(Action<T> action, Func<T, bool>? executeCondition = default)
+        public DelegateCommand(Action<T> action, Func<T, bool> executeCondition = default)
         {
             _action = action ?? throw new ArgumentNullException(nameof(action));
             _condition = executeCondition;

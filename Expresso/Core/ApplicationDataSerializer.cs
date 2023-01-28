@@ -113,6 +113,7 @@ namespace Expresso.Core
 
             void WriteProcessorStep(BinaryWriter writer, ApplicationProcessorStep step)
             {
+                writer.Write(step.IsStartingStep);
                 writer.Write(step.Inputs.Count);
                 foreach (var input in step.Inputs)
                 {
@@ -251,9 +252,16 @@ namespace Expresso.Core
                 ApplicationProcessorStep step = new ApplicationProcessorStep();
 
                 {
+                    step.IsStartingStep = reader.ReadBoolean();
+                }
+                {
                     int inputsCount = reader.ReadInt32();
                     for (int i = 0; i < inputsCount; i++)
-                        step.Inputs.Add(new ApplicationProcessorStep.ParameterMapping(reader.ReadString(), reader.ReadString()));
+                        step.Inputs.Add(new ApplicationProcessorStep.ParameterMapping()
+                        {
+                            FromName = reader.ReadString(),
+                            AsName = reader.ReadString(),
+                        });
                 }
                 {
                     step.Action = reader.ReadString();
@@ -262,7 +270,11 @@ namespace Expresso.Core
                     int outputsCount = reader.ReadInt32();
                     for (int i = 0; i < outputsCount; i++)
                     {
-                        step.Outputs.Add(new ApplicationProcessorStep.ParameterMapping(reader.ReadString(), reader.ReadString()));
+                        step.Outputs.Add(new ApplicationProcessorStep.ParameterMapping()
+                        {
+                            FromName = reader.ReadString(),
+                            AsName = reader.ReadString(),
+                        });
                     }
                 }
                 {

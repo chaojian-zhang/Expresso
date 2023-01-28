@@ -28,18 +28,27 @@ namespace Expresso.Core
         public string Parameter { get => _Parameter; set => SetField(ref _Parameter, value); }
     }
     /// <remarks>
-    /// Root level step takes only a single input and has a bypass action that just passes the input to output
+    /// Root level step takes one or more inputs (with renaming) and just passes the inputs to outputs without any action
     /// </remarks>
     public class ApplicationProcessorStep : BaseNotifyPropertyChanged
     {
-        public record struct ParameterMapping(string FromName, string AsName);
+        public class ParameterMapping : BaseNotifyPropertyChanged
+        {
+            private string _FromName = string.Empty;
+            private string _AsName = string.Empty;
 
+            public string FromName { get => _FromName; set => SetField(ref _FromName, value); }
+            public string AsName { get => _AsName; set => SetField(ref _AsName, value); }
+        };
+
+        private bool _IsStartingStep = false;
         private ObservableCollection<ParameterMapping> _Inputs = new();
         private string _Action = string.Empty;
         private ObservableCollection<ParameterMapping> _Outputs = new();
         private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
         private bool _IsFinalOutput = false;
 
+        public bool IsStartingStep { get => _IsStartingStep; set => SetField(ref _IsStartingStep, value); }
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
         public string Action { get => _Action; set => SetField(ref _Action, value); }
         public ObservableCollection<ParameterMapping> Outputs { get => _Outputs; set => SetField(ref _Outputs, value); }
@@ -48,8 +57,8 @@ namespace Expresso.Core
     }
     public class ApplicationProcessor: BaseNotifyPropertyChanged
     {
-        private string _Name;
-        private string _Description;
+        private string _Name = string.Empty;
+        private string _Description = string.Empty;
         private ObservableCollection<ApplicationProcessorStep> _StartingSteps = new ObservableCollection<ApplicationProcessorStep>();
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }

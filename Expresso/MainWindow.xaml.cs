@@ -18,6 +18,7 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows.Controls;
+using System.Diagnostics;
 
 namespace Expresso
 {
@@ -78,6 +79,8 @@ namespace Expresso
 
         private int _MainTabControlTabIndex = 0;
         public int MainTabControlTabIndex { get => _MainTabControlTabIndex; set => SetField(ref _MainTabControlTabIndex, value); }
+        private int _ProcessorStepTabItemIndex = 0;
+        public int ProcessorStepTabItemIndex { get => _ProcessorStepTabItemIndex; set => SetField(ref _ProcessorStepTabItemIndex, value); }
 
         private string _CurrentFilePath;
         public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
@@ -121,15 +124,45 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationProcessor processor = button.DataContext as ApplicationProcessor;
 
-            ApplicationProcessorStep step = new ApplicationProcessorStep();
+            ApplicationProcessorStep step = new ApplicationProcessorStep()
+            {
+                IsStartingStep = true,
+                Action = "Root"
+            };
             processor.StartingSteps.Add(step);
             processor.ListingOfAllSteps.Add(step);
             processor.NotifyPropertyChanged(nameof(processor.ListingOfAllSteps));
         }
-        private void AddProcessorExecutionStepButton_Click(object sender, RoutedEventArgs e)
+        private void AddProcessorStepInputButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
             ApplicationProcessorStep step = button.DataContext as ApplicationProcessorStep;
+
+            step.Inputs.Add(new ApplicationProcessorStep.ParameterMapping());
+            step.NotifyPropertyChanged(nameof(ApplicationProcessorStep.Inputs));
+        }
+
+        private void AddProcessorStepOutputButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessorStep step = button.DataContext as ApplicationProcessorStep;
+
+            step.Outputs.Add(new ApplicationProcessorStep.ParameterMapping());
+            step.NotifyPropertyChanged(nameof(ApplicationProcessorStep.Outputs));
+        }
+        private void AddProcessorStepSubstepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationProcessor processor = button.Tag as ApplicationProcessor;
+            ApplicationProcessorStep step = button.DataContext as ApplicationProcessorStep;
+
+            ApplicationProcessorStep nextStep = new ApplicationProcessorStep()
+            {
+                Action = "New"
+            };
+            step.NextSteps.Add(nextStep);
+            processor.ListingOfAllSteps.Add(nextStep);
+            processor.NotifyPropertyChanged(nameof(processor.ListingOfAllSteps));
         }
         private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
         {
@@ -183,6 +216,14 @@ namespace Expresso
             ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
             writer.Command = editor.Text;
         }
+        private void ProcessorTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            TreeView treeView = sender as TreeView;
+            ApplicationProcessor processor = treeView.DataContext as ApplicationProcessor;
+            ApplicationProcessorStep step = e.NewValue as ApplicationProcessorStep;
+
+            ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
+        }
         #endregion
 
         #region Menu Items
@@ -210,7 +251,7 @@ namespace Expresso
             if (openFileDialog.ShowDialog() == true)
             {
                 CurrentFilePath = openFileDialog.FileName;
-                ApplicationData = ApplicationDataSerializer.Load(CurrentFilePath);
+                ApplicationData = OpenFile(CurrentFilePath);
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
         }
@@ -262,6 +303,10 @@ namespace Expresso
             => MenuItemFileOpen_Click(null, null);
         private void FileOpenCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
             => e.CanExecute = true;
+        private void FileSaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemFileSave_Click(null, null);
+        private void FileSaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
         #endregion
 
         #region Data Binding
@@ -352,6 +397,26 @@ namespace Expresso
         private static string WriteReaderToCSV(string connection, string query)
         {
             throw new NotImplementedException();
+        }
+        private static ApplicationData OpenFile(string filePath)
+        {
+            // Open file
+            var appData = ApplicationDataSerializer.Load(filePath);
+            // Some additional GUI requred setups
+            foreach (var processor in appData.Processors)
+            {
+                foreach (var startingSteps in processor.StartingSteps)
+                    PopulateSteps(processor, startingSteps);
+            }
+
+            return appData;
+
+            void PopulateSteps(ApplicationProcessor processor, ApplicationProcessorStep step)
+            {
+                processor.ListingOfAllSteps.Add(step);
+                foreach (var nextStep in step.NextSteps)
+                    processor.ListingOfAllSteps.Add(nextStep);
+            }
         }
         #endregion
     }

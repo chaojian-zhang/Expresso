@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
         xmlns:conv="clr-namespace:Expresso.Converters"
+        xmlns:core="clr-namespace:Expresso.Core"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Width="1024" Height="768"
@@ -51,10 +52,12 @@
     <Window.InputBindings>
         <KeyBinding Command="New" Key="N" Modifiers="Ctrl"/>
         <KeyBinding Command="Open" Key="O" Modifiers="Ctrl"/>
+        <KeyBinding Command="Save" Key="S" Modifiers="Ctrl"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="New" CanExecute="FileNewCommand_CanExecute" Executed="FileNewCommand_Executed" />
         <CommandBinding Command="Open" CanExecute="FileOpenCommand_CanExecute" Executed="FileOpenCommand_Executed" />
+        <CommandBinding Command="Save" CanExecute="FileSaveCommand_CanExecute" Executed="FileSaveCommand_Executed" />
     </Window.CommandBindings>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
@@ -290,7 +293,7 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
-                <TabItem Header="Processor"  Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Processor" Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl ItemsSource="{Binding ApplicationData.Processors}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -305,51 +308,65 @@
                                         <RowDefinition Height="5" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <Grid Grid.Row="0">
-                                        <StackPanel 
-                                HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                                Orientation="Horizontal">
-                                            <Button Content="Add Input" Click="AddProcessorInputStepButton_Click"/>
-                                        </StackPanel>
-
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="5" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <Canvas Grid.Column="0">
-
-                                            </Canvas>
-                                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
-                                            <DockPanel Grid.Column="2">
-                                                <Label DockPanel.Dock="Top" Content="Processor"/>
-                                                <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
-                                                    <Label Content="Name"/>
-                                                    <TextBox Text="{Binding Name}"/>
-                                                </DockPanel>
-                                                <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="2">
-                                                    <Label DockPanel.Dock="Top" Content="Description"/>
-                                                    <TextBox Text="{Binding Description}"
+                                    <Grid Grid.Row="0" >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="5" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <DockPanel Grid.Column="0" LastChildFill="True">
+                                            <StackPanel DockPanel.Dock="Bottom"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                    Orientation="Horizontal">
+                                                <Button Content="Add New Step" Click="AddProcessorInputStepButton_Click"/>
+                                            </StackPanel>
+                                            <TreeView SelectedItemChanged="ProcessorTreeView_SelectedItemChanged">
+                                                <TreeView.Resources>
+                                                    <HierarchicalDataTemplate DataType="{x:Type core:ApplicationProcessorStep}" ItemsSource="{Binding NextSteps}">
+                                                        <TextBlock Text="{Binding Action}" />
+                                                    </HierarchicalDataTemplate>
+                                                </TreeView.Resources>
+                                                <TreeViewItem ItemsSource="{Binding StartingSteps}" Header="Processor Steps" />
+                                            </TreeView>
+                                        </DockPanel>
+                                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                                        <DockPanel Grid.Column="2">
+                                            <Label DockPanel.Dock="Top" Content="Processor"/>
+                                            <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
+                                                <Label Content="Name"/>
+                                                <TextBox Text="{Binding Name}"/>
+                                            </DockPanel>
+                                            <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="2">
+                                                <Label DockPanel.Dock="Top" Content="Description"/>
+                                                <TextBox Text="{Binding Description}"
                                                          TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                                          SpellCheck.IsEnabled="True"/>
-                                                </DockPanel>
                                             </DockPanel>
-                                        </Grid>
+                                        </DockPanel>
                                     </Grid>
                                     <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
-                                    <TabControl Grid.Row="2" ItemsSource="{Binding ListingOfAllSteps}">
+                                    <TabControl Grid.Row="2" ItemsSource="{Binding ListingOfAllSteps}" Tag="{Binding}" SelectedIndex="{Binding ProcessorStepTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                         <TabControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Label Content="Step" />
+                                                <Label Content="{Binding Action}" />
                                             </DataTemplate>
                                         </TabControl.ItemTemplate>
                                         <TabControl.ContentTemplate>
                                             <DataTemplate>
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                                        <Button Content="Add Step" Click="AddProcessorExecutionStepButton_Click"/>
-                                                        <ToggleButton Content="Is Final Output" IsChecked="{Binding IsFinalOutput}"/>
+                                                <DockPanel LastChildFill="True">
+                                                    <StackPanel DockPanel.Dock="Top">
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                                                Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}">
+                                                            <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Add Output" Click="AddProcessorStepOutputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <CheckBox Content="Is Final Output" IsChecked="{Binding IsFinalOutput}"/>
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                                                Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                        </StackPanel>
                                                     </StackPanel>
                                                     <DockPanel LastChildFill="True">
                                                         <DockPanel DockPanel.Dock="Left">
@@ -365,14 +382,15 @@
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
                                                         </DockPanel>
-                                                        <DockPanel DockPanel.Dock="Right">
+                                                        <DockPanel DockPanel.Dock="Right"
+                                                                   Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}">
                                                             <ListView ItemsSource="{Binding Outputs}">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <StackPanel Orientation="Horizontal">
-                                                                            <TextBox Text="{Binding FromName}" MinWidth="128"/>
+                                                                            <TextBox Text="{Binding FromName, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
                                                                             <Label Content="As"/>
-                                                                            <TextBox Text="{Binding AsName}" MinWidth="128"/>
+                                                                            <TextBox Text="{Binding AsName, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
                                                                         </StackPanel>
                                                                     </DataTemplate>
                                                                 </ListView.ItemTemplate>
@@ -380,13 +398,15 @@
                                                         </DockPanel>
                                                         <DockPanel DockPanel.Dock="Right">
                                                             <Grid>
-                                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                    <TextBox Text="{Binding Action}" MinWidth="128"/>
+                                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                    <Label Content="Action" Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverterInverse}}"/>
+                                                                    <Label Content="Name" Visibility="{Binding IsStartingStep, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                                    <TextBox Text="{Binding Action, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
                                                                 </StackPanel>
                                                             </Grid>
                                                         </DockPanel>
                                                     </DockPanel>
-                                                </Grid>
+                                                </DockPanel>
                                             </DataTemplate>
                                         </TabControl.ContentTemplate>
                                     </TabControl>
