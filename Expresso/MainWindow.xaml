@@ -264,6 +264,14 @@
                                                                                     </DockPanel>
                                                                                 </DockPanel>
                                                                             </DataTemplate>
+                                                                            <DataTemplate DataType="{x:Type dataQuery:EnvironmentVariablesReaderDataQueryParameter}">
+                                                                                <DockPanel LastChildFill="True">
+                                                                                    <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                                                                        <Label Content="Specific Variable"/>
+                                                                                        <TextBox Text="{Binding SpecificVariable, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                                    </DockPanel>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
                                                                         </ContentPresenter.Resources>
                                                                     </ContentPresenter>
                                                                 </DockPanel>

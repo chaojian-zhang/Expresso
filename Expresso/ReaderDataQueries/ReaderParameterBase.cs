@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Csv;
+using System.Collections;
 
 namespace Expresso.ReaderDataQueries
 {
@@ -172,6 +173,83 @@ namespace Expresso.ReaderDataQueries
         {
             base.ReadFromStream(reader);
             FilePath = reader.ReadString();
+        }
+        #endregion
+    }
+
+    public sealed class EnvironmentVariablesReaderDataQueryParameter : ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Environment Variables";
+        #endregion
+
+        #region Base Property
+        private string _SpecificVariable = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string SpecificVariable { get => _SpecificVariable; set => SetField(ref _SpecificVariable, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            if (string.IsNullOrWhiteSpace(SpecificVariable))
+            {
+                string[] headers = new string[]
+                {
+                    "Environment Variable",
+                    "Value"
+                };
+
+                List<string[]> lines = new();
+                foreach (DictionaryEntry variable in Environment.GetEnvironmentVariables())
+                    lines.Add(new string[]
+                    {
+                        variable.Key.ToString(),
+                        variable.Value.ToString()
+                    });
+
+                return CsvWriter.WriteToText(headers, lines);
+            }
+            else
+            {
+                string variable = Environment.GetEnvironmentVariable(SpecificVariable);
+                if (variable == null)
+                    return "Environment Variable,Value";
+
+                string[] headers = new string[]
+                {
+                    "Item",
+                    "Value"
+                };
+                string[] variableValues = variable.Split(';').Where(v => !string.IsNullOrWhiteSpace(v)).ToArray();
+                List<string[]> lines = new();
+                for (int i = 0; i < variableValues.Length; i++)
+                {
+                    string value = variableValues[i];
+                    lines.Add(new string[]
+                    {
+                        i.ToString(),
+                        value
+                    });
+                }
+
+                return CsvWriter.WriteToText(headers, lines);
+            }
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(SpecificVariable);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            SpecificVariable = reader.ReadString();
         }
         #endregion
     }
