@@ -46,6 +46,17 @@ namespace Expresso
         }
         #endregion
 
+        #region Properties
+        /// <summary>
+        /// For caching remote data queries, used by specific data query readers
+        /// </summary>
+        private static DatabaseContext GlobalDatabaseContext = new DatabaseContext();
+        /// <summary>
+        /// For general management of file-scope readers
+        /// </summary>
+        private DatabaseContext SessionDatabaseContext;
+        #endregion
+
         #region Handlers
         private enum MainTabControlTabIndexMapping
         {
@@ -57,16 +68,6 @@ namespace Expresso
             Variable = 5,
             Workflow = 6
         };
-        //private static readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
-        //{
-        //    { "Folder Filepaths", ExecuteFolderFilepathsQuery },
-        //    { "ODBC", ExecuteODBCQuery },
-        //    { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
-        //    { "CSV", ExecuteCSVQuery },
-        //    { "Excel", ExecuteExcelQuery },
-        //    { "SQLite", ExecuteSQLiteQuery },
-        //    { "Expresso", ExecuteReaderQuery }
-        //};
         private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
         {
             { "Execute ODBC Command", ExecuteODBCNonQuery },
@@ -89,8 +90,6 @@ namespace Expresso
 
         private string _CurrentFilePath;
         public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
-        private string _BackgroundText = "Open or Create A File to Get Started.";
-        public string BackgroundText { get => _BackgroundText; set => SetField(ref _BackgroundText, value); }
         private string _WindowTitle = "Expressor (Idle)";
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
@@ -101,7 +100,15 @@ namespace Expresso
         private ICollection _ReaderResultsView;
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
         private ApplicationData _ApplicationData;
-        public ApplicationData ApplicationData { get => _ApplicationData; set => SetField(ref _ApplicationData, value); }
+        public ApplicationData ApplicationData 
+        { 
+            get => _ApplicationData; 
+            set
+            {
+                SetField(ref _ApplicationData, value);
+                SessionDatabaseContext = new DatabaseContext();
+            }
+        }
         private ApplicationVariable _CurrentSelectedVariable;
         public ApplicationVariable CurrentSelectedVariable { get => _CurrentSelectedVariable; set => SetField(ref _CurrentSelectedVariable, value); }
         #endregion
@@ -119,6 +126,17 @@ namespace Expresso
         #region Events
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
             =>MenuItemFileOpen_Click(null, null);
+        private void DeleteReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            if (ApplicationData.DataReaders.Remove(reader))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.DataReaders));
+
+            if (ApplicationData.DataReaders.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
         private void DeleteProcessorButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -222,10 +240,23 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
 
-            var newQuery = new ApplicationDataQuery();
+            var newQuery = new ApplicationDataQuery()
+            {
+                Name = $"Query{reader.DataQueries.Count + 1}",
+                ServiceProvider = ReaderDataServiceProviderNames.First()
+            };
             reader.DataQueries.Add(newQuery);
             reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
             newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
+        }
+        private void DeleteDataQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.Tag as ApplicationDataReader;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+
+            reader.DataQueries.Remove(query);
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
         }
         private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -238,7 +269,27 @@ namespace Expresso
         }
         private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
+            {
+                List<ParcelDataGrid> intermediateData = new();
+                foreach (var query in reader.DataQueries)
+                    intermediateData.Add(new ParcelDataGrid(query.Name, query.Parameters.MakeQuery()));
+
+                string resultCSV = null;
+                try
+                {
+                    resultCSV = intermediateData.ProcessDataGrids(reader.Transform).ToCSV();
+                }
+                catch (Exception err) 
+                { 
+                    resultCSV = $"Result,Message\nError,\"{err.Message.Replace(Environment.NewLine, " ")}\""; 
+                }
+                ResultPreview = resultCSV.CSVToConsoleTable();
+                ReaderResultsView = resultCSV.CSVToDataTable();
+            }
         }
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -249,6 +300,13 @@ namespace Expresso
                 throw new ArgumentException("Invalid service provider");
             else
                 WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.AdditionalParameter, writer.Command);
+        }
+        private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            if (reader != null)
+                editor.Text = reader.Transform;
         }
         private void ReaderTransformAvalonTextEditor_Initialized(object sender, EventArgs e)
         {
@@ -418,29 +476,6 @@ namespace Expresso
         #endregion
 
         #region Routines
-        public static string ExecuteAnalysisServiceQuery(string connection, string query)
-        {
-            try
-            {
-                using AdomdConnection conn = new AdomdConnection(connection);
-                conn.Open();
-                using AdomdCommand cmd = new AdomdCommand(query.TrimEnd(';'), conn);
-                CellSet result = cmd.ExecuteCellSet();
-                return result.CellSetToTableNew().ToCSVFull();
-            }
-            catch (Exception e)
-            {
-                return $"Result,Message\nError,\"{e.Message}\"";
-            }
-        }
-        private static string ExecuteReaderQuery(string connection, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static string ExecuteSQLiteQuery(string connection, string query)
-        {
-            throw new NotImplementedException();
-        }
         private static string ExecuteExcelQuery(string connection, string query)
         {
             throw new NotImplementedException();

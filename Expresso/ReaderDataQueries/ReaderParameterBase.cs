@@ -6,10 +6,10 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Csv;
 using System.Collections;
+using Microsoft.AnalysisServices.AdomdClient;
+using System.Data.SQLite;
 
 namespace Expresso.ReaderDataQueries
 {
@@ -84,6 +84,7 @@ namespace Expresso.ReaderDataQueries
                 oracleConnection.Open();
                 var dataTable = new DataTable();
                 dataTable.Load(new OdbcCommand(Query, oracleConnection).ExecuteReader());
+                oracleConnection.Close();
                 return dataTable.ToCSV();
             }
             catch (Exception e)
@@ -103,6 +104,52 @@ namespace Expresso.ReaderDataQueries
         {
             base.ReadFromStream(reader);
             DSN = reader.ReadString();
+        }
+        #endregion
+    }
+
+    public sealed class MicrosoftAnalysisServiceDataQueryParameter: ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Microsoft Analysis Service";
+        #endregion
+
+        #region Base Property
+        private string _ConnectionString = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string ConnectionString { get => _ConnectionString; set => SetField(ref _ConnectionString, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            try
+            {
+                using AdomdConnection conn = new AdomdConnection(ConnectionString);
+                conn.Open();
+                using AdomdCommand cmd = new AdomdCommand(Query.TrimEnd(';'), conn);
+                CellSet result = cmd.ExecuteCellSet();
+                return result.CellSetToTableNew().ToCSVFull();
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(ConnectionString);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            ConnectionString = reader.ReadString();
         }
         #endregion
     }
@@ -142,6 +189,45 @@ namespace Expresso.ReaderDataQueries
         #endregion
     }
 
+    public sealed class ExcelReaderDataQueryParameter : ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Excel";
+        #endregion
+
+        #region Base Property
+        private string _FilePath = string.Empty;
+        private string _Worksheet = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
+        public string Worksheet { get => _Worksheet; set => SetField(ref _Worksheet, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(FilePath);
+            writer.Write(Worksheet);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            FilePath = reader.ReadString();
+            Worksheet = reader.ReadString();
+        }
+        #endregion
+    }
+
     public sealed class SQLiteReaderDataQueryParameter : ReaderDataQueryParameterBase
     {
         #region Meta Data
@@ -159,7 +245,21 @@ namespace Expresso.ReaderDataQueries
         #region Query Interface
         public override string MakeQuery()
         {
-            throw new NotImplementedException();
+            try
+            {
+                using SQLiteConnection sqliteConnection = new SQLiteConnection($"Data Source={FilePath}");
+                sqliteConnection.Open();
+
+                var dataTable = new DataTable();
+                dataTable.Load(new SQLiteCommand(Query.TrimEnd(';'), sqliteConnection).ExecuteReader());
+
+                sqliteConnection.Close();
+                return dataTable.ToCSV();
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
         }
         #endregion
 
@@ -303,6 +403,41 @@ namespace Expresso.ReaderDataQueries
         {
             base.ReadFromStream(reader);
             FolderPath = reader.ReadString();
+        }
+        #endregion
+    }
+
+    public sealed class ExpressorReaderDataQueryParameter : ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Existing Readers";
+        #endregion
+
+        #region Base Property
+        private string _ReaderName = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string ReaderName { get => _ReaderName; set => SetField(ref _ReaderName, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(ReaderName);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            ReaderName = reader.ReadString();
         }
         #endregion
     }

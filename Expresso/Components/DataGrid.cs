@@ -185,6 +185,11 @@ namespace Expresso.Components
                 Columns.Add(col);
             }
         }
+        public ParcelDataGrid(string name, string csv)
+            : this(CsvReader.ReadFromText(csv))
+        {
+            TableName = name;
+        }
         public ParcelDataGrid(IEnumerable<ICsvLine> csvLines)
         {
             string[] headers = null;
@@ -302,7 +307,9 @@ namespace Expresso.Components
             StringBuilder builder = new StringBuilder();
             if (OptionalRowHeaderColumn != null) builder.Append($"{PreProcessColumnNameForDisplay(OptionalRowHeaderColumn.Header, repeatNameCounter)},");
             if (withColumnHeader)
-                builder.AppendLine(string.Join(',', Columns.Select(c => PreProcessColumnNameForDisplay(c.Header, repeatNameCounter))));
+                builder.AppendLine(string.Join(',', Columns
+                    .Select(c => PreProcessColumnNameForDisplay(c.Header, repeatNameCounter))
+                    .Select(n => EscapeNameForCSV(n))));
 
             for (int row = 0; row < RowCount; row++)
             {
@@ -316,6 +323,13 @@ namespace Expresso.Components
             }
 
             return builder.ToString();
+
+            string EscapeNameForCSV(string name)
+            {
+                if (name.Contains(','))
+                    name = name.Replace("\"", "\"\"");
+                return $"\"{name.Trim()}\"";
+            }
         }
         #endregion
 

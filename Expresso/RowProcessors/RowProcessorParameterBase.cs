@@ -125,6 +125,42 @@ namespace Expresso.ReaderDataQueries
         #endregion
     }
 
+    public sealed class WebRequestRowProcessorParameterBase : RowProcessorParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Web Request";
+        #endregion
+
+        #region Base Property
+        private string _URL = string.Empty;
+        private string _Method = string.Empty;
+        private string _OptionalBody = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string URL { get => _URL; set => SetField(ref _URL, value); }
+        public string Method { get => _Method; set => SetField(ref _Method, value); }
+        public string OptionalBody { get => _OptionalBody; set => SetField(ref _OptionalBody, value); }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(URL);
+            writer.Write(Method);
+            writer.Write(OptionalBody);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            URL = reader.ReadString();
+            Method = reader.ReadString();
+            OptionalBody = reader.ReadString();
+        }
+        #endregion
+    }
+
     public sealed class ReadFileContentRowProcessorParameterBase : RowProcessorParameterBase
     {
         #region Meta Data

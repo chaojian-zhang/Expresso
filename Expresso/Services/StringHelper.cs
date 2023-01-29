@@ -41,7 +41,8 @@ namespace Expresso.Services
             {
                 var reader = Csv.CsvReader.ReadFromText(csv, new Csv.CsvOptions()
                 {
-                    HeaderMode = Csv.HeaderMode.HeaderPresent
+                    HeaderMode = Csv.HeaderMode.HeaderPresent,
+                    AllowNewLineInEnclosedFieldValues = true,
                 }).ToArray();
 
                 string[] columnNames = reader.First().Headers;
@@ -60,21 +61,30 @@ namespace Expresso.Services
         {
             var reader = Csv.CsvReader.ReadFromText(csv, new Csv.CsvOptions()
             {
-                HeaderMode = Csv.HeaderMode.HeaderPresent
+                HeaderMode = Csv.HeaderMode.HeaderPresent,
+                AllowNewLineInEnclosedFieldValues = true
             }).ToArray();
 
             DataTable dataTable = new DataTable();
             foreach (string header in reader.First().Headers)
-                dataTable.Columns.Add(new DataColumn(header.Replace("/", " or "), typeof(string)));
+                dataTable.Columns.Add(new DataColumn(EscapeDataGridViewInvalidCharacters(header), typeof(string)));
 
             foreach (Csv.ICsvLine row in reader)
             {
                 DataRow dataRow = dataTable.NewRow();
                 dataRow.ItemArray = row.Values;
                 dataTable.Rows.Add(dataRow);
-            }         
+            }
 
             return new DataView(dataTable);
+
+            static string EscapeDataGridViewInvalidCharacters(string header)
+            {
+                var invalidChar = "()[]!@#$%^&*-_=\\/,. ".ToArray();
+                if (invalidChar.Any(c => header.Contains(c)))
+                    return $"\"{header}\"";
+                else return header;
+            }
         }
     }
 }

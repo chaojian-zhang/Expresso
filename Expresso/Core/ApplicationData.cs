@@ -88,9 +88,11 @@ namespace Expresso.Core
     }
     public class ApplicationDataQuery : BaseNotifyPropertyChanged
     {
+        private string _Name = string.Empty;
         private string _ServiceProvider = MainWindow.ReaderDataServiceProviderNames.First();
         private ReaderDataQueryParameterBase _Parameters = new ODBCReaderDataQueryParameter();
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
         public string ServiceProvider 
         { 
             get => _ServiceProvider;

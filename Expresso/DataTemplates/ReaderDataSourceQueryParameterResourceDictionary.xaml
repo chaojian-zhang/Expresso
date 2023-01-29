@@ -11,7 +11,7 @@
                 BorderThickness="2" BorderBrush="Beige"
                 ShowLineNumbers="True"
                 SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                FontSize="10pt" FontFamily="Consolas" 
+                FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
                 Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
                 DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
                 TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
@@ -30,7 +30,27 @@
                     BorderThickness="2" BorderBrush="Beige"
                     ShowLineNumbers="True"
                     SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                    FontSize="10pt" FontFamily="Consolas" 
+                    FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                    Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
+                    DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
+                    TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type dataQuery:MicrosoftAnalysisServiceDataQueryParameter}">
+        <DockPanel LastChildFill="True">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label Content="DSN"/>
+                <TextBox Text="{Binding ConnectionString, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <DockPanel>
+                <Label DockPanel.Dock="Top" Content="Query"/>
+                <avalonEdit:TextEditor 
+                    DockPanel.Dock="Bottom" Margin="5"
+                    BorderThickness="2" BorderBrush="Beige"
+                    ShowLineNumbers="True"
+                    SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                    FontSize="10pt" FontFamily="Consolas" WordWrap="True"
                     Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
                     DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
                     TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
@@ -40,8 +60,19 @@
     <DataTemplate DataType="{x:Type dataQuery:CSVReaderDataQueryParameter}">
         <DockPanel LastChildFill="True">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Label Content="File Path"/>
-                <TextBox Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label DockPanel.Dock="Left" Content="File Path"/>
+                <Button DockPanel.Dock="Right" Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type dataQuery:ExcelReaderDataQueryParameter}">
+        <DockPanel LastChildFill="True">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="File Path"/>
+                <TextBox DockPanel.Dock="Right" Text="{Binding Worksheet, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                <Label DockPanel.Dock="Right" Content="Worksheet"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>
             <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click"/>
         </DockPanel>
@@ -49,10 +80,10 @@
     <DataTemplate DataType="{x:Type dataQuery:SQLiteReaderDataQueryParameter}">
         <DockPanel LastChildFill="True">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Label Content="File Path"/>
-                <TextBox Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label DockPanel.Dock="Left" Content="File Path"/>
+                <Button DockPanel.Dock="Right" Content="Open" Click="ReaderDataQuerySQLiteTypeOpenFileButton_Click"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>
-            <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQuerySQLiteTypeOpenFileButton_Click"/>
             <DockPanel>
                 <Label DockPanel.Dock="Top" Content="Query"/>
                 <avalonEdit:TextEditor 
@@ -60,7 +91,7 @@
                     BorderThickness="2" BorderBrush="Beige"
                     ShowLineNumbers="True"
                     SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                    FontSize="10pt" FontFamily="Consolas" 
+                    FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
                     Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
                     DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
                     TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>

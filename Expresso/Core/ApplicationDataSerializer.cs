@@ -74,6 +74,7 @@ namespace Expresso.Core
                 writer.Write(dataReader.DataQueries.Count);
                 foreach (ApplicationDataQuery dataQuery in dataReader.DataQueries)
                 {
+                    writer.Write(dataQuery.Name);
                     writer.Write(dataQuery.ServiceProvider);
 
                     dataQuery.Parameters.WriteToStream(writer);
@@ -181,6 +182,7 @@ namespace Expresso.Core
                     {
                         var query = new ApplicationDataQuery()
                         {
+                            Name = reader.ReadString(),
                             ServiceProvider = reader.ReadString()
                         };
 

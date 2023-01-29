@@ -97,11 +97,16 @@
             </MenuItem>
         </Menu>
         <Grid>
-            <Label Content="{Binding BackgroundText}" FontSize="32" Foreground="LightGray" 
-                   Background="Transparent" MouseDoubleClick="BackgroundLabel_MouseDoubleClick"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label Content="Open or Create A File to Get Started." FontSize="32" Foreground="LightGray" 
+                   Background="Transparent" MouseDoubleClick="BackgroundLabel_MouseDoubleClick"       
                    Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                <TextBlock TextAlignment="Center" FontSize="22" Foreground="LightGray" HorizontalAlignment="Center" Margin="6">
+                    <Run>Open Ctrl+O</Run>
+                    <LineBreak/>
+                    <Run>Create Ctrl+N</Run>
+                </TextBlock>
+            </StackPanel>
             <TabControl TabStripPlacement="Left" Margin="0, 0, 0, 10" SelectedIndex="{Binding MainTabControlTabIndex}"
                         Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverter}}">
                 <TabControl.ItemContainerStyle>
@@ -190,9 +195,14 @@
                                                                 <DockPanel LastChildFill="True">
                                                                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
                                                                         <Button Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
+                                                                        <Button Content="Delete Query" Click="DeleteDataQueryButton_Click" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                                         <Button Content="Add Query" Click="AddDataQueryButton_Click" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                                     </StackPanel>
                                                                     <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+                                                                        <DockPanel LastChildFill="True">
+                                                                            <Label DockPanel.Dock="Left" Content="Name"/>
+                                                                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                        </DockPanel>
                                                                         <DockPanel LastChildFill="False">
                                                                             <Label Content="Data Service Provider"/>
                                                                             <ComboBox DockPanel.Dock="Top" MinWidth="120" 
@@ -238,6 +248,7 @@
                                                         ShowLineNumbers="True"
                                                         SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                                                         FontSize="10pt" FontFamily="Consolas" 
+                                                        DataContextChanged="ReaderTransformAvalonTextEditor_DataContextChanged"
                                                         Initialized="ReaderTransformAvalonTextEditor_Initialized"
                                                         TextChanged="ReaderTransformAvalonTextEditor_OnTextChanged"/>
                                                 </DockPanel>
@@ -259,6 +270,7 @@
                                              TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                              SpellCheck.IsEnabled="True"/>
                                             </DockPanel>
+                                            <Button Content="Delete" Click="DeleteReaderButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Grid>

@@ -1,19 +1,32 @@
 ﻿using Expresso.Components;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SQLite;
+using System.Data;
 using System.Dynamic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Expresso.Core
 {
-    public static class SQLite
+    internal class DatabaseContext
+    {
+        #region Properties
+
+        #endregion
+
+        #region Methods
+
+        #endregion
+    }
+
+    internal static class SQLiteHelper
     {
         #region Rudimentary Interface
-        public static ParcelDataGrid ProcessDataGrids(this ParcelDataGrid[] inputTables, string command)
+        public static ParcelDataGrid ProcessDataGrids(this IList<ParcelDataGrid> inputTables, string command)
         {
-            if (inputTables.Select(t => t.TableName).Distinct().Count() != inputTables.Length)
+            if (inputTables.Select(t => t.TableName).Distinct().Count() != inputTables.Count)
                 throw new ArgumentException("Missing Data Table names.");
 
             using SQLiteConnection connection = new SQLiteConnection("Data Source=:memory:");
@@ -24,7 +37,7 @@ namespace Expresso.Core
 
             // Execute
             string formattedText = command.TrimEnd(';') + ';';
-            for (int i = 0; i < inputTables.Length; i++)
+            for (int i = 0; i < inputTables.Count; i++)
                 formattedText = formattedText.Replace($"@Table{i + 1}", $"'{inputTables[i].TableName}'"); // Table names can't use parameters, so do it manually
             SQLiteDataAdapter adapter = new SQLiteDataAdapter(formattedText, connection);
             DataSet result = new();
