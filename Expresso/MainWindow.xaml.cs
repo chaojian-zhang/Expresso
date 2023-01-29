@@ -67,8 +67,6 @@ namespace Expresso
         //    { "SQLite", ExecuteSQLiteQuery },
         //    { "Expresso", ExecuteReaderQuery }
         //};
-        private static Dictionary<string, Type> ReaderDataServiceProviders
-            => ReaderDataQueryParameterBase.GetServiceProviders();
         private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
         {
             { "Execute ODBC Command", ExecuteODBCNonQuery },
@@ -97,7 +95,7 @@ namespace Expresso
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
-        public static string[] ReaderDataServiceProviderNames => ReaderDataServiceProviders.Keys.ToArray();
+        public static string[] ReaderDataServiceProviderNames => ReaderDataQueryParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] WriterDataServiceProviderNames => WriterDataServiceProviders.Keys.ToArray();
 
         private ICollection _ReaderResultsView;
@@ -224,8 +222,10 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
 
-            reader.DataQueries.Add(new ApplicationDataQuery());
+            var newQuery = new ApplicationDataQuery();
+            reader.DataQueries.Add(newQuery);
             reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+            newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
         }
         private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -240,34 +240,6 @@ namespace Expresso
         {
             
         }
-        private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            CSVReaderDataQueryParameter parameter = button.DataContext as CSVReaderDataQueryParameter;
-
-            OpenFileDialog openFileDialog = new()
-            {
-                Filter = "All (*.*)|*.*"
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                parameter.FilePath = openFileDialog.FileName;
-            }
-        }
-        private void ReaderDataQuerySQLiteTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            SQLiteReaderDataQueryParameter parameter = button.DataContext as SQLiteReaderDataQueryParameter;
-
-            OpenFileDialog openFileDialog = new()
-            {
-                Filter = "All (*.*)|*.*"
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                parameter.FilePath = openFileDialog.FileName;
-            }
-        }
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -278,17 +250,11 @@ namespace Expresso
             else
                 WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.AdditionalParameter, writer.Command);
         }
-        private void ReaderDataSourceQueryAvalonTextEditor_Initialized(object sender, EventArgs e)
+        private void ReaderTransformAvalonTextEditor_Initialized(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
-            ReaderDataQueryParameterBase queryParameters = editor.DataContext as ReaderDataQueryParameterBase;
-            editor.Text = queryParameters.Query;
-        }
-        private void ReaderDataSourceQueryAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ReaderDataQueryParameterBase queryParameters = editor.DataContext as ReaderDataQueryParameterBase;
-            queryParameters.Query = editor.Text;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            editor.Text = reader.Transform;
         }
         private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
@@ -328,13 +294,6 @@ namespace Expresso
 
             if (step != null) 
                 ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
-        }
-        private void ReaderDataQueryServiceProviderComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            ApplicationDataQuery query = comboBox.DataContext as ApplicationDataQuery;
-            if (query != null && e.RemovedItems.Count != 0 /*Without the second check, this event handler will reset the parameters during first loading/initialization of the data source*/)
-                query.Parameters = (ReaderDataQueryParameterBase)Activator.CreateInstance(ReaderDataServiceProviders[query.ServiceProvider]);  
         }
         #endregion
 
