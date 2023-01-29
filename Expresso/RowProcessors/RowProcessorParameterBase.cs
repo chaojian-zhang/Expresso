@@ -124,4 +124,22 @@ namespace Expresso.ReaderDataQueries
         }
         #endregion
     }
+
+    public sealed class ReadFileContentRowProcessorParameterBase : RowProcessorParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Read File Content";
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+        }
+        #endregion
+    }
 }
