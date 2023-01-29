@@ -277,6 +277,17 @@ namespace Expresso
             var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
             MessageBox.Show(result, "Test Result");
         }
+        private void WriterDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            if (ApplicationData.OutputWriters.Remove(writer))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
+
+            if (ApplicationData.OutputWriters.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
         private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             TextEditor editor = sender as TextEditor;

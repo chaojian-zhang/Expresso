@@ -247,9 +247,14 @@ namespace Expresso.Core
             {
                 try
                 {
-                    var finalDataGrid = writerInputs.ProcessDataGrids(Transform, out _);
-                    InMemorySQLIte.InsertODBCData(TargetTableName, finalDataGrid, DSN);
-                    return "Done.";
+                    if (string.IsNullOrEmpty(Transform))
+                        InMemorySQLIte.InsertODBCData(TargetTableName, writerInputs.Last(), DSN);
+                    else
+                    {
+                        var finalDataGrid = writerInputs.ProcessDataGrids(Transform, out _);
+                        InMemorySQLIte.InsertODBCData(TargetTableName, finalDataGrid, DSN);
+                    }
+                    return $"Data written to {TargetTableName} ({DSN}).";
                 }
                 catch (Exception e)
                 {
@@ -308,8 +313,13 @@ namespace Expresso.Core
             List<ParcelDataGrid> writerInputs = FetchInputs(overwriteInputs, InputTableNames);
             if (writerInputs.Count != 0)
             {
-                ParcelDataGrid finalDataGrid = writerInputs.ProcessDataGrids(Transform, out _);
-                File.WriteAllText(FilePath, finalDataGrid.ToCSV());
+                if (string.IsNullOrEmpty(Transform))
+                    File.WriteAllText(FilePath, writerInputs.Last().ToCSV());
+                else
+                {
+                    ParcelDataGrid finalDataGrid = writerInputs.ProcessDataGrids(Transform, out _);
+                    File.WriteAllText(FilePath, finalDataGrid.ToCSV());
+                }
                 return $"File written to {FilePath}";
             }
             return "Cannot find input.";

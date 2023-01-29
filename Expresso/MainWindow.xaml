@@ -287,7 +287,19 @@
                         <TabControl.ContentTemplate>
                             <DataTemplate>
                                 <DockPanel LastChildFill="True">
-                                    <Button DockPanel.Dock="Bottom" Content="Test" Click="WriterTestButton_Click" HorizontalAlignment="Left"/>
+                                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Width" Value="60"/>
+                                                <Setter Property="Height" Value="32"/>
+                                                <Setter Property="Margin" Value="4"/>
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <Button Content="Test" Click="WriterTestButton_Click" 
+                                                Foreground="White" Background="IndianRed" BorderThickness="0"/>
+                                        <Button Content="Delete" Click="WriterDeleteButton_Click"
+                                                Foreground="Black" Background="LightGray" BorderThickness="0"/>
+                                    </StackPanel>
                                     <DockPanel DockPanel.Dock="Top">
                                         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
