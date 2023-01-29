@@ -1,4 +1,5 @@
 ﻿using Expresso.Components;
+using Expresso.ReaderDataQueries;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -89,13 +90,13 @@ namespace Expresso.Core
     {
         private string _ServiceProvider = MainWindow.ReaderDataServiceProviderNames.First();
         private string _DataSourceString = string.Empty;
-        private string _Query = string.Empty;
         private string _AdditionalParameter = string.Empty;
+        private ReaderDataQueryParameterBase _Parameters = new ReaderDataQueryParameterBase();
 
         public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
         public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
-        public string Query { get => _Query; set => SetField(ref _Query, value); }
         public string AdditionalParameter { get => _AdditionalParameter; set => SetField(ref _AdditionalParameter, value); }
+        public ReaderDataQueryParameterBase Parameters { get => _Parameters; set => SetField(ref _Parameters, value); }
     }
     public class ApplicationDataReader : BaseNotifyPropertyChanged
     {

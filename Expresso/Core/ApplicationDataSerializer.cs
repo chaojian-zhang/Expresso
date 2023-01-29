@@ -1,4 +1,5 @@
-﻿using K4os.Compression.LZ4.Streams;
+﻿using Expresso.ReaderDataQueries;
+using K4os.Compression.LZ4.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -74,8 +75,9 @@ namespace Expresso.Core
                 {
                     writer.Write(dataQuery.ServiceProvider);
                     writer.Write(dataQuery.DataSourceString);
-                    writer.Write(dataQuery.Query);
                     writer.Write(dataQuery.AdditionalParameter);
+
+                    writer.Write(dataQuery.Parameters.Query);
                 }
                 writer.Write(dataReader.Transform);
             }
@@ -177,13 +179,17 @@ namespace Expresso.Core
                     var queriesCount = reader.ReadInt32();
                     for (int j = 0; j < queriesCount; j++)
                     {
-                        dataReader.DataQueries.Add(new ApplicationDataQuery()
+                        var query = new ApplicationDataQuery()
                         {
                             ServiceProvider = reader.ReadString(),
                             DataSourceString = reader.ReadString(),
-                            Query = reader.ReadString(),
                             AdditionalParameter = reader.ReadString()
-                        });
+                        };
+                        query.Parameters = new ReaderDataQueryParameterBase()
+                        {
+                            Query = reader.ReadString(),
+                        };
+                        dataReader.DataQueries.Add(query);
                     }
                     dataReader.Transform = reader.ReadString();
 

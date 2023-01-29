@@ -18,10 +18,9 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows.Controls;
-using System.Diagnostics;
 using System.Text;
 using Expresso.PopUps;
-using System.Data.SQLite;
+using Expresso.ReaderDataQueries;
 
 namespace Expresso
 {
@@ -240,7 +239,7 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
 
-            string resultCSV = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Query);
+            string resultCSV = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Parameters.Query);
             ResultPreview = resultCSV.CSVToConsoleTable();
             ReaderResultsView = resultCSV.CSVToDataTable();
         }
@@ -272,17 +271,17 @@ namespace Expresso
             else
                 WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.AdditionalParameter, writer.Command);
         }
-        private void ReaderAvalonTextEditor_Initialized(object sender, EventArgs e)
+        private void ReaderDataSourceQueryAvalonTextEditor_Initialized(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
-            ApplicationDataQuery query = editor.DataContext as ApplicationDataQuery;
-            editor.Text = query.Query;
+            ReaderDataQueryParameterBase queryParameters = editor.DataContext as ReaderDataQueryParameterBase;
+            editor.Text = queryParameters.Query;
         }
-        private void ReaderAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        private void ReaderDataSourceQueryAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
             TextEditor editor = sender as TextEditor;
-            ApplicationDataQuery query = editor.DataContext as ApplicationDataQuery;
-            query.Query = editor.Text;
+            ReaderDataQueryParameterBase queryParameters = editor.DataContext as ReaderDataQueryParameterBase;
+            queryParameters.Query = editor.Text;
         }
         private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
         {
