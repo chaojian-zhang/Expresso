@@ -2,15 +2,8 @@
 
 Self-contained, modularized.
 
-## Features Specification
+## Road Map
 
-* Variable
-* Condition
-* Reader
-* Writer
-* Processor
-* Workflow
-
-## Implementation Requirement
-
-To ensure sufficiency, no more features will be added beyond existing functionalities. The goal is to be efficient, robust and usable, not well-rounded or general purpose.
+1. V1: Variable, Condition, Reader, Writer, Processor, Workflow
+2. V2: Visualization, Algorithms Toolbox (Reader and Processor)
+3. V3: Large numerical data optimization

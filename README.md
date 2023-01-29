@@ -24,6 +24,13 @@ Standard ETL without using processors.
 
 Use processors exclusively to chain operations.
 
+## Development
+
+**Implementation Requirement**
+
+To ensure sufficiency, no more features will be added beyond existing functionalities. The goal is to be efficient, robust and usable, not well-rounded or general purpose.
+
 ## Remarks
 
 * Components: SQLite
+* V1 intermediate data transmission format: CSV
