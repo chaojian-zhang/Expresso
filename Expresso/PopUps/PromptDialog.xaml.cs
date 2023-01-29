@@ -23,18 +23,25 @@ namespace Expresso.PopUps
         }
 
         #region Construction
-        public PromptDialog(string question, string title, string defaultValue = "", InputType inputType = InputType.Text)
+        public PromptDialog(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null)
         {
             InitializeComponent();
             Loaded += new RoutedEventHandler(PromptDialogLoaded);
             QuestionText.Text = question;
             Title = title;
             GeneralTextResponse.Text = defaultValue;
+
             _InputType = inputType;
             if (_InputType == InputType.Password)
                 GeneralTextResponse.Visibility = Visibility.Collapsed;
             else
                 PasswordTextResponse.Visibility = Visibility.Collapsed;
+
+            if (!string.IsNullOrEmpty(furtherExplanation))
+            {
+                ExplanationText.Text = furtherExplanation;
+                ExplanationText.Visibility = Visibility.Visible;
+            }
         }
         #endregion
 
@@ -73,9 +80,9 @@ namespace Expresso.PopUps
         #endregion
 
         #region Interface Method
-        public static string Prompt(string question, string title, string defaultValue = "", InputType inputType = InputType.Text)
+        public static string Prompt(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null)
         {
-            PromptDialog inst = new(question, title, defaultValue, inputType);
+            PromptDialog inst = new(question, title, defaultValue, inputType, furtherExplanation);
             inst.ShowDialog();
             if (inst.DialogResult == true)
                 return inst.ResponseText;

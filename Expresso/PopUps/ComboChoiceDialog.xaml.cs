@@ -6,7 +6,7 @@ namespace Expresso.PopUps
     public partial class ComboChoiceDialog : Window
     {
         #region Construction
-        public ComboChoiceDialog(string title, string text, string defaultValue, string[] options)
+        public ComboChoiceDialog(string title, string text, string defaultValue, string[] options, string furtherExplanation = null)
         {
             InitializeComponent();
             Loaded += new RoutedEventHandler(ComboChoiceDialogLoaded);
@@ -17,6 +17,12 @@ namespace Expresso.PopUps
             foreach (var option in options)
                 OptionComboBox.Items.Add(option);
             OptionComboBox.SelectedValue = defaultValue;
+
+            if (!string.IsNullOrEmpty(furtherExplanation))
+            {
+                ExplanationText.Text = furtherExplanation;
+                ExplanationText.Visibility = Visibility.Visible;
+            }
         }
         #endregion
 
@@ -40,9 +46,9 @@ namespace Expresso.PopUps
         #endregion
 
         #region Interface Method
-        public static string Prompt(string title, string text, string defaultValue, string[] options)
+        public static string Prompt(string title, string text, string defaultValue, string[] options, string furtherExplanation = null)
         {
-            ComboChoiceDialog inst = new(title, text, defaultValue, options);
+            ComboChoiceDialog inst = new(title, text, defaultValue, options, furtherExplanation);
             inst.ShowDialog();
             if (inst.DialogResult == true)
                 return inst.ResponseText;
