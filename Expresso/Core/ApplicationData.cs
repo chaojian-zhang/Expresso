@@ -120,10 +120,12 @@ namespace Expresso.Core
         private string _Name = string.Empty;
         private VariableType _Type;
         private string _Value = string.Empty;
+        private bool _IsIterator = false;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public VariableType Type { get => _Type; set => SetField(ref _Type, value); }
         public string Value { get => _Value; set => SetField(ref _Value, value); }
+        public bool IsIterator { get => _IsIterator; set => SetField(ref _IsIterator, value); }
     }
     public class ApplicationData: BaseNotifyPropertyChanged
     {

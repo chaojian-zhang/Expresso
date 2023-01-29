@@ -97,6 +97,7 @@ namespace Expresso.Core
                 writer.Write(variable.Name);
                 writer.Write((byte)variable.Type);
                 writer.Write(variable.Value);
+                writer.Write(variable.IsIterator);
             }
 
             writer.Write(data.Processors.Count);
@@ -220,7 +221,8 @@ namespace Expresso.Core
                     {
                         Name = reader.ReadString(),
                         Type = (ApplicationVariable.VariableType)reader.ReadByte(),
-                        Value= reader.ReadString()
+                        Value = reader.ReadString(),
+                        IsIterator = reader.ReadBoolean(),
                     };
 
                     applicationData.Variables.Add(variable);
