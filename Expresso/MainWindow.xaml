@@ -374,7 +374,7 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
-                <TabItem Header="Processor" Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Row Processor" Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl ItemsSource="{Binding ApplicationData.Processors}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
