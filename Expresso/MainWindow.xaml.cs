@@ -269,13 +269,13 @@ namespace Expresso
                 ReaderResultsView = resultCSV.CSVToDataTable();
             }
         }
-
-        private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
+        private void WriterTestButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
             ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
 
-            writer.Parameters.PerformAction();
+            var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
+            MessageBox.Show(result, "Test Result");
         }
         private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -326,6 +326,7 @@ namespace Expresso
             {
                 Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*",
                 AddExtension = true,
+                Title = "Choose location to save file"
             };
             if(saveFileDialog.ShowDialog() == true)
             {
@@ -339,7 +340,8 @@ namespace Expresso
         {
             OpenFileDialog openFileDialog = new()
             {
-                Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*"
+                Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*",
+                Title = "Choose file to open"
             };
             if (openFileDialog.ShowDialog() == true)
             {

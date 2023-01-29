@@ -5,45 +5,151 @@
                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit">
     <DataTemplate DataType="{x:Type core:WriterParameterBase}">
     </DataTemplate>
-    <DataTemplate DataType="{x:Type core:ODBCWriterParameter}">
+    <DataTemplate DataType="{x:Type core:OutputWriterODBCCommandParameter}">
         <DockPanel>
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Label DockPanel.Dock="Left" Content="Target Table Name"/>
-                <TextBox DockPanel.Dock="Right" Text="{Binding TargetTableName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
-                <Label DockPanel.Dock="Right" Content="DSN"/>
-                <TextBox DockPanel.Dock="Left" Text="{Binding DSN, UpdateSourceTrigger=PropertyChanged}"/>
-            </DockPanel>
-            <DockPanel>
-                <StackPanel>
-                    <Label Content="Inputs"/>
-                    <StackPanel>
-                        <Button Content="Add"/>
-                        <Button Content="Remove"/>
-                    </StackPanel>
-                </StackPanel>
-                <ListView ItemsSource="{Binding InputDataNames}" Width="120">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <Label Content="{Binding}" />
-                                <TextBox Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                <Label Content="DSN"/>
+                <TextBox Text="{Binding DSN, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>
             <DockPanel LastChildFill="True">
                 <Label DockPanel.Dock="Top" Content="Query"/>
                 <avalonEdit:TextEditor 
-                DockPanel.Dock="Bottom" Margin="5"
-                BorderThickness="2" BorderBrush="Beige"
-                ShowLineNumbers="True"
-                SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
-                DataContextChanged="ODBCWriterAvalonTextEditor_DataContextChanged"
-                Initialized="ODBCWriterAvalonTextEditor_Initialized"
-                TextChanged="ODBCWriterAvalonTextEditor_OnTextChanged"/>
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="ODBCCommandAvalonTextEditor_DataContextChanged"
+                        Initialized="ODBCCommandAvalonTextEditor_Initialized"
+                        TextChanged="ODBCCommandAvalonTextEditor_OnTextChanged"/>
             </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type core:OutputWriterSQLiteCommandParameter}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label Content="File Path"/>
+                <TextBox Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <DockPanel LastChildFill="True">
+                <Label DockPanel.Dock="Top" Content="Query"/>
+                <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="OutputWriterSQLiteCommandAvalonTextEditor_DataContextChanged"
+                        Initialized="OutputWriterSQLiteCommandAvalonTextEditor_Initialized"
+                        TextChanged="OutputWriterSQLiteCommandAvalonTextEditor_OnTextChanged"/>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type core:OutputWriterODBCWriterParameter}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="DSN"/>
+                <TextBox DockPanel.Dock="Right" Text="{Binding TargetTableName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                <Label DockPanel.Dock="Right" Content="Target Table Name"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding DSN, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel>
+                            <Label Content="Inputs"/>
+                            <StackPanel>
+                                <Button Content="Add" Click="ODBCWriterAddInputButton_Click"/>
+                                <Button Content="Pick" Click="ODBCWriterReaderNamePickButton_Click"/>
+                                <Button Content="Remove" Click="ODBCWriterRemoveInputButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border BorderBrush="LightGray" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding InputTableNames}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True">
+                                            <Label DockPanel.Dock="Left" Content="Table Input" />
+                                            <TextBox DockPanel.Dock="Left" Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </DockPanel>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                <DockPanel  Grid.Column="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Content="Query"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="ODBCWriterAvalonTextEditor_DataContextChanged"
+                        Initialized="ODBCWriterAvalonTextEditor_Initialized"
+                        TextChanged="ODBCWriterAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type core:OutputWriterCSVWriterParameter}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label Content="File Path"/>
+                <Button DockPanel.Dock="Right" Content="Choose" Click="CSVWriterChooseSaveLocationButton_Click"/>
+                <TextBox DockPanel.Dock="Right" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel>
+                            <Label Content="Inputs"/>
+                            <StackPanel>
+                                <Button Content="Add" Click="CSVWriterAddInputButton_Click"/>
+                                <Button Content="Pick" Click="CSVWriterReaderNamePickButton_Click"/>
+                                <Button Content="Remove" Click="CSVWriterRemoveInputButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border BorderBrush="LightGray" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding InputTableNames}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True">
+                                            <Label DockPanel.Dock="Left" Content="Table Input" />
+                                            <TextBox DockPanel.Dock="Left" Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </DockPanel>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                <DockPanel  Grid.Column="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Content="Query"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="CSVWriterAvalonTextEditor_DataContextChanged"
+                        Initialized="CSVWriterAvalonTextEditor_Initialized"
+                        TextChanged="CSVWriterAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

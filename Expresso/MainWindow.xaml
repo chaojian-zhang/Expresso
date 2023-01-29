@@ -18,6 +18,9 @@
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
 
+        <Style TargetType="Control">
+            <Setter Property="ToolTipService.ShowDuration" Value="6000"/>
+        </Style>
         <Style TargetType="Button">
             <Style.Resources>
                 <Style TargetType="Border">
@@ -86,12 +89,6 @@
                 <MenuItem Header="_Variable..." Click="MenuItemCreateVariable_Click"/>
                 <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
             </MenuItem>
-            <MenuItem Header="_Engine">
-                <MenuItem Header="Submit" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
-                <Separator/>
-                <MenuItem Header="Create Workflow..."/>
-                <MenuItem Header="Schedules Stack..."/>
-            </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
             </MenuItem>
@@ -99,8 +96,9 @@
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Label Content="Open or Create A File to Get Started." FontSize="32" Foreground="LightGray" 
-                   Background="Transparent" MouseDoubleClick="BackgroundLabel_MouseDoubleClick"       
-                   Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                       Background="Transparent" MouseDoubleClick="BackgroundLabel_MouseDoubleClick"       
+                       ToolTip="Double click to open file"
+                       Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
                 <TextBlock TextAlignment="Center" FontSize="22" Foreground="LightGray" HorizontalAlignment="Center" Margin="6">
                     <Run>Open Ctrl+O</Run>
                     <LineBreak/>
@@ -289,7 +287,7 @@
                         <TabControl.ContentTemplate>
                             <DataTemplate>
                                 <DockPanel LastChildFill="True">
-                                    <Button DockPanel.Dock="Bottom" Content="Execute" Click="WriterExecuteButton_Click" HorizontalAlignment="Left"/>
+                                    <Button DockPanel.Dock="Bottom" Content="Test" Click="WriterTestButton_Click" HorizontalAlignment="Left"/>
                                     <DockPanel DockPanel.Dock="Top">
                                         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
@@ -302,7 +300,6 @@
                                                 </ComboBox>
                                             </StackPanel>
                                         </StackPanel>
-
                                         <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
                                             <ContentPresenter.Resources>
                                                 <ResourceDictionary>

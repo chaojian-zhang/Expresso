@@ -285,19 +285,20 @@ namespace Expresso.Components
             {
                 var command = odbcConnection.CreateCommand();
                 command.Transaction = transaction;
-                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => c.Header))}) VALUES ({string.Join(',', columns.Select(c => "?"))})";
-                foreach (string column in columns.Select(c => c.Header))
-                {
-                    OdbcParameter parameter = command.CreateParameter();
-                    parameter.ParameterName = $"@{column}";
-                    parameter.Value = row[column].ToString();
-                    command.Parameters.Add(parameter);
-                }
+                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => $"\"{c.Header}\""))}) VALUES ({string.Join(',', columns.Select(c => FormatValue(row[c.Header])))})";
 
                 command.ExecuteNonQuery();
             }
             transaction.Commit();
             odbcConnection.Close();
+
+            string FormatValue(object value)
+            {
+                var text = value.ToString();
+                if (double.TryParse(text, out _))
+                    return text;
+                else return $"\"{text}\"";
+            }
         }
         public static DataTable ExecuteODBC(string sqlQuery, string dsn)
         {

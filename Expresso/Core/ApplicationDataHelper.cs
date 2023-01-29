@@ -44,10 +44,22 @@ namespace Expresso.Core
             foreach (var query in reader.DataQueries)
                 intermediateData.Add(new ParcelDataGrid(query.Name, query.Parameters.MakeQuery()));
 
+            if (reader.DataQueries.Count == 0 )
+            {
+                dataGrid = null;
+                table = null;
+                return $"Result,Message\nError,Reader has no data queries.";
+            }
+
             string resultCSV = null;
             try
             {
-                dataGrid = intermediateData.ProcessDataGrids(reader.Transform, out table);
+                var query = reader.Transform;
+                if (string.IsNullOrEmpty(query))
+                    query = $"select * from {reader.DataQueries.Last().Name}";
+
+                dataGrid = intermediateData.ProcessDataGrids(query, out table);
+                dataGrid.TableName = table.TableName = reader.Name;
                 resultCSV = dataGrid.ToCSV();
             }
             catch (Exception err)
