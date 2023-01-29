@@ -51,10 +51,10 @@
                 </Style>
             </Style.Resources>
             
-            <Setter Property="Width" Value="220"/>
+            <Setter Property="Width" Value="240"/>
             <Setter Property="Height" Value="160"/>
             <Setter Property="Margin" Value="16"/>
-            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontSize" Value="22"/>
             <Setter Property="Background" Value="LightCyan"/>
         </Style>
     </Window.Resources>
@@ -83,10 +83,11 @@
                 <MenuItem Header="Exit"/>
             </MenuItem>
             <MenuItem Header="_Create" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
+                <MenuItem Header="_Variable..." Click="MenuItemCreateVariable_Click"/>
                 <MenuItem Header="_Condition..." Click="MenuItemCreateCondition_Click"/>
                 <MenuItem Header="_Reader..." Click="MenuItemCreateReader_Click"/>
                 <MenuItem Header="_Writer..." Click="MenuItemCreateWriter_Click"/>
-                <MenuItem Header="_Variable..." Click="MenuItemCreateVariable_Click"/>
+                <MenuItem Header="_Row Processor..." Click="MenuItemCreateWriter_Click"/>
                 <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
             </MenuItem>
             <MenuItem Header="Help">
@@ -122,10 +123,6 @@
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
-                                <Button Content="Create Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
                                 <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
                                 <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
                             </StackPanel>
@@ -133,8 +130,60 @@
                                 <Button Content="Create Reader" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateReader_Click"/>
                                 <Button Content="Create Writer" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWriter_Click"/>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Create Row Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
+                                <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
+                </TabItem>
+                <!--Variable Tab-->
+                <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Bottom">
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                                <Button Content="Add" Click="VariablesAddVariableButton_Click"/>
+                                <Button Content="Remove" Click="VariablesRemoveVariableButton_Click"/>
+                            </StackPanel>
+                            <TextBlock >
+                                <Span FontSize="32" FontWeight="Bold">Variables</Span>
+                                <LineBreak/>
+                                <Span>Use variables at anywhere strings are evaluated, e.g. queries.</Span>
+                            </TextBlock>
+                        </StackPanel>
+                        <Grid DockPanel.Dock="Top">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="5" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <DockPanel Grid.Column="0">
+                                <Label DockPanel.Dock="Top" Content="Current Variables"/>
+                                <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding ApplicationData.Variables}" SelectedItem="{Binding CurrentSelectedVariable}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Label Content="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </DockPanel>
+                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                            <DockPanel Grid.Column="2">
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Name"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Type"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Type}"/>
+                                </DockPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Label Content="Value"/>
+                                    <TextBox Text="{Binding CurrentSelectedVariable.Value, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                            </DockPanel>
+                        </Grid>
+                    </DockPanel>
                 </TabItem>
                 <!--Conditions Tab-->
                 <TabItem Header="Condition" Visibility="{Binding ApplicationData.Conditionals, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -449,54 +498,6 @@
                             </DataTemplate>
                         </TabControl.ContentTemplate>
                     </TabControl>
-                </TabItem>
-                <!--Variable Tab-->
-                <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <DockPanel LastChildFill="True">
-                        <StackPanel DockPanel.Dock="Bottom">
-                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                                <Button Content="Add" Click="VariablesAddVariableButton_Click"/>
-                                <Button Content="Remove" Click="VariablesRemoveVariableButton_Click"/>
-                            </StackPanel>
-                            <TextBlock >
-                                <Span FontSize="32" FontWeight="Bold">Variables</Span>
-                                <LineBreak/>
-                                <Span>Use variables at anywhere strings are evaluated, e.g. queries.</Span>
-                            </TextBlock>
-                        </StackPanel>
-                        <Grid DockPanel.Dock="Top">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="5" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <DockPanel Grid.Column="0">
-                                <Label DockPanel.Dock="Top" Content="Current Variables"/>
-                                <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding ApplicationData.Variables}" SelectedItem="{Binding CurrentSelectedVariable}">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Label Content="{Binding Name}"/>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </DockPanel>
-                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
-                            <DockPanel Grid.Column="2">
-                                <DockPanel DockPanel.Dock="Top">
-                                    <Label Content="Name"/>
-                                    <TextBox Text="{Binding CurrentSelectedVariable.Name, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DockPanel>
-                                <DockPanel DockPanel.Dock="Top">
-                                    <Label Content="Type"/>
-                                    <TextBox Text="{Binding CurrentSelectedVariable.Type}"/>
-                                </DockPanel>
-                                <DockPanel DockPanel.Dock="Top">
-                                    <Label Content="Value"/>
-                                    <TextBox Text="{Binding CurrentSelectedVariable.Value, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DockPanel>
-                            </DockPanel>
-                        </Grid>
-                    </DockPanel>
                 </TabItem>
                 <!--Workflow Tab-->
                 <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
