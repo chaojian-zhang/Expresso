@@ -1,0 +1,49 @@
+﻿<ResourceDictionary x:Class="Expresso.DataTemplates.OutputWriterParameterResourceDictionary"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:core="clr-namespace:Expresso.Core"
+                    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit">
+    <DataTemplate DataType="{x:Type core:WriterParameterBase}">
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type core:ODBCWriterParameter}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="Target Table Name"/>
+                <TextBox DockPanel.Dock="Right" Text="{Binding TargetTableName, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                <Label DockPanel.Dock="Right" Content="DSN"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding DSN, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <DockPanel>
+                <StackPanel>
+                    <Label Content="Inputs"/>
+                    <StackPanel>
+                        <Button Content="Add"/>
+                        <Button Content="Remove"/>
+                    </StackPanel>
+                </StackPanel>
+                <ListView ItemsSource="{Binding InputDataNames}" Width="120">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <Label Content="{Binding}" />
+                                <TextBox Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </DockPanel>
+            <DockPanel LastChildFill="True">
+                <Label DockPanel.Dock="Top" Content="Query"/>
+                <avalonEdit:TextEditor 
+                DockPanel.Dock="Bottom" Margin="5"
+                BorderThickness="2" BorderBrush="Beige"
+                ShowLineNumbers="True"
+                SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                DataContextChanged="ODBCWriterAvalonTextEditor_DataContextChanged"
+                Initialized="ODBCWriterAvalonTextEditor_Initialized"
+                TextChanged="ODBCWriterAvalonTextEditor_OnTextChanged"/>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

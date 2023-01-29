@@ -214,37 +214,11 @@ namespace Expresso.Components
         {
             DataTable table = dataset.Tables[0];
             TableName = table.TableName;
-
-            // Initialize columns
-            List<string> headers = new List<string>();
-            if (!forceFirstLineAsHeader)
-            {
-                foreach (System.Data.DataColumn column in table.Columns)
-                {
-                    headers.Add(column.Caption);
-                    Columns.Add(new ParcelDataColumn(column.Caption));
-                }
-            }
-            else
-            {
-                DataRow row = table.Rows[0];
-                for (int index = 0; index < table.Columns.Count; index++)
-                {
-                    string text = row[index].ToString();
-                    headers.Add(text);
-                    Columns.Add(new ParcelDataColumn(text));
-                }
-            }
-
-            // Populate row data
-            int startingIndex = forceFirstLineAsHeader ? 1 : 0;
-            for (int i = startingIndex; i < table.Rows.Count; i++)
-            {
-                DataRow row = table.Rows[i];
-                // Add data to columns
-                for (var col = 0; col < headers.Count; col++)
-                    Columns[col].Add(row[col]);
-            }
+            LoadFromDataTable(forceFirstLineAsHeader, table);
+        }
+        public ParcelDataGrid(DataTable dataTable)
+        {
+            LoadFromDataTable(false, dataTable);
         }
         #endregion
 
@@ -256,7 +230,6 @@ namespace Expresso.Components
                 col.Add(value);
             Columns.Add(col);
         }
-
         public ParcelDataGrid(IEnumerable<int> values)
         {
             ParcelDataColumn col = new ParcelDataColumn("Array");
@@ -264,7 +237,6 @@ namespace Expresso.Components
                 col.Add(value);
             Columns.Add(col);
         }
-
         public ParcelDataGrid(IEnumerable<double> values)
         {
             ParcelDataColumn col = new ParcelDataColumn("Array");
@@ -272,7 +244,6 @@ namespace Expresso.Components
                 col.Add(value);
             Columns.Add(col);
         }
-
         #endregion
 
         #region Members
@@ -569,6 +540,39 @@ namespace Expresso.Components
             for (int col = 0; col < columnHeaders.Length; col++)
                 ((IDictionary<string, object>)temp)[PreProcessColumnNameForDisplay(columnHeaders[col], repeatNameCounter)] = Columns[col][rowIndex];
             return temp;
+        }
+        private void LoadFromDataTable(bool forceFirstLineAsHeader, DataTable table)
+        {
+            // Initialize columns
+            List<string> headers = new List<string>();
+            if (!forceFirstLineAsHeader)
+            {
+                foreach (DataColumn column in table.Columns)
+                {
+                    headers.Add(column.Caption);
+                    Columns.Add(new ParcelDataColumn(column.Caption));
+                }
+            }
+            else
+            {
+                DataRow row = table.Rows[0];
+                for (int index = 0; index < table.Columns.Count; index++)
+                {
+                    string text = row[index].ToString();
+                    headers.Add(text);
+                    Columns.Add(new ParcelDataColumn(text));
+                }
+            }
+
+            // Populate row data
+            int startingIndex = forceFirstLineAsHeader ? 1 : 0;
+            for (int i = startingIndex; i < table.Rows.Count; i++)
+            {
+                DataRow row = table.Rows[i];
+                // Add data to columns
+                for (var col = 0; col < headers.Count; col++)
+                    Columns[col].Add(row[col]);
+            }
         }
         #endregion
     }

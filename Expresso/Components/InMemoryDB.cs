@@ -186,38 +186,38 @@ namespace Expresso.Components
         }
         public void ImportFromODBC(string databaseName, string query, string destinationTable)
         {
-            Import(FetchFromOracleDatabase(databaseName, query), destinationTable);
+            Import(FetchFromODBCDatabase(databaseName, query), destinationTable);
         }
         /// <summary>
         /// Migrate table from current InMemoryDB to another; If target table already exists, simply append to it.
         /// </summary>
-        public void Migrate(InMemorySQLIte other, string tableName, string targetTableName)
+        public void Migrate(InMemorySQLIte other, string tableName, string targetTableName, string dsn)
         {
             if (!TablesAndViews.Contains(tableName))
                 throw new ArgumentException($"Table '{tableName}' doesn't exist.");
             if (other.Tables.Contains(targetTableName))
-                other.Push(DestinationDatabase.InMemoryDB, targetTableName, this[tableName]);
+                other.Push(DestinationDatabase.InMemoryDB, targetTableName, this[tableName], dsn);
             else
                 other.Import(this[tableName], targetTableName);
         }
         /// <summary>
         /// Append content of in-memory table to Oracle table. 
         /// </summary>
-        public void Transfer(string tableName, string remoteTableName = null)
+        public void Transfer(string tableName, string dsn, string remoteTableName = null)
         {
             remoteTableName ??= tableName;
             var table = this[tableName];
-            Push(DestinationDatabase.Oracle, remoteTableName, table);
+            Push(DestinationDatabase.Oracle, remoteTableName, table, dsn);
         }
         /// <summary>
         /// Append content of a dataframe to target database.
         /// </summary>
-        public void Push(DestinationDatabase target, string tableName, ParcelDataGrid dataframe)
+        public void Push(DestinationDatabase target, string tableName, ParcelDataGrid dataframe, string dsn)
         {
             if (target == DestinationDatabase.InMemoryDB)
                 InsertInMemoryData(tableName, dataframe);
             else if (target == DestinationDatabase.Oracle)
-                InsertOracleData(tableName, dataframe);
+                InsertODBCData(tableName, dataframe, dsn);
             else
                 throw new ArgumentException($"Invalid target: Target should be either `{DestinationDatabase.InMemoryDB}` or `{DestinationDatabase.Oracle}.");
         }
@@ -231,12 +231,12 @@ namespace Expresso.Components
         #endregion
 
         #region Helpers
-        public static ParcelDataGrid FetchFromOracleDatabase(string query, string dsn = "EDBPROD")
+        public static ParcelDataGrid FetchFromODBCDatabase(string query, string dsn)
         {
-            OdbcConnection oracleConnection = new OdbcConnection($"DSN={dsn}");
-            oracleConnection.Open();
+            OdbcConnection odbcConnection = new OdbcConnection($"DSN={dsn}");
+            odbcConnection.Open();
             DataTable dt = new DataTable();
-            dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
+            dt.Load(new OdbcCommand(query, odbcConnection).ExecuteReader());
 
             // Convert to CSV
             StringBuilder output = new StringBuilder();
@@ -273,17 +273,17 @@ namespace Expresso.Components
             }
             transaction.Commit();
         }
-        public static void InsertOracleData(string tableName, ParcelDataGrid table, string dsn = "EDBPROD")
+        public static void InsertODBCData(string tableName, ParcelDataGrid table, string dsn)
         {
             var columns = table.Columns;
 
-            OdbcConnection oracleConnection = new OdbcConnection($"DSN={dsn}");
-            oracleConnection.Open();
+            OdbcConnection odbcConnection = new OdbcConnection($"DSN={dsn}");
+            odbcConnection.Open();
 
-            var transaction = oracleConnection.BeginTransaction();
+            var transaction = odbcConnection.BeginTransaction();
             foreach (IDictionary<string, object> row in table.Rows)
             {
-                var command = oracleConnection.CreateCommand();
+                var command = odbcConnection.CreateCommand();
                 command.Transaction = transaction;
                 command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => c.Header))}) VALUES ({string.Join(',', columns.Select(c => "?"))})";
                 foreach (string column in columns.Select(c => c.Header))
@@ -297,26 +297,26 @@ namespace Expresso.Components
                 command.ExecuteNonQuery();
             }
             transaction.Commit();
-            oracleConnection.Close();
+            odbcConnection.Close();
         }
-        public static DataTable ExecuteOracle(string sqlQuery, string dsn = "EDBPROD")
+        public static DataTable ExecuteODBC(string sqlQuery, string dsn)
         {
-            OdbcConnection oracleConnection = new OdbcConnection($"DSN={dsn}");
-            oracleConnection.Open();
+            OdbcConnection odbcConnection = new OdbcConnection($"DSN={dsn}");
+            odbcConnection.Open();
             try
             {
                 if (sqlQuery.ToLower().Trim().StartsWith("select"))
                 {
                     DataSet result = new DataSet();
                     string formattedQuery = sqlQuery.EndsWith(';') ? sqlQuery : sqlQuery + ';';
-                    using var adapter = new OdbcDataAdapter(formattedQuery, oracleConnection);
+                    using var adapter = new OdbcDataAdapter(formattedQuery, odbcConnection);
 
                     adapter.Fill(result);
                     return result.Tables[0];
                 }
                 else
                 {
-                    using var command = new OdbcCommand(sqlQuery, oracleConnection);
+                    using var command = new OdbcCommand(sqlQuery, odbcConnection);
                     command.ExecuteNonQuery();
                     return null;
                 }
@@ -327,7 +327,7 @@ namespace Expresso.Components
             }
             finally
             {
-                oracleConnection.Close();
+                odbcConnection.Close();
             }
         }
         public static DataTable ExecuteMDXQuery(string mdxQuery)
@@ -642,11 +642,13 @@ namespace Expresso.Components
         private Dictionary<string, DataTable> DataTables = new() { };
         private bool GenerateDebugCSVs { get; set; } = true;
         private bool PrintDebugOutputs { get; set; } = true;
+        private string DSN { get; set; }
         #endregion
 
         #region Construction
-        public ProceduralInMemoryDB(Dictionary<string, string> views, Dictionary<string, (QuerySourceType Type, string Query)> queries, bool generateDebugCSVs = true, bool printDebugOutputs = true)
+        public ProceduralInMemoryDB(string dsn, Dictionary<string, string> views, Dictionary<string, (QuerySourceType Type, string Query)> queries, bool generateDebugCSVs = true, bool printDebugOutputs = true)
         {
+            DSN = dsn;
             ViewProceduresReference = views;
             SourceQueriesReferences = queries;
             GenerateDebugCSVs = generateDebugCSVs;
@@ -707,11 +709,11 @@ namespace Expresso.Components
             DB.RunSQL($"DROP TABLE IF EXISTS \"{tableName}\"");
             if (type == QuerySourceType.SQL)
             {
-                var oracleConnection = new OdbcConnection("DSN=EDBPROD");
-                oracleConnection.Open();
+                var odbcConnection = new OdbcConnection($"DSN={DSN}");
+                odbcConnection.Open();
 
                 DataTable datatable = new DataTable();
-                datatable.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
+                datatable.Load(new OdbcCommand(query, odbcConnection).ExecuteReader());
                 DB.Import(datatable, tableName);
                 PerformBookkeepingRoutine(datatable, tableName);
             }

@@ -70,16 +70,23 @@ namespace Expresso.Core
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
         private string _Name = string.Empty;
-        private string _ServiceProvider = MainWindow.WriterDataServiceProviderNames.First();
-        private string _DataSourceString = string.Empty;
-        private string _Command = string.Empty;
-        private string _AdditionalParameter = string.Empty;
+        private string _ServiceProvider = null;
+        private WriterParameterBase _Parameters = null;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
-        public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
-        public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
-        public string Command { get => _Command; set => SetField(ref _Command, value); }
-        public string AdditionalParameter { get => _AdditionalParameter; set => SetField(ref _AdditionalParameter, value); }
+        public string ServiceProvider
+        {
+            get => _ServiceProvider;
+            set
+            {
+                if (_ServiceProvider != value)
+                    _Parameters = (WriterParameterBase)Activator.CreateInstance(WriterParameterBase.GetServiceProviders()[value]);
+
+                SetField(ref _ServiceProvider, value);
+                NotifyPropertyChanged(nameof(Parameters));
+            }
+        }
+        public WriterParameterBase Parameters { get => _Parameters; set => SetField(ref _Parameters, value); }
     }
     public class ApplicationWorkflow : BaseNotifyPropertyChanged
     {
@@ -88,8 +95,8 @@ namespace Expresso.Core
     public class ApplicationDataQuery : BaseNotifyPropertyChanged
     {
         private string _Name = string.Empty;
-        private string _ServiceProvider = MainWindow.ReaderDataServiceProviderNames.First();
-        private ReaderDataQueryParameterBase _Parameters = new ODBCReaderDataQueryParameter();
+        private string _ServiceProvider = null;
+        private ReaderDataQueryParameterBase _Parameters = null;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public string ServiceProvider 

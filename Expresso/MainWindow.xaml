@@ -210,7 +210,7 @@
                                                                                       ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                                                                         </DockPanel>
                                                                     </StackPanel>
-                                                                    <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters, Mode=TwoWay}">
+                                                                    <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
                                                                         <ContentPresenter.Resources>
                                                                             <ResourceDictionary>
                                                                                 <ResourceDictionary.MergedDictionaries>
@@ -289,8 +289,9 @@
                         <TabControl.ContentTemplate>
                             <DataTemplate>
                                 <DockPanel LastChildFill="True">
+                                    <Button DockPanel.Dock="Bottom" Content="Execute" Click="WriterExecuteButton_Click" HorizontalAlignment="Left"/>
                                     <DockPanel DockPanel.Dock="Top">
-                                        <StackPanel Orientation="Vertical">
+                                        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
                                                 <Label Content="Name"/>
                                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
@@ -300,31 +301,17 @@
                                                 <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                                 </ComboBox>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                                    <Label Content="Data Source String"/>
-                                                    <TextBox Text="{Binding DataSourceString, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                                    <Label Content="Additional Parameter"/>
-                                                    <TextBox Text="{Binding AdditionalParameter, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
-                                                </StackPanel>
-                                            </StackPanel>
                                         </StackPanel>
-                                    </DockPanel>
-                                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft">
-                                        <Button Content="Execute" Click="WriterExecuteButton_Click"/>
-                                    </StackPanel>
-                                    <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
-                                        <Label Content="Query"/>
-                                        <avalonEdit:TextEditor
-                                            Margin="5"
-                                            BorderThickness="2" BorderBrush="Beige"
-                                            ShowLineNumbers="True"
-                                            SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                                            FontSize="10pt" FontFamily="Consolas" 
-                                            Initialized="WriterAvalonTextEditor_Initialized"
-                                            TextChanged="WriterAvalonTextEditor_OnTextChanged"/>
+
+                                        <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
+                                            <ContentPresenter.Resources>
+                                                <ResourceDictionary>
+                                                    <ResourceDictionary.MergedDictionaries>
+                                                        <ResourceDictionary Source="DataTemplates\OutputWriterParameterResourceDictionary.xaml"/>
+                                                    </ResourceDictionary.MergedDictionaries>
+                                                </ResourceDictionary>
+                                            </ContentPresenter.Resources>
+                                        </ContentPresenter>
                                     </DockPanel>
                                 </DockPanel>
                             </DataTemplate>

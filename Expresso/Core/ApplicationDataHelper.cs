@@ -1,6 +1,7 @@
 ﻿using Expresso.Components;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -37,7 +38,7 @@ namespace Expresso.Core
         #endregion
 
         #region Evaluators
-        public static string EvaluateTransform(this ApplicationDataReader reader)
+        public static string EvaluateTransform(this ApplicationDataReader reader, out ParcelDataGrid dataGrid, out DataTable table)
         {
             List<ParcelDataGrid> intermediateData = new();
             foreach (var query in reader.DataQueries)
@@ -46,10 +47,13 @@ namespace Expresso.Core
             string resultCSV = null;
             try
             {
-                resultCSV = intermediateData.ProcessDataGrids(reader.Transform).ToCSV();
+                dataGrid = intermediateData.ProcessDataGrids(reader.Transform, out table);
+                resultCSV = dataGrid.ToCSV();
             }
             catch (Exception err)
             {
+                dataGrid = null;
+                table = null;
                 resultCSV = $"Result,Message\nError,\"{err.Message.Replace(Environment.NewLine, " ")}\"";
             }
 

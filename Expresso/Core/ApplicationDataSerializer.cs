@@ -86,9 +86,7 @@ namespace Expresso.Core
             {
                 writer.Write(outputWriter.Name);
                 writer.Write(outputWriter.ServiceProvider);
-                writer.Write(outputWriter.DataSourceString);
-                writer.Write(outputWriter.Command);
-                writer.Write(outputWriter.AdditionalParameter);
+                outputWriter.Parameters.WriteToStream(writer);
             }
 
             writer.Write(data.Variables.Count);
@@ -188,8 +186,8 @@ namespace Expresso.Core
                         var type = ReaderDataQueryParameterBase.GetServiceProviders()[query.ServiceProvider];
                         var paramters = (ReaderDataQueryParameterBase)Activator.CreateInstance(type);
                         paramters.ReadFromStream(reader);
-                        query.Parameters = paramters;
 
+                        query.Parameters = paramters;
                         dataReader.DataQueries.Add(query);
                     }
                     dataReader.Transform = reader.ReadString();
@@ -202,15 +200,18 @@ namespace Expresso.Core
                 var outputWritersCount = reader.ReadInt32();
                 for (int i = 0; i < outputWritersCount; i++)
                 {
-                    ApplicationOutputWriter writer = new ApplicationOutputWriter()
+                    ApplicationOutputWriter outputWriter = new ApplicationOutputWriter()
                     {
                         Name = reader.ReadString(),
-                        ServiceProvider = reader.ReadString(),
-                        DataSourceString = reader.ReadString(),
-                        Command = reader.ReadString(),
-                        AdditionalParameter = reader.ReadString()
+                        ServiceProvider = reader.ReadString()
                     };
-                    applicationData.OutputWriters.Add(writer);
+
+                    var type = WriterParameterBase.GetServiceProviders()[outputWriter.ServiceProvider];
+                    var paramters = (WriterParameterBase)Activator.CreateInstance(type);
+                    paramters.ReadFromStream(reader);
+
+                    outputWriter.Parameters = paramters;
+                    applicationData.OutputWriters.Add(outputWriter);
                 }
             }
 

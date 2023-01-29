@@ -24,7 +24,7 @@ namespace Expresso.Core
     internal static class SQLiteHelper
     {
         #region Rudimentary Interface
-        public static ParcelDataGrid ProcessDataGrids(this IList<ParcelDataGrid> inputTables, string command)
+        public static ParcelDataGrid ProcessDataGrids(this IList<ParcelDataGrid> inputTables, string command, out DataTable dataTable)
         {
             if (inputTables.Select(t => t.TableName).Distinct().Count() != inputTables.Count)
                 throw new ArgumentException("Missing Data Table names.");
@@ -39,12 +39,12 @@ namespace Expresso.Core
             string formattedText = command.TrimEnd(';') + ';';
             for (int i = 0; i < inputTables.Count; i++)
                 formattedText = formattedText.Replace($"@Table{i + 1}", $"'{inputTables[i].TableName}'"); // Table names can't use parameters, so do it manually
-            SQLiteDataAdapter adapter = new SQLiteDataAdapter(formattedText, connection);
-            DataSet result = new();
-            adapter.Fill(result);
+
+            dataTable = new DataTable();
+            dataTable.Load(new SQLiteCommand(command, connection).ExecuteReader());
 
             connection.Close();
-            return new ParcelDataGrid(result);
+            return new ParcelDataGrid(dataTable);
         }
         #endregion
 

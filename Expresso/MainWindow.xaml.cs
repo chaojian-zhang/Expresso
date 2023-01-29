@@ -67,18 +67,6 @@ namespace Expresso
             Variable = 5,
             Workflow = 6
         };
-        private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
-        {
-            { "Execute ODBC Command", ExecuteODBCNonQuery },
-            { "Execute SQLite Command", ExecuteSQLiteNonQuery },
-            { "Output Arbitrary Text", WriteArbitraryText },
-            { "Write Reader to ODBC", WriteReaderToODBC },
-            { "Write Reader to CSV", WriteReaderToCSV },
-            { "Write Reader to SQLite", WriteReaderToSQLite },
-            { "Export Reader to CSV", WriteReaderToSQLite },
-            { "Export Readers to SQLite", WriteReaderToSQLite },
-            { "Export Readers to Excel", WriteReaderToSQLite },
-        };
         #endregion
 
         #region Data Binding Properties
@@ -97,7 +85,7 @@ namespace Expresso
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
         public static string[] ReaderDataServiceProviderNames => ReaderDataQueryParameterBase.GetServiceProviders().Keys.ToArray();
-        public static string[] WriterDataServiceProviderNames => WriterDataServiceProviders.Keys.ToArray();
+        public static string[] WriterDataServiceProviderNames => WriterParameterBase.GetServiceProviders().Keys.ToArray();
 
         private ICollection _ReaderResultsView;
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
@@ -276,7 +264,7 @@ namespace Expresso
 
             if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
             {
-                string resultCSV = reader.EvaluateTransform();
+                string resultCSV = reader.EvaluateTransform(out _, out _);
                 ResultPreview = resultCSV.CSVToConsoleTable();
                 ReaderResultsView = resultCSV.CSVToDataTable();
             }
@@ -287,10 +275,7 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
 
-            if (!WriterDataServiceProviders.ContainsKey(writer.ServiceProvider))
-                throw new ArgumentException("Invalid service provider");
-            else
-                WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.AdditionalParameter, writer.Command);
+            writer.Parameters.PerformAction();
         }
         private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -310,18 +295,6 @@ namespace Expresso
             TextEditor editor = sender as TextEditor;
             ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
             reader.Transform = editor.Text;
-        }
-        private void WriterAvalonTextEditor_Initialized(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
-            editor.Text = writer.Command;
-        }
-        private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
-            writer.Command = editor.Text;
         }
         private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
         {
@@ -419,10 +392,13 @@ namespace Expresso
         private void MenuItemCreateWriter_Click(object sender, RoutedEventArgs e)
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Writer;
-            ApplicationData.OutputWriters.Add(new ApplicationOutputWriter()
+
+            var writer = new ApplicationOutputWriter()
             {
-                Name = "New Writer"
-            });
+                Name = "New Writer",
+                ServiceProvider = WriterDataServiceProviderNames.First()
+            };
+            ApplicationData.OutputWriters.Add(writer);
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
         }
         private void MenuItemExportSQLite_Click(object sender, RoutedEventArgs e)
@@ -467,48 +443,6 @@ namespace Expresso
         #endregion
 
         #region Routines
-        private static string ExecuteExcelQuery(string connection, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static void WriteArbitraryText(string connection, string parmeter, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static void ExecuteODBCNonQuery(string connection, string parameter, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static void ExecuteSQLiteNonQuery(string connection, string parameter, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static void WriteReaderToODBC(string connection, string parameter, string query)
-        {
-            //try
-            //{
-            //    var oracleConnection = new OdbcConnection($"DSN={connection}");
-            //    oracleConnection.Open();
-                
-            //    QueryContext.ExecuteQuery(query)
-
-            //    var dt = new DataTable();
-            //    dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show(e.Message, "Error");
-            //}
-        }
-        private static void WriteReaderToSQLite(string connection, string parameter, string query)
-        {
-
-            throw new NotImplementedException();
-        }
-        private static void WriteReaderToCSV(string connection, string parameter, string query)
-        {
-            throw new NotImplementedException();
-        }
         private static ApplicationData OpenFile(string filePath)
         {
             // Open file

@@ -80,11 +80,11 @@ namespace Expresso.Core
         {
             try
             {
-                var oracleConnection = new OdbcConnection($"DSN={DSN}");
-                oracleConnection.Open();
+                var odbcConnection = new OdbcConnection($"DSN={DSN}");
+                odbcConnection.Open();
                 var dataTable = new DataTable();
-                dataTable.Load(new OdbcCommand(Query, oracleConnection).ExecuteReader());
-                oracleConnection.Close();
+                dataTable.Load(new OdbcCommand(Query, odbcConnection).ExecuteReader());
+                odbcConnection.Close();
                 return dataTable.ToCSV();
             }
             catch (Exception e)
@@ -427,7 +427,7 @@ namespace Expresso.Core
             var current = ApplicationDataHelper.GetCurrentApplicationData();
             var reader = current.FindReaderWithName(ReaderName);
             if (reader != null)
-                return reader.EvaluateTransform();
+                return reader.EvaluateTransform(out _, out _);
             else return $"Result,Message\nError,Cannot find reader.";
         }
         #endregion
