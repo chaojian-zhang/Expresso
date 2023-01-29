@@ -75,8 +75,6 @@ namespace Expresso.Core
                 foreach (ApplicationDataQuery dataQuery in dataReader.DataQueries)
                 {
                     writer.Write(dataQuery.ServiceProvider);
-                    writer.Write(dataQuery.DataSourceString);
-                    writer.Write(dataQuery.AdditionalParameter);
 
                     dataQuery.Parameters.WriteToStream(writer);
                 }
@@ -182,9 +180,7 @@ namespace Expresso.Core
                     {
                         var query = new ApplicationDataQuery()
                         {
-                            ServiceProvider = reader.ReadString(),
-                            DataSourceString = reader.ReadString(),
-                            AdditionalParameter = reader.ReadString()
+                            ServiceProvider = reader.ReadString()
                         };
 
                         var type = ReaderDataQueryParameterBase.GetServiceProviders()[query.ServiceProvider];

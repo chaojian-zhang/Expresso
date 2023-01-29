@@ -195,12 +195,6 @@
                                                                             <Label Content="Data Service Provider"/>
                                                                             <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" SelectionChanged="ReaderDataQueryServiceProviderComboBox_SelectionChanged"/>
                                                                         </DockPanel>
-                                                                        <DockPanel LastChildFill="True">
-                                                                            <Label DockPanel.Dock="Left" Content="Data Source String"/>
-                                                                            <TextBox DockPanel.Dock="Right" Text="{Binding AdditionalParameter}" Width="120"/>
-                                                                            <Label DockPanel.Dock="Right" Content="Additional Parameter"/>
-                                                                            <TextBox DockPanel.Dock="Left" Text="{Binding DataSourceString}"/>
-                                                                        </DockPanel>
                                                                     </StackPanel>
                                                                     <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
                                                                         <ContentPresenter.Resources>
