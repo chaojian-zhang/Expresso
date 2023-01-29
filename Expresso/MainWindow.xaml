@@ -90,6 +90,9 @@
                 <MenuItem Header="_Row Processor..." Click="MenuItemCreateProcessor_Click"/>
                 <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
             </MenuItem>
+            <MenuItem Header="_Engine">
+                <MenuItem Header="Run..." Click="MenuItemEngineRun_Click"/>
+            </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
             </MenuItem>
@@ -509,6 +512,92 @@
                 </TabItem>
                 <!--Workflow Tab-->
                 <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <TabControl ItemsSource="{Binding ApplicationData.Workflows}">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Name}"/>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate>
+                                <Grid Grid.Row="0" >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!--Workflow Steps Tree View-->
+                                    <DockPanel Grid.Column="0" LastChildFill="True">
+                                        <StackPanel DockPanel.Dock="Bottom"
+                                                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                                    Orientation="Horizontal">
+                                            <StackPanel.Resources>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="MinWidth" Value="60"/>
+                                                    <Setter Property="MinHeight" Value="22"/>
+                                                    <Setter Property="Margin" Value="4"/>
+                                                    <Setter Property="Padding" Value="4"/>
+                                                </Style>
+                                            </StackPanel.Resources>
+                                            <Button Content="Add New Step" Click="AddWorkflowStepButton_Click"/>
+                                            <Button Content="Add Subsequent Step" Click="AddWorkflowStepSubstepButton_Click" />
+                                            <Button Content="Remove Step" Click="RemoveWorkflowStepButton_Click" />
+                                            <Button Content="Delete Workflow" Click="DeleteWorkflowButton_Click"/>
+                                            <Button Content="Execute" Click="ExecuteWorkflowButton_Click" 
+                                                    Background="SteelBlue" Foreground="White" BorderBrush="DarkBlue" BorderThickness="2" />
+                                        </StackPanel>
+                                        <Label DockPanel.Dock="Top" Content="Workflow Steps"/>
+                                        <TreeView SelectedItemChanged="WorkflowTreeView_SelectedItemChanged" ItemsSource="{Binding StartingSteps}">
+                                            <TreeView.Resources>
+                                                <HierarchicalDataTemplate DataType="{x:Type core:ApplicationWorkflowStep}" ItemsSource="{Binding NextSteps}">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </HierarchicalDataTemplate>
+                                            </TreeView.Resources>
+                                        </TreeView>
+                                    </DockPanel>
+                                    <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                                    <Grid Grid.Column="2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="5" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <!--Workflow Properties Panel-->
+                                        <DockPanel Grid.Row="0">
+                                            <Label DockPanel.Dock="Top" Content="Workflow Properties"/>
+                                            <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
+                                                <Label Content="Name"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DockPanel>
+                                            <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="2">
+                                                <Label DockPanel.Dock="Top" Content="Description"/>
+                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                                         SpellCheck.IsEnabled="True"/>
+                                            </DockPanel>
+                                        </DockPanel>
+                                        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                                        <!--Workflow Step Properties Panel-->
+                                        <StackPanel Grid.Row="2" DataContext="{Binding CurrentSelectedWorkflowStep, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                            <Label Content="Step Properties" />
+                                            <DockPanel>
+                                                <Label Content="Name"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <Label Content="Action"/>
+                                                <TextBox Text="{Binding ActionType, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <Label Content="Action"/>
+                                                <TextBox Text="{Binding ActionItem, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
                 </TabItem>
                 <!--Engine Tab-->
                 <TabItem Header="Engine" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -537,7 +626,7 @@
                             </DockPanel>
                             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                             <!--Workflow Choice Panel-->
-                            <DockPanel LastChildFill="True">
+                            <DockPanel Grid.Row="2" LastChildFill="True">
                                 <Label DockPanel.Dock="Top" Content="Pick Workflow"/>
                                 <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Workflows}">
                                     <ComboBox.ItemTemplate>

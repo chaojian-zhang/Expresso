@@ -21,6 +21,7 @@ using System.Windows.Controls;
 using System.Text;
 using Expresso.PopUps;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Expresso
 {
@@ -99,6 +100,8 @@ namespace Expresso
                 SessionDatabaseContext = new DatabaseContext();
             }
         }
+        private ApplicationWorkflowStep _CurrentSelectedWorkflowStep;
+        public ApplicationWorkflowStep CurrentSelectedWorkflowStep { get => _CurrentSelectedWorkflowStep; set => SetField(ref _CurrentSelectedWorkflowStep, value); }
         private ApplicationVariable _CurrentSelectedVariable;
         public ApplicationVariable CurrentSelectedVariable { get => _CurrentSelectedVariable; set => SetField(ref _CurrentSelectedVariable, value); }
         #endregion
@@ -127,6 +130,103 @@ namespace Expresso
             if (ApplicationData.DataReaders.Count == 0)
                 MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
         }
+        private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            var newQuery = new ApplicationDataQuery()
+            {
+                Name = $"Query{reader.DataQueries.Count + 1}",
+                ServiceProvider = ReaderDataServiceProviderNames.First()
+            };
+            reader.DataQueries.Add(newQuery);
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+            newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
+        }
+        private void DeleteDataQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.Tag as ApplicationDataReader;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+
+            reader.DataQueries.Remove(query);
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+        }
+        private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+            
+            string resultCSV = query.Parameters.MakeQuery();
+            ResultPreview = resultCSV.CSVToConsoleTable();
+            ReaderResultsView = resultCSV.CSVToDataTable();
+        }
+        private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
+            {
+                string resultCSV = reader.EvaluateTransform(out _, out _);
+                ResultPreview = resultCSV.CSVToConsoleTable();
+                ReaderResultsView = resultCSV.CSVToDataTable();
+            }
+        }
+        private void WriterTestButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
+            MessageBox.Show(result, "Test Result");
+        }
+        private void WriterDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            if (ApplicationData.OutputWriters.Remove(writer))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
+
+            if (ApplicationData.OutputWriters.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
+        private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            if (reader != null)
+                editor.Text = reader.Transform;
+        }
+        private void ReaderTransformAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            editor.Text = reader.Transform;
+        }
+        private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
+            reader.Transform = editor.Text;
+        }
+        private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentSelectedVariable = new ApplicationVariable();
+            ApplicationData.Variables.Add(CurrentSelectedVariable);
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
+        }
+        private void VariablesRemoveVariableButton_Click(object sender, RoutedEventArgs e)
+        {
+            ApplicationData.Variables.Remove(CurrentSelectedVariable);
+            CurrentSelectedVariable = null;
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
+        }
+        #endregion
+
+        #region Events - Row Processors
         private void DeleteProcessorButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -225,108 +325,87 @@ namespace Expresso
             }
             Evaluation.TestProcessor(processor.StartingSteps, inputs);
         }
-        private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
-
-            var newQuery = new ApplicationDataQuery()
-            {
-                Name = $"Query{reader.DataQueries.Count + 1}",
-                ServiceProvider = ReaderDataServiceProviderNames.First()
-            };
-            reader.DataQueries.Add(newQuery);
-            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
-            newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
-        }
-        private void DeleteDataQueryButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.Tag as ApplicationDataReader;
-            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-
-            reader.DataQueries.Remove(query);
-            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
-        }
-        private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-            
-            string resultCSV = query.Parameters.MakeQuery();
-            ResultPreview = resultCSV.CSVToConsoleTable();
-            ReaderResultsView = resultCSV.CSVToDataTable();
-        }
-        private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
-
-            if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
-            {
-                string resultCSV = reader.EvaluateTransform(out _, out _);
-                ResultPreview = resultCSV.CSVToConsoleTable();
-                ReaderResultsView = resultCSV.CSVToDataTable();
-            }
-        }
-        private void WriterTestButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
-
-            var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
-            MessageBox.Show(result, "Test Result");
-        }
-        private void WriterDeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
-
-            if (ApplicationData.OutputWriters.Remove(writer))
-                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
-
-            if (ApplicationData.OutputWriters.Count == 0)
-                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
-        }
-        private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
-            if (reader != null)
-                editor.Text = reader.Transform;
-        }
-        private void ReaderTransformAvalonTextEditor_Initialized(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
-            editor.Text = reader.Transform;
-        }
-        private void ReaderTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
-            reader.Transform = editor.Text;
-        }
-        private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
-        {
-            CurrentSelectedVariable = new ApplicationVariable();
-            ApplicationData.Variables.Add(CurrentSelectedVariable);
-            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
-        }
-        private void VariablesRemoveVariableButton_Click(object sender, RoutedEventArgs e)
-        {
-            ApplicationData.Variables.Remove(CurrentSelectedVariable);
-            CurrentSelectedVariable = null;
-            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
-        }
         private void ProcessorTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             TreeView treeView = sender as TreeView;
             ApplicationProcessor processor = treeView.DataContext as ApplicationProcessor;
             ApplicationProcessorStep step = e.NewValue as ApplicationProcessorStep;
 
-            if (step != null) 
+            if (step != null)
                 ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
+        }
+        #endregion
+
+        #region Events - Workflows
+        private void AddWorkflowStepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
+
+            ApplicationWorkflowStep step = new ()
+            {
+                Name = "Starting Step"
+            };
+            workflow.StartingSteps.Add(step);
+        }
+        private void DeleteWorkflowButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
+
+            if (ApplicationData.Workflows.Remove(workflow))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Workflows));
+
+            if (ApplicationData.Workflows.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Workflow;
+        }
+
+        private void ExecuteWorkflowButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
+
+            throw new NotImplementedException();
+        }
+
+        private void WorkflowTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            TreeView treeView = sender as TreeView;
+            ApplicationWorkflow workflow = treeView.DataContext as ApplicationWorkflow;
+            CurrentSelectedWorkflowStep = e.NewValue as ApplicationWorkflowStep;
+        }
+        private void AddWorkflowStepSubstepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
+            ApplicationWorkflowStep step = CurrentSelectedWorkflowStep;
+
+            if (CurrentSelectedWorkflowStep != null) 
+            {
+                ApplicationWorkflowStep nextStep = new ApplicationWorkflowStep()
+                {
+                    Name = "New"
+                };
+                step.NextSteps.Add(nextStep);
+                CurrentSelectedWorkflowStep = nextStep;
+            }
+        }
+        private void RemoveWorkflowStepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
+            ApplicationWorkflowStep step = CurrentSelectedWorkflowStep;
+
+            FindAndRemoveStep(workflow.StartingSteps, step);
+
+            static void FindAndRemoveStep(ObservableCollection<ApplicationWorkflowStep> stepsCollection, ApplicationWorkflowStep stepToRemove)
+            {
+                if (!stepsCollection.Remove(stepToRemove))
+                {
+                    foreach (ApplicationWorkflowStep childStep in stepsCollection)
+                        FindAndRemoveStep(childStep.NextSteps, stepToRemove);
+                }
+            }
         }
         #endregion
 
@@ -372,13 +451,19 @@ namespace Expresso
 
             ApplicationData.Processors.Add(new ApplicationProcessor()
             {
-                Name = "Processor"
+                Name = "New Processor"
             });
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
         }
         private void MenuItemCreateWorkflow_Click(object sender, RoutedEventArgs e)
         {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Workflow;
 
+            ApplicationData.Workflows.Add(new ApplicationWorkflow()
+            {
+                Name = "New Workflow"
+            });
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Workflows));
         }
         private void MenuItemCreateVariable_Click(object sender, RoutedEventArgs e)
         {
@@ -424,6 +509,18 @@ namespace Expresso
             //}
             //connection.
             //connection.Close();
+        }
+        private void MenuItemEngineRun_Click(object sender, RoutedEventArgs e)
+        {
+            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            string[] readerNames = currentApplicationData.Workflows
+                .Select(r => r.Name).ToArray();
+            if (readerNames.Length != 0)
+            {
+                var pick = ComboChoiceDialog.Prompt("Pick Workflow", "Select workflow to run:", readerNames.FirstOrDefault(), readerNames);
+                if (pick != null)
+                    throw new NotImplementedException();
+            }
         }
         #endregion
 

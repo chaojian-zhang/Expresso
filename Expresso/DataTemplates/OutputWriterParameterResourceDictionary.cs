@@ -112,7 +112,6 @@ namespace Expresso.DataTemplates
                 if (pick != null)
                     parameter.InputTableNames.Add(pick);
             }
-                
         }
         #endregion
 

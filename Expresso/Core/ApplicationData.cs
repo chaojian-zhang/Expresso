@@ -27,6 +27,19 @@ namespace Expresso.Core
         public string Specification { get => _Specification; set => SetField(ref _Specification, value); }
         public string Parameter { get => _Parameter; set => SetField(ref _Parameter, value); }
     }
+    public class ApplicationWorkflowStep : BaseNotifyPropertyChanged
+    {
+        private string _Name = string.Empty;
+        private string _ActionType = string.Empty;
+        private string _ActionItem = string.Empty;
+        private ObservableCollection<ApplicationWorkflowStep> _NextSteps = new();
+
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
+        public string ActionType { get => _ActionType; set => SetField(ref _ActionType, value); }
+        public string ActionItem { get => _ActionItem; set => SetField(ref _ActionItem, value); }
+        public ObservableCollection<ApplicationWorkflowStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
+    }
+
     public class ApplicationProcessorStep : BaseNotifyPropertyChanged
     {
         public class ParameterMapping : BaseNotifyPropertyChanged
@@ -90,7 +103,13 @@ namespace Expresso.Core
     }
     public class ApplicationWorkflow : BaseNotifyPropertyChanged
     {
+        private string _Name = string.Empty;
+        private string _Description = string.Empty;
+        private ObservableCollection<ApplicationWorkflowStep> _StartingSteps = new();
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
+        public string Description { get => _Description; set => SetField(ref _Description, value); }
+        public ObservableCollection<ApplicationWorkflowStep> StartingSteps { get => _StartingSteps; set => SetField(ref _StartingSteps, value); }
     }
     public class ApplicationDataQuery : BaseNotifyPropertyChanged
     {

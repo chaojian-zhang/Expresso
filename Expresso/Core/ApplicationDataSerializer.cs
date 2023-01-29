@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -111,6 +112,11 @@ namespace Expresso.Core
             writer.Write(data.Workflows.Count);
             foreach (ApplicationWorkflow workflow in data.Workflows)
             {
+                writer.Write(workflow.Name);
+                writer.Write(workflow.Description);
+                writer.Write(workflow.StartingSteps.Count);
+                foreach (ApplicationWorkflowStep step in workflow.StartingSteps)
+                    WriteWorkflowStep(writer, step);
             }
 
             void WriteProcessorStep(BinaryWriter writer, ApplicationProcessorStep step)
@@ -136,6 +142,15 @@ namespace Expresso.Core
                     foreach (var next in step.NextSteps)
                         WriteProcessorStep(writer, next);
                 }
+            }
+            void WriteWorkflowStep(BinaryWriter writer, ApplicationWorkflowStep step)
+            {
+                writer.Write(step.Name);
+                writer.Write(step.ActionType);
+                writer.Write(step.ActionItem);
+                writer.Write(step.NextSteps.Count);
+                foreach (var next in step.NextSteps)
+                    WriteWorkflowStep(writer, next);
             }
         }
         private static ApplicationData ReadFromStream(BinaryReader reader)
@@ -255,7 +270,13 @@ namespace Expresso.Core
                 {
                     ApplicationWorkflow workflow = new()
                     {
+                        Name = reader.ReadString(),
+                        Description = reader.ReadString()
                     };
+
+                    int workflowSteps = reader.ReadInt32();
+                    for (int j = 0; j < workflowSteps; j++)
+                        workflow.StartingSteps.Add(ReadWorkflowStep(reader));
 
                     applicationData.Workflows.Add(workflow);
                 }
@@ -303,6 +324,22 @@ namespace Expresso.Core
                         for (int i = 0; i < subStepsCount; i++)
                             step.NextSteps.Add(ReadProcessorStep(reader));
                     }
+                }
+                return step;
+            }
+            ApplicationWorkflowStep ReadWorkflowStep(BinaryReader reader)
+            {
+                ApplicationWorkflowStep step = new();
+
+                {
+                    step.Name = reader.ReadString();
+                    step.ActionType = reader.ReadString();
+                    step.ActionItem = reader.ReadString();
+                }
+                {
+                    int subStepsCount = reader.ReadInt32();
+                    for (int i = 0; i < subStepsCount; i++)
+                        step.NextSteps.Add(ReadWorkflowStep(reader));
                 }
                 return step;
             }
