@@ -76,6 +76,9 @@ namespace Expresso
             { "Write Reader to ODBC", WriteReaderToODBC },
             { "Write Reader to CSV", WriteReaderToCSV },
             { "Write Reader to SQLite", WriteReaderToSQLite },
+            { "Export Reader to CSV", WriteReaderToSQLite },
+            { "Export Readers to SQLite", WriteReaderToSQLite },
+            { "Export Readers to Excel", WriteReaderToSQLite },
         };
         #endregion
 
@@ -274,23 +277,12 @@ namespace Expresso
 
             if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
             {
-                List<ParcelDataGrid> intermediateData = new();
-                foreach (var query in reader.DataQueries)
-                    intermediateData.Add(new ParcelDataGrid(query.Name, query.Parameters.MakeQuery()));
-
-                string resultCSV = null;
-                try
-                {
-                    resultCSV = intermediateData.ProcessDataGrids(reader.Transform).ToCSV();
-                }
-                catch (Exception err) 
-                { 
-                    resultCSV = $"Result,Message\nError,\"{err.Message.Replace(Environment.NewLine, " ")}\""; 
-                }
+                string resultCSV = reader.EvaluateTransform();
                 ResultPreview = resultCSV.CSVToConsoleTable();
                 ReaderResultsView = resultCSV.CSVToDataTable();
             }
         }
+
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;

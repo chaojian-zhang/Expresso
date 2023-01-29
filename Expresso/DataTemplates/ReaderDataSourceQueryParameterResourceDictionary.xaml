@@ -66,6 +66,15 @@
             </DockPanel>
         </DockPanel>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type dataQuery:ExpressorReaderDataQueryParameter}">
+        <DockPanel LastChildFill="True">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="Reader Name"/>
+                <Button DockPanel.Dock="Right" Content="Pick" Click="ReaderDataQueryExistingReaderTypePickReaderButton_Click"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding ReaderName, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+        </DockPanel>
+    </DataTemplate>
     <DataTemplate DataType="{x:Type dataQuery:ExcelReaderDataQueryParameter}">
         <DockPanel LastChildFill="True">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">

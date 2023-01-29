@@ -1,7 +1,10 @@
-﻿using Expresso.ReaderDataQueries;
+﻿using Expresso.Core;
+using Expresso.PopUps;
+using Expresso.ReaderDataQueries;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -49,6 +52,17 @@ namespace Expresso.DataTemplates
             {
                 parameter.FilePath = openFileDialog.FileName;
             }
+        }
+        private void ReaderDataQueryExistingReaderTypePickReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ExpressorReaderDataQueryParameter parameter = button.DataContext as ExpressorReaderDataQueryParameter;
+
+            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            ApplicationDataReader currentReader = currentApplicationData.FindReaderFromParameters(parameter);
+            string[] readerNames = currentApplicationData.DataReaders.Except(new[] { currentReader }).Select(r => r.Name).ToArray();
+            if (readerNames.Length != 0)
+                parameter.ReaderName = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from", readerNames.FirstOrDefault(), readerNames);
         }
         private void ReaderDataQuerySQLiteTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
         {

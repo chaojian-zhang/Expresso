@@ -37,4 +37,10 @@
     <PackageReference Include="YamlDotNet" Version="12.3.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="PopUps\ComboChoiceDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

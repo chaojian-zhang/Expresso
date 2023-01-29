@@ -10,6 +10,7 @@ using Csv;
 using System.Collections;
 using Microsoft.AnalysisServices.AdomdClient;
 using System.Data.SQLite;
+using Expresso.Core;
 
 namespace Expresso.ReaderDataQueries
 {
@@ -424,7 +425,11 @@ namespace Expresso.ReaderDataQueries
         #region Query Interface
         public override string MakeQuery()
         {
-            throw new NotImplementedException();
+            var current = ApplicationDataHelper.GetCurrentApplicationData();
+            var reader = current.FindReaderWithName(ReaderName);
+            if (reader != null)
+                return reader.EvaluateTransform();
+            else return $"Result,Message\nError,Cannot find reader.";
         }
         #endregion
 
