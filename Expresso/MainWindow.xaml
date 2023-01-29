@@ -114,6 +114,7 @@
                         <Setter Property="Height" Value="30"/>
                     </Style>
                 </TabControl.ItemContainerStyle>
+                <!--Welcome Tab-->
                 <TabItem Header="Welcome">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Vertical">
@@ -132,9 +133,11 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
+                <!--Conditions Tab-->
                 <TabItem Header="Condition" Visibility="{Binding ApplicationData.Conditionals, Converter={StaticResource ObjectToVisibilityConverter}}">
 
                 </TabItem>
+                <!--Reader Tab-->
                 <TabItem Header="Reader" Visibility="{Binding ApplicationData.DataReaders, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl ItemsSource="{Binding ApplicationData.DataReaders}">
                         <TabControl.ItemTemplate>
@@ -263,6 +266,7 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
+                <!--Writer Tab-->
                 <TabItem Header="Writer" Visibility="{Binding ApplicationData.OutputWriters, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.OutputWriters}">
                         <TabControl.ItemTemplate>
@@ -315,6 +319,7 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
+                <!--Row Processor Tab-->
                 <TabItem Header="Row Processor" Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl ItemsSource="{Binding ApplicationData.Processors}">
                         <TabControl.ItemTemplate>
@@ -437,6 +442,7 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
+                <!--Variable Tab-->
                 <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Bottom">
@@ -484,7 +490,61 @@
                         </Grid>
                     </DockPanel>
                 </TabItem>
+                <!--Workflow Tab-->
                 <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                </TabItem>
+                <!--Engine Tab-->
+                <TabItem Header="Engine" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="5" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <!--Variables Configuration Panel-->
+                            <DockPanel Grid.Row="0" LastChildFill="True">
+                                <Label Content="Configure Variables"/>
+                                <DockPanel>
+                                    <ListView ItemsSource="{Binding ApplicationData.Variables}">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate></DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </DockPanel>
+                            </DockPanel>
+                            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                            <!--Workflow Choice Panel-->
+                            <DockPanel LastChildFill="True">
+                                <Label DockPanel.Dock="Top" Content="Pick Workflow"/>
+                                <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Workflows}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate></DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button DockPanel.Dock="Top" Content="Run!"/>
+                                <!--Workflow Preview-->
+                                <DockPanel LastChildFill="True">
+                                    <Label Content="Preview"/>
+                                    <TextBlock>
+                                        <Span>The workflow will execute N times for the following configurations.</Span>
+                                    </TextBlock>
+                                    <DataGrid/>
+                                </DockPanel>
+                            </DockPanel>
+                        </Grid>
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                        <!--Log Panel-->
+                        <DockPanel LastChildFill="True">
+                            <Label Content="Logs"/>
+                            <TextBlock></TextBlock>
+                        </DockPanel>
+                    </Grid>
                 </TabItem>
             </TabControl>
         </Grid>
