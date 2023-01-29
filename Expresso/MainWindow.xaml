@@ -87,7 +87,7 @@
                 <MenuItem Header="_Condition..." Click="MenuItemCreateCondition_Click"/>
                 <MenuItem Header="_Reader..." Click="MenuItemCreateReader_Click"/>
                 <MenuItem Header="_Writer..." Click="MenuItemCreateWriter_Click"/>
-                <MenuItem Header="_Row Processor..." Click="MenuItemCreateWriter_Click"/>
+                <MenuItem Header="_Row Processor..." Click="MenuItemCreateProcessor_Click"/>
                 <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
             </MenuItem>
             <MenuItem Header="Help">
@@ -402,6 +402,14 @@
                                             <StackPanel DockPanel.Dock="Bottom"
                                                     HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                                     Orientation="Horizontal">
+                                                <StackPanel.Resources>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="MinWidth" Value="60"/>
+                                                        <Setter Property="MinHeight" Value="22"/>
+                                                        <Setter Property="Margin" Value="4"/>
+                                                        <Setter Property="Padding" Value="4"/>
+                                                    </Style>
+                                                </StackPanel.Resources>
                                                 <Button Content="Add New Step" Click="AddProcessorInputStepButton_Click"/>
                                                 <Button Content="Delete Processor" Click="DeleteProcessorButton_Click"/>
                                                 <Button Content="Test" Click="TestProcessorButton_Click" 

@@ -23,13 +23,10 @@ namespace Expresso.Core
     {
         //private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
         //{
-        //    { "Execute ODBC Command", ExecuteODBCNonQuery },
-        //    { "Execute SQLite Command", ExecuteSQLiteNonQuery },
         //    { "Output Arbitrary Text", WriteArbitraryText },
         //    { "Write Reader to ODBC", WriteReaderToODBC },
         //    { "Write Reader to CSV", WriteReaderToCSV },
         //    { "Write Reader to SQLite", WriteReaderToSQLite },
-        //    { "Export Reader to CSV", WriteReaderToSQLite },
         //    { "Export Readers to SQLite", WriteReaderToSQLite },
         //    { "Export Readers to Excel", WriteReaderToSQLite },
         //};

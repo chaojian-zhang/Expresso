@@ -60,11 +60,11 @@ namespace Expresso
         private enum MainTabControlTabIndexMapping
         {
             Welcome = 0,
-            Condition = 1,
-            Reader = 2,
-            Writer = 3,
-            Processor = 4,
-            Variable = 5,
+            Variable = 1,
+            Condition = 2,
+            Reader = 3,
+            Writer = 4,
+            Processor = 5,
             Workflow = 6
         };
         #endregion
