@@ -21,6 +21,7 @@ using System.Windows.Controls;
 using System.Diagnostics;
 using System.Text;
 using Expresso.PopUps;
+using System.Data.SQLite;
 
 namespace Expresso
 {
@@ -66,7 +67,7 @@ namespace Expresso
             { "SQLite", ExecuteSQLiteQuery },
             { "Expresso", ExecuteReaderQuery }
         };
-        private static readonly Dictionary<string, Func<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
         {
             { "Execute ODBC Command", ExecuteODBCNonQuery },
             { "Execute SQLite Command", ExecuteSQLiteNonQuery },
@@ -269,7 +270,7 @@ namespace Expresso
             if (!WriterDataServiceProviders.ContainsKey(writer.ServiceProvider))
                 throw new ArgumentException("Invalid service provider");
             else
-                WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.Command);
+                WriterDataServiceProviders[writer.ServiceProvider](writer.DataSourceString, writer.AdditionalParameter, writer.Command);
         }
         private void ReaderAvalonTextEditor_Initialized(object sender, EventArgs e)
         {
@@ -289,6 +290,18 @@ namespace Expresso
             ApplicationDataReader reader = editor.DataContext as ApplicationDataReader;
             reader.Transform = editor.Text;
         }
+        private void WriterAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
+            editor.Text = writer.Command;
+        }
+        private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
+            writer.Command = editor.Text;
+        }
         private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
         {
             CurrentSelectedVariable = new ApplicationVariable();
@@ -300,12 +313,6 @@ namespace Expresso
             ApplicationData.Variables.Remove(CurrentSelectedVariable);
             CurrentSelectedVariable = null;
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
-        }
-        private void WriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
-        {
-            TextEditor editor = sender as TextEditor;
-            ApplicationOutputWriter writer = editor.DataContext as ApplicationOutputWriter;
-            writer.Command = editor.Text;
         }
         private void ProcessorTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -382,14 +389,31 @@ namespace Expresso
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Reader;
 
-            ApplicationData.DataReaders.Add(new ApplicationDataReader());
+            ApplicationData.DataReaders.Add(new ApplicationDataReader()
+            {
+                Name = "New Reader"
+            });
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.DataReaders));
         }
         private void MenuItemCreateWriter_Click(object sender, RoutedEventArgs e)
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Writer;
-            ApplicationData.OutputWriters.Add(new ApplicationOutputWriter());
+            ApplicationData.OutputWriters.Add(new ApplicationOutputWriter()
+            {
+                Name = "New Writer"
+            });
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
+        }
+        private void MenuItemExportSQLite_Click(object sender, RoutedEventArgs e)
+        {
+            //using SQLiteConnection connection = new SQLiteConnection("Data Source=:memory:");
+            //connection.Open();
+            //foreach (ApplicationDataReader item in ApplicationData.DataReaders)
+            //{
+            //    SQLite.PopulateTable()
+            //}
+            //connection.
+            //connection.Close();
         }
         #endregion
 
@@ -430,7 +454,7 @@ namespace Expresso
                 conn.Open();
                 using AdomdCommand cmd = new AdomdCommand(query.TrimEnd(';'), conn);
                 CellSet result = cmd.ExecuteCellSet();
-                return result.CellSetToTable().ToCSV();
+                return result.CellSetToTableNew().ToCSVFull();
             }
             catch (Exception e)
             {
@@ -476,27 +500,41 @@ namespace Expresso
             return File.ReadAllText(connection);
         }
 
-        private static string WriteArbitraryText(string connection, string query)
+        private static void WriteArbitraryText(string connection, string parmeter, string query)
         {
             throw new NotImplementedException();
         }
-        private static string ExecuteODBCNonQuery(string connection, string query)
+        private static void ExecuteODBCNonQuery(string connection, string parameter, string query)
         {
             throw new NotImplementedException();
         }
-        private static string ExecuteSQLiteNonQuery(string connection, string query)
+        private static void ExecuteSQLiteNonQuery(string connection, string parameter, string query)
         {
             throw new NotImplementedException();
         }
-        private static string WriteReaderToODBC(string connection, string query)
+        private static void WriteReaderToODBC(string connection, string parameter, string query)
         {
+            //try
+            //{
+            //    var oracleConnection = new OdbcConnection($"DSN={connection}");
+            //    oracleConnection.Open();
+                
+            //    QueryContext.ExecuteQuery(query)
+
+            //    var dt = new DataTable();
+            //    dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show(e.Message, "Error");
+            //}
+        }
+        private static void WriteReaderToSQLite(string connection, string parameter, string query)
+        {
+
             throw new NotImplementedException();
         }
-        private static string WriteReaderToSQLite(string connection, string query)
-        {
-            throw new NotImplementedException();
-        }
-        private static string WriteReaderToCSV(string connection, string query)
+        private static void WriteReaderToCSV(string connection, string parameter, string query)
         {
             throw new NotImplementedException();
         }

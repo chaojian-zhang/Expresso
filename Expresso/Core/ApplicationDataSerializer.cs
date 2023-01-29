@@ -83,6 +83,7 @@ namespace Expresso.Core
             writer.Write(data.OutputWriters.Count);
             foreach (ApplicationOutputWriter outputWriter in data.OutputWriters)
             {
+                writer.Write(outputWriter.Name);
                 writer.Write(outputWriter.ServiceProvider);
                 writer.Write(outputWriter.DataSourceString);
                 writer.Write(outputWriter.Command);
@@ -196,6 +197,7 @@ namespace Expresso.Core
                 {
                     ApplicationOutputWriter writer = new ApplicationOutputWriter()
                     {
+                        Name = reader.ReadString(),
                         ServiceProvider = reader.ReadString(),
                         DataSourceString = reader.ReadString(),
                         Command = reader.ReadString(),

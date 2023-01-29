@@ -73,7 +73,8 @@
                 <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
                 <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <Separator/>
-                <MenuItem Header="Export..."/>
+                <MenuItem Header="Export CSV..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
+                <MenuItem Header="Export as SQLite..." Click="MenuItemExportSQLite_Click" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <Separator/>
                 <MenuItem Header="Close"/>
                 <MenuItem Header="Exit"/>
@@ -138,7 +139,7 @@
                     <TabControl ItemsSource="{Binding ApplicationData.DataReaders}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
-                                <Label Content="Reader"/>
+                                <Label Content="{Binding Name}"/>
                             </DataTemplate>
                         </TabControl.ItemTemplate>
                         <TabControl.ContentTemplate>
@@ -208,6 +209,9 @@
                                                                                         <DataTrigger Binding="{Binding ServiceProvider}" Value="CSV">
                                                                                             <Setter Property="Visibility" Value="Visible"/>
                                                                                         </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding ServiceProvider}" Value="SQLite">
+                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                        </DataTrigger>
                                                                                     </Style.Triggers>
                                                                                 </Style>
                                                                             </Button.Style>
@@ -267,11 +271,11 @@
                                         <StackPanel>
                                             <DockPanel LastChildFill="True" Margin="2">
                                                 <Label Content="Name"/>
-                                                <TextBox Text="{Binding Name}"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DockPanel>
                                             <DockPanel LastChildFill="True" Margin="2">
                                                 <Label Content="Description"/>
-                                                <TextBox Text="{Binding Description}"
+                                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
                                              Height="250"
                                              TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                              SpellCheck.IsEnabled="True"/>
@@ -287,23 +291,32 @@
                     <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.OutputWriters}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
-                                <Label Content="Writer"/>
+                                <Label Content="{Binding Name}"/>
                             </DataTemplate>
                         </TabControl.ItemTemplate>
                         <TabControl.ContentTemplate>
                             <DataTemplate>
                                 <DockPanel LastChildFill="True">
-                                    <Label DockPanel.Dock="Top" Content="Writer 1" FontWeight="Bold" FontStyle="Italic"/>
                                     <DockPanel DockPanel.Dock="Top">
                                         <StackPanel Orientation="Vertical">
+                                            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                                <Label Content="Name"/>
+                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
+                                            </StackPanel>
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
                                                 <Label Content="Data Service Provider"/>
                                                 <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                                 </ComboBox>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                                <Label Content="Data Source String"/>
-                                                <TextBox Text="{Binding DataSourceString}" MinWidth="250"/>
+                                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                                    <Label Content="Data Source String"/>
+                                                    <TextBox Text="{Binding DataSourceString, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                                                    <Label Content="Additional Parameter"/>
+                                                    <TextBox Text="{Binding AdditionalParameter, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
+                                                </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
                                     </DockPanel>
@@ -318,6 +331,7 @@
                                             ShowLineNumbers="True"
                                             SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                                             FontSize="10pt" FontFamily="Consolas" 
+                                            Initialized="WriterAvalonTextEditor_Initialized"
                                             TextChanged="WriterAvalonTextEditor_OnTextChanged"/>
                                     </DockPanel>
                                 </DockPanel>

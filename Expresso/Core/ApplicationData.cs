@@ -69,11 +69,13 @@ namespace Expresso.Core
     }
     public class ApplicationOutputWriter : BaseNotifyPropertyChanged
     {
+        private string _Name = string.Empty;
         private string _ServiceProvider = MainWindow.WriterDataServiceProviderNames.First();
         private string _DataSourceString = string.Empty;
         private string _Command = string.Empty;
         private string _AdditionalParameter = string.Empty;
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
         public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
         public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }
         public string Command { get => _Command; set => SetField(ref _Command, value); }
@@ -97,7 +99,7 @@ namespace Expresso.Core
     }
     public class ApplicationDataReader : BaseNotifyPropertyChanged
     {
-        private string _Name = "Table";
+        private string _Name = string.Empty;
         private string _Description = string.Empty;
 
         private ObservableCollection<ApplicationDataQuery> _DataQueries = new();
