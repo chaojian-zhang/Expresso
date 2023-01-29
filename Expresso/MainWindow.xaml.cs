@@ -20,7 +20,6 @@ using System.Collections;
 using System.Windows.Controls;
 using System.Text;
 using Expresso.PopUps;
-using Expresso.ReaderDataQueries;
 using System.Reflection;
 
 namespace Expresso

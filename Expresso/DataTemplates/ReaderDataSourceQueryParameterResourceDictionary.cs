@@ -1,6 +1,5 @@
 ﻿using Expresso.Core;
 using Expresso.PopUps;
-using Expresso.ReaderDataQueries;
 using ICSharpCode.AvalonEdit;
 using Microsoft.Win32;
 using System;

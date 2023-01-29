@@ -1,5 +1,4 @@
-﻿using Expresso.ReaderDataQueries;
-using K4os.Compression.LZ4.Streams;
+﻿using K4os.Compression.LZ4.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

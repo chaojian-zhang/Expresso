@@ -1,5 +1,4 @@
 ﻿using Expresso.Components;
-using Expresso.ReaderDataQueries;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

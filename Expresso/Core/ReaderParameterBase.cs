@@ -10,9 +10,8 @@ using Csv;
 using System.Collections;
 using Microsoft.AnalysisServices.AdomdClient;
 using System.Data.SQLite;
-using Expresso.Core;
 
-namespace Expresso.ReaderDataQueries
+namespace Expresso.Core
 {
     public abstract class ReaderDataQueryParameterBase : BaseNotifyPropertyChanged
     {
@@ -25,7 +24,7 @@ namespace Expresso.ReaderDataQueries
                     .GetExecutingAssembly()
                     .GetTypes()
                     .Where(t => t != typeof(ReaderDataQueryParameterBase) && typeof(ReaderDataQueryParameterBase).IsAssignableFrom(t))
-                    .ToDictionary(t => t.GetProperty(nameof(ReaderDataQueryParameterBase.DisplayName)).GetValue(null) as string, t => t);
+                    .ToDictionary(t => t.GetProperty(nameof(DisplayName)).GetValue(null) as string, t => t);
 
             return _ServiceProviders;
         }
@@ -109,7 +108,7 @@ namespace Expresso.ReaderDataQueries
         #endregion
     }
 
-    public sealed class MicrosoftAnalysisServiceDataQueryParameter: ReaderDataQueryParameterBase
+    public sealed class MicrosoftAnalysisServiceDataQueryParameter : ReaderDataQueryParameterBase
     {
         #region Meta Data
         public static new string DisplayName => "Microsoft Analysis Service";
@@ -388,7 +387,7 @@ namespace Expresso.ReaderDataQueries
                     item.Name,
                     item is DirectoryInfo ? "Folder" : item.Extension,
                     item is FileInfo file ? file.Length.ToString() : string.Empty
-                });            
+                });
 
             return CsvWriter.WriteToText(headers, lines);
         }

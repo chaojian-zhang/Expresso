@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Csv;
 
-namespace Expresso.ReaderDataQueries
+namespace Expresso.Core
 {
     public abstract class RowProcessorParameterBase : BaseNotifyPropertyChanged
     {
@@ -23,7 +23,7 @@ namespace Expresso.ReaderDataQueries
                     .GetExecutingAssembly()
                     .GetTypes()
                     .Where(t => t != typeof(RowProcessorParameterBase) && typeof(RowProcessorParameterBase).IsAssignableFrom(t))
-                    .ToDictionary(t => t.GetProperty(nameof(RowProcessorParameterBase.DisplayName)).GetValue(null) as string, t => t);
+                    .ToDictionary(t => t.GetProperty(nameof(DisplayName)).GetValue(null) as string, t => t);
 
             return _ServiceProviders;
         }
