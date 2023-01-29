@@ -177,7 +177,6 @@
                                                 <DockPanel LastChildFill="True">
                                                     <TabControl DockPanel.Dock="Top" 
                                                     Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverter}}"
-                                                    SelectedIndex="{Binding CurrentReaderDataSourceQueryItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                     ItemsSource="{Binding DataQueries}">
                                                         <TabControl.ItemTemplate>
                                                             <DataTemplate>
@@ -189,12 +188,12 @@
                                                                 <DockPanel LastChildFill="True">
                                                                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" FlowDirection="RightToLeft" Margin="2">
                                                                         <Button Content="Submit" Click="ReaderQuerySubmitButton_Click"/>
-                                                                        <Button Content="Add Query" Click="AddDataQueryButton_Click"/>
+                                                                        <Button Content="Add Query" Click="AddDataQueryButton_Click" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                                     </StackPanel>
                                                                     <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
                                                                         <DockPanel LastChildFill="False">
                                                                             <Label Content="Data Service Provider"/>
-                                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                                            <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding ReaderDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" SelectionChanged="ReaderDataQueryServiceProviderComboBox_SelectionChanged"/>
                                                                         </DockPanel>
                                                                         <DockPanel LastChildFill="True">
                                                                             <Label DockPanel.Dock="Left" Content="Data Source String"/>
@@ -202,21 +201,6 @@
                                                                             <Label DockPanel.Dock="Right" Content="Additional Parameter"/>
                                                                             <TextBox DockPanel.Dock="Left" Text="{Binding DataSourceString}"/>
                                                                         </DockPanel>
-                                                                        <Button Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click">
-                                                                            <Button.Style>
-                                                                                <Style TargetType="Button">
-                                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                                    <Style.Triggers>
-                                                                                        <DataTrigger Binding="{Binding ServiceProvider}" Value="CSV">
-                                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                                        </DataTrigger>
-                                                                                        <DataTrigger Binding="{Binding ServiceProvider}" Value="SQLite">
-                                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                                        </DataTrigger>
-                                                                                    </Style.Triggers>
-                                                                                </Style>
-                                                                            </Button.Style>
-                                                                        </Button>
                                                                     </StackPanel>
                                                                     <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
                                                                         <ContentPresenter.Resources>
@@ -232,22 +216,74 @@
                                                                                                            TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
                                                                                 </DockPanel>
                                                                             </DataTemplate>
+                                                                            <DataTemplate DataType="{x:Type dataQuery:ODBCReaderDataQueryParameter}">
+                                                                                <DockPanel LastChildFill="True">
+                                                                                    <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                                                                        <Label Content="DSN"/>
+                                                                                        <TextBox Text="{Binding DSN, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                                    </DockPanel>
+                                                                                    <DockPanel>
+                                                                                        <Label DockPanel.Dock="Top" Content="Query"/>
+                                                                                        <avalonEdit:TextEditor DockPanel.Dock="Bottom" Margin="5"
+                                                                                                           BorderThickness="2" BorderBrush="Beige"
+                                                                                                           ShowLineNumbers="True"
+                                                                                                           SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                                                                           FontSize="10pt" FontFamily="Consolas" 
+                                                                                                           Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
+                                                                                                           TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
+                                                                                    </DockPanel>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
+                                                                            <DataTemplate DataType="{x:Type dataQuery:CSVReaderDataQueryParameter}">
+                                                                                <DockPanel LastChildFill="True">
+                                                                                    <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                                                                        <Label Content="File Path"/>
+                                                                                        <TextBox Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                                    </DockPanel>
+                                                                                    <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click"/>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
+                                                                            <DataTemplate DataType="{x:Type dataQuery:SQLiteReaderDataQueryParameter}">
+                                                                                <DockPanel LastChildFill="True">
+                                                                                    <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                                                                        <Label Content="File Path"/>
+                                                                                        <TextBox Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                                    </DockPanel>
+                                                                                    <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQuerySQLiteTypeOpenFileButton_Click"/>
+                                                                                    <DockPanel>
+                                                                                        <Label DockPanel.Dock="Top" Content="Query"/>
+                                                                                        <avalonEdit:TextEditor DockPanel.Dock="Bottom" Margin="5"
+                                                                                                           BorderThickness="2" BorderBrush="Beige"
+                                                                                                           ShowLineNumbers="True"
+                                                                                                           SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                                                                           FontSize="10pt" FontFamily="Consolas" 
+                                                                                                           Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
+                                                                                                           TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
+                                                                                    </DockPanel>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
+                                                                            <DataTemplate DataType="{x:Type dataQuery:FolderFilePathsReaderDataQueryParameter}">
+                                                                                <DockPanel LastChildFill="True">
+                                                                                    <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                                                                        <Label Content="Folder Path"/>
+                                                                                        <TextBox Text="{Binding FolderPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                                    </DockPanel>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
                                                                         </ContentPresenter.Resources>
                                                                     </ContentPresenter>
                                                                 </DockPanel>
                                                             </DataTemplate>
                                                         </TabControl.ContentTemplate>
                                                     </TabControl>
-                                                    <Grid DockPanel.Dock="Top" >
+                                                    <Grid DockPanel.Dock="Top" Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}">
                                                         <Label 
                                                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                                             Content="Add A Query to Get Started." 
                                                             FontSize="16" 
-                                                            Foreground="LightGray" 
-                                                            Visibility="{Binding DataQueries, Converter={StaticResource ObjectToVisibilityConverterInverted}}"/>
+                                                            Foreground="LightGray" />
                                                         <Button Content="Add Query" Click="AddDataQueryButton_Click" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
                                                     </Grid>
-                                                    
                                                 </DockPanel>
                                             </TabItem>
                                             <TabItem Header="Transform">

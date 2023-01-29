@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace Expresso.Core
 {
@@ -77,7 +78,7 @@ namespace Expresso.Core
                     writer.Write(dataQuery.DataSourceString);
                     writer.Write(dataQuery.AdditionalParameter);
 
-                    writer.Write(dataQuery.Parameters.Query);
+                    dataQuery.Parameters.WriteToStream(writer);
                 }
                 writer.Write(dataReader.Transform);
             }
@@ -185,10 +186,12 @@ namespace Expresso.Core
                             DataSourceString = reader.ReadString(),
                             AdditionalParameter = reader.ReadString()
                         };
-                        query.Parameters = new ReaderDataQueryParameterBase()
-                        {
-                            Query = reader.ReadString(),
-                        };
+
+                        var type = ReaderDataQueryParameterBase.GetServiceProviders()[query.ServiceProvider];
+                        var paramters = (ReaderDataQueryParameterBase)Activator.CreateInstance(type);
+                        paramters.ReadFromStream(reader);
+                        query.Parameters = paramters;
+
                         dataReader.DataQueries.Add(query);
                     }
                     dataReader.Transform = reader.ReadString();

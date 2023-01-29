@@ -91,7 +91,7 @@ namespace Expresso.Core
         private string _ServiceProvider = MainWindow.ReaderDataServiceProviderNames.First();
         private string _DataSourceString = string.Empty;
         private string _AdditionalParameter = string.Empty;
-        private ReaderDataQueryParameterBase _Parameters = new ReaderDataQueryParameterBase();
+        private ReaderDataQueryParameterBase _Parameters = new ODBCReaderDataQueryParameter();
 
         public string ServiceProvider { get => _ServiceProvider; set => SetField(ref _ServiceProvider, value); }
         public string DataSourceString { get => _DataSourceString; set => SetField(ref _DataSourceString, value); }

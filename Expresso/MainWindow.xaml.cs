@@ -21,6 +21,7 @@ using System.Windows.Controls;
 using System.Text;
 using Expresso.PopUps;
 using Expresso.ReaderDataQueries;
+using System.Reflection;
 
 namespace Expresso
 {
@@ -56,16 +57,18 @@ namespace Expresso
             Variable = 5,
             Workflow = 6
         };
-        private static readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
-        {
-            { "Folder Filepaths", ExecuteFolderFilepathsQuery },
-            { "ODBC", ExecuteODBCQuery },
-            { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
-            { "CSV", ExecuteCSVQuery },
-            { "Excel", ExecuteExcelQuery },
-            { "SQLite", ExecuteSQLiteQuery },
-            { "Expresso", ExecuteReaderQuery }
-        };
+        //private static readonly Dictionary<string, Func<string, string, string>> ReaderDataServiceProviders = new Dictionary<string, Func<string, string, string>>()
+        //{
+        //    { "Folder Filepaths", ExecuteFolderFilepathsQuery },
+        //    { "ODBC", ExecuteODBCQuery },
+        //    { "Microsoft Analysis Service", ExecuteAnalysisServiceQuery },
+        //    { "CSV", ExecuteCSVQuery },
+        //    { "Excel", ExecuteExcelQuery },
+        //    { "SQLite", ExecuteSQLiteQuery },
+        //    { "Expresso", ExecuteReaderQuery }
+        //};
+        private static Dictionary<string, Type> ReaderDataServiceProviders
+            => ReaderDataQueryParameterBase.GetServiceProviders();
         private static readonly Dictionary<string, Action<string, string, string>> WriterDataServiceProviders = new Dictionary<string, Action<string, string, string>>()
         {
             { "Execute ODBC Command", ExecuteODBCNonQuery },
@@ -112,16 +115,6 @@ namespace Expresso
         {
             get => _SQLSyntaxHighlighting;
             set => SetField(ref _SQLSyntaxHighlighting, value);
-        }
-        #endregion
-
-        #region Actions
-        public static string ExecuteQuery(string dataSource, string connectionString, string query)
-        {
-            if (!ReaderDataServiceProviders.ContainsKey(dataSource))
-                return "Invalid service provider";
-            else
-                return ReaderDataServiceProviders[dataSource](connectionString, query);
         }
         #endregion
 
@@ -238,8 +231,8 @@ namespace Expresso
         {
             Button button = sender as Button;
             ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-
-            string resultCSV = ExecuteQuery(query.ServiceProvider, query.DataSourceString, query.Parameters.Query);
+            
+            string resultCSV = query.Parameters.MakeQuery();
             ResultPreview = resultCSV.CSVToConsoleTable();
             ReaderResultsView = resultCSV.CSVToDataTable();
         }
@@ -250,7 +243,7 @@ namespace Expresso
         private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
-            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+            CSVReaderDataQueryParameter parameter = button.DataContext as CSVReaderDataQueryParameter;
 
             OpenFileDialog openFileDialog = new()
             {
@@ -258,7 +251,21 @@ namespace Expresso
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                query.DataSourceString = openFileDialog.FileName;
+                parameter.FilePath = openFileDialog.FileName;
+            }
+        }
+        private void ReaderDataQuerySQLiteTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            SQLiteReaderDataQueryParameter parameter = button.DataContext as SQLiteReaderDataQueryParameter;
+
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                parameter.FilePath = openFileDialog.FileName;
             }
         }
         private void WriterExecuteButton_Click(object sender, RoutedEventArgs e)
@@ -321,6 +328,13 @@ namespace Expresso
 
             if (step != null) 
                 ProcessorStepTabItemIndex = processor.ListingOfAllSteps.IndexOf(step);
+        }
+        private void ReaderDataQueryServiceProviderComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox comboBox = sender as ComboBox;
+            ApplicationDataQuery query = comboBox.DataContext as ApplicationDataQuery;
+            if (query != null && e.RemovedItems.Count != 0 /*Without the second check, this event handler will reset the parameters during first loading/initialization of the data source*/)
+                query.Parameters = (ReaderDataQueryParameterBase)Activator.CreateInstance(ReaderDataServiceProviders[query.ServiceProvider]);  
         }
         #endregion
 
@@ -460,28 +474,6 @@ namespace Expresso
                 return $"Result,Message\nError,\"{e.Message}\"";
             }
         }
-        public static string ExecuteFolderFilepathsQuery(string connection, string query)
-        {
-            StringBuilder csvBuilder = new StringBuilder("File Paths,File Names,Type/Extensions,Sizes");
-            foreach (FileSystemInfo item in new DirectoryInfo(connection).EnumerateFileSystemInfos())
-                csvBuilder.AppendLine($"{item.FullName},{item.Name},{(item is DirectoryInfo ? "Folder" : item.Extension)},{(item is FileInfo file ? file.Length : string.Empty)}");
-            return csvBuilder.ToString();
-        }
-        public static string ExecuteODBCQuery(string connection, string query)
-        {
-            try
-            {
-                var oracleConnection = new OdbcConnection($"DSN={connection}");
-                oracleConnection.Open();
-                var dt = new DataTable();
-                dt.Load(new OdbcCommand(query, oracleConnection).ExecuteReader());
-                return dt.ToCSV();
-            }
-            catch (Exception e)
-            {
-                return $"Result,Message\nError,\"{e.Message}\"";
-            }
-        }
         private static string ExecuteReaderQuery(string connection, string query)
         {
             throw new NotImplementedException();
@@ -494,11 +486,6 @@ namespace Expresso
         {
             throw new NotImplementedException();
         }
-        private static string ExecuteCSVQuery(string connection, string query)
-        {
-            return File.ReadAllText(connection);
-        }
-
         private static void WriteArbitraryText(string connection, string parmeter, string query)
         {
             throw new NotImplementedException();

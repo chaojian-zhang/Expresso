@@ -65,7 +65,7 @@ namespace Expresso.Services
 
             DataTable dataTable = new DataTable();
             foreach (string header in reader.First().Headers)
-                dataTable.Columns.Add(new DataColumn(header, typeof(string)));
+                dataTable.Columns.Add(new DataColumn(header.Replace("/", " or "), typeof(string)));
 
             foreach (Csv.ICsvLine row in reader)
             {
