@@ -594,7 +594,7 @@ namespace Expresso.Core
         public override string MakeQuery()
         {
             // Remark-cz: Will make all MakeQuery into async by default in the future
-            return MakeQueryAsync().Result;
+            return Task.Run(() => MakeQueryAsync()).Result;
         }
         private async Task<string> MakeQueryAsync()
         {
