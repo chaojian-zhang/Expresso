@@ -10,6 +10,7 @@ using Csv;
 using System.Collections;
 using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Data.Sqlite;
+using ExcelDataReader;
 
 namespace Expresso.Core
 {
@@ -208,7 +209,20 @@ namespace Expresso.Core
         #region Query Interface
         public override string MakeQuery()
         {
-            throw new NotImplementedException();
+            using FileStream stream = File.Open(FilePath, FileMode.Open, FileAccess.Read);
+            using IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream);
+            DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration()
+            {
+                ConfigureDataTable = (tableReader) => new ExcelDataTableConfiguration()
+                {
+                    UseHeaderRow = true
+                }
+            });
+
+            if (string.IsNullOrWhiteSpace(Worksheet))
+                return result.Tables[0].ToCSV();
+            else 
+                return result.Tables[Worksheet].ToCSV();
         }
         #endregion
 

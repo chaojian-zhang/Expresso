@@ -39,20 +39,6 @@ namespace Expresso.DataTemplates
             ReaderDataQueryParameterBase queryParameters = editor.DataContext as ReaderDataQueryParameterBase;
             queryParameters.Query = editor.Text;
         }
-        private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            CSVReaderDataQueryParameter parameter = button.DataContext as CSVReaderDataQueryParameter;
-
-            OpenFileDialog openFileDialog = new()
-            {
-                Filter = "All (*.*)|*.*"
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                parameter.FilePath = openFileDialog.FileName;
-            }
-        }
         private void ReaderDataQueryExistingReaderTypePickReaderButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -76,6 +62,40 @@ namespace Expresso.DataTemplates
             OpenFileDialog openFileDialog = new()
             {
                 Filter = "All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                parameter.FilePath = openFileDialog.FileName;
+            }
+        }
+        #endregion
+
+        #region Event Handlers - CSV
+        private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            CSVReaderDataQueryParameter parameter = button.DataContext as CSVReaderDataQueryParameter;
+
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "CSV Files (*.csv)|*.csv|All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                parameter.FilePath = openFileDialog.FileName;
+            }
+        }
+        #endregion
+
+        #region Event Handlers - Excel
+        private void ReaderDataQueryExcelTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ExcelReaderDataQueryParameter parameter = button.DataContext as ExcelReaderDataQueryParameter;
+
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "Excel XLS (*.xls)|*.xls|Excel XLSX (*.xlsx)|*.xlsx|Excel XLSB (*.xlsb)|*.xlsb|CSV (*.csv)|*.csv|All (*.*)|*.*"
             };
             if (openFileDialog.ShowDialog() == true)
             {

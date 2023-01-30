@@ -83,7 +83,7 @@
                 <Label DockPanel.Dock="Right" Content="Worksheet"/>
                 <TextBox DockPanel.Dock="Left" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>
-            <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQueryCSVTypeOpenFileButton_Click"/>
+            <Button DockPanel.Dock="Top" Content="Open" Click="ReaderDataQueryExcelTypeOpenFileButton_Click"/>
         </DockPanel>
     </DataTemplate>
     <DataTemplate DataType="{x:Type core:SQLiteReaderDataQueryParameter}">
