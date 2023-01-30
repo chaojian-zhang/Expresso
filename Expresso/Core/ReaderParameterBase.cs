@@ -139,10 +139,12 @@ namespace Expresso.Core
 
         #region Base Property
         private string _ConnectionString = string.Empty;
+        private string _Transform = string.Empty;
         #endregion
 
         #region Data Binding Setup
         public string ConnectionString { get => _ConnectionString; set => SetField(ref _ConnectionString, value); }
+        public string Transform { get => _Transform; set => SetField(ref _Transform, value); }
         #endregion
 
         #region Query Interface
@@ -150,11 +152,19 @@ namespace Expresso.Core
         {
             try
             {
-                using AdomdConnection conn = new AdomdConnection(ConnectionString);
+                using AdomdConnection conn = new(ConnectionString);
                 conn.Open();
-                using AdomdCommand cmd = new AdomdCommand(Query.TrimEnd(';'), conn);
-                CellSet result = cmd.ExecuteCellSet();
-                return result.CellSetToTableNew().ToCSVFull();
+                using AdomdCommand cmd = new(Query.TrimEnd(';'), conn);
+                string mdxResult = cmd.ExecuteCellSet().CellSetToTableNew().ToCSVFull();
+                conn.Close();
+
+                if (!string.IsNullOrWhiteSpace(Transform))
+                {
+                    var current = ApplicationDataHelper.GetCurrentApplicationData();
+                    string tableName = current.FindReaderDataQueryFromParameters(this).Name;
+                    return SQLiteHelper.TransformCSV(tableName, mdxResult, Transform, out _, out _);
+                }
+                else return mdxResult;
             }
             catch (Exception e)
             {
@@ -168,11 +178,13 @@ namespace Expresso.Core
         {
             base.WriteToStream(writer);
             writer.Write(ConnectionString);
+            writer.Write(Transform);
         }
         public override void ReadFromStream(BinaryReader reader)
         {
             base.ReadFromStream(reader);
             ConnectionString = reader.ReadString();
+            Transform = reader.ReadString();
         }
         #endregion
 
@@ -203,7 +215,15 @@ namespace Expresso.Core
         #region Query Interface
         public override string MakeQuery()
         {
-            return File.ReadAllText(_FilePath);
+            string csv = File.ReadAllText(_FilePath);
+
+            if (!string.IsNullOrWhiteSpace(Query))
+            {
+                var current = ApplicationDataHelper.GetCurrentApplicationData();
+                string tableName = current.FindReaderFromParameters(this).Name;
+                return SQLiteHelper.TransformCSV(tableName, csv, Query, out _, out _);
+            }
+            else return csv;
         }
         #endregion
 

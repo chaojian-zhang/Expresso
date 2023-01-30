@@ -21,6 +21,25 @@ namespace Expresso.Core
 
     internal static class SQLiteHelper
     {
+        #region One-Shot Use
+        public static string TransformCSV(string tableName, string csv, string transformQuery, out ParcelDataGrid dataGrid, out DataTable table)
+        {
+            ParcelDataGrid tableGrid = new(tableName, csv, true);
+            try
+            {
+                dataGrid = new ParcelDataGrid[] { tableGrid }.ProcessDataGrids(transformQuery, out table);
+                dataGrid.TableName = table.TableName = tableName;
+                return dataGrid.ToCSV();
+            }
+            catch (Exception err)
+            {
+                dataGrid = null;
+                table = null;
+                return $"Result,Message\nError,\"{err.Message.Replace(Environment.NewLine, " ")}\"";
+            }
+        }
+        #endregion
+
         #region Rudimentary Interface
         public static ParcelDataGrid ProcessDataGrids(this IList<ParcelDataGrid> inputTables, string command, out DataTable dataTable)
         {

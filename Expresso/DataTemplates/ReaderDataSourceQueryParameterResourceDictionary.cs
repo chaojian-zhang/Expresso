@@ -70,6 +70,28 @@ namespace Expresso.DataTemplates
         }
         #endregion
 
+        #region Event Handlers - Microsoft Analysis Service
+        private void ReaderAnalysisServiceTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            MicrosoftAnalysisServiceDataQueryParameter queryParameters = editor.DataContext as MicrosoftAnalysisServiceDataQueryParameter;
+            if (queryParameters != null)
+                editor.Text = queryParameters.Transform;
+        }
+        private void ReaderAnalysisServiceTransformAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            MicrosoftAnalysisServiceDataQueryParameter queryParameters = editor.DataContext as MicrosoftAnalysisServiceDataQueryParameter;
+            editor.Text = queryParameters.Transform;
+        }
+        private void ReaderAnalysisServiceTransformAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            MicrosoftAnalysisServiceDataQueryParameter queryParameters = editor.DataContext as MicrosoftAnalysisServiceDataQueryParameter;
+            queryParameters.Transform = editor.Text;
+        }
+        #endregion
+
         #region Event Handlers - CSV
         private void ReaderDataQueryCSVTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
         {

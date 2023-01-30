@@ -28,11 +28,19 @@ namespace Expresso.Core
                     return reader;
             return null;
         }
-        public static ApplicationDataReader FindReaderFromParameters(this ApplicationData data, ExpressorReaderDataQueryParameter parameter)
+        public static ApplicationDataReader FindReaderFromParameters(this ApplicationData data, ReaderDataQueryParameterBase parameter)
         {
             foreach (ApplicationDataReader reader in data.DataReaders)
                 if (reader.DataQueries.Any(q => q.Parameters == parameter))
                     return reader;
+            return null;
+        }
+        public static ApplicationDataQuery FindReaderDataQueryFromParameters(this ApplicationData data, ReaderDataQueryParameterBase parameter)
+        {
+            foreach (ApplicationDataReader reader in data.DataReaders)
+                foreach (var query in reader.DataQueries)
+                    if (query.Parameters == parameter)
+                        return query;
             return null;
         }
         #endregion

@@ -274,7 +274,7 @@ namespace Expresso.Components
             {
                 var command = connection.CreateCommand();
                 command.Transaction = transaction;
-                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => $"\"{c.Header}\""))}) VALUES ({string.Join(',', columns.Select(c => FormatValue(row[c.Header])))})";
+                command.CommandText = $"INSERT INTO '{tableName}' ({string.Join(',', columns.Select(c => $"\"{c.Header}\""))}) VALUES ({string.Join(',', columns.Select(c => FormatValue(row[c.Header])))})";
 
                 command.ExecuteNonQuery();
             }
