@@ -11,6 +11,7 @@ using System.Collections;
 using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Data.Sqlite;
 using ExcelDataReader;
+using System.Text;
 
 namespace Expresso.Core
 {
@@ -60,6 +61,18 @@ namespace Expresso.Core
             Query = reader.ReadString();
         }
         #endregion
+
+        #region Script Exporting Interface
+        public virtual void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrWhiteSpace(Query))
+            {
+                builder.AppendLine("```sql");
+                builder.AppendLine(Query);
+                builder.AppendLine("```\n");
+            }
+        }
+        #endregion
     }
 
     public sealed class ODBCReaderDataQueryParameter : ReaderDataQueryParameterBase
@@ -105,6 +118,15 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
             DSN = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(DSN)) 
+                builder.AppendLine($"DSN: {DSN}\n");
+            base.BuildMarkdown(builder);
         }
         #endregion
     }
@@ -153,6 +175,15 @@ namespace Expresso.Core
             ConnectionString = reader.ReadString();
         }
         #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(ConnectionString))
+                builder.AppendLine($"Connection String: `{ConnectionString}`\n");
+            base.BuildMarkdown(builder);
+        }
+        #endregion
     }
 
     public sealed class CSVReaderDataQueryParameter : ReaderDataQueryParameterBase
@@ -186,6 +217,15 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
             FilePath = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(FilePath))
+                builder.AppendLine($"File Path: {FilePath}\n");
+            base.BuildMarkdown(builder);
         }
         #endregion
     }
@@ -240,6 +280,17 @@ namespace Expresso.Core
             Worksheet = reader.ReadString();
         }
         #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(FilePath))
+                builder.AppendLine($"File Path: {FilePath}  ");
+            if (!string.IsNullOrEmpty(Worksheet))
+                builder.AppendLine($"Worksheet: {Worksheet}\n");
+            base.BuildMarkdown(builder);
+        }
+        #endregion
     }
 
     public sealed class SQLiteReaderDataQueryParameter : ReaderDataQueryParameterBase
@@ -287,6 +338,15 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
             FilePath = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(FilePath))
+                builder.AppendLine($"File Path: {FilePath}\n");
+            base.BuildMarkdown(builder);
         }
         #endregion
     }
@@ -366,6 +426,15 @@ namespace Expresso.Core
             SpecificVariable = reader.ReadString();
         }
         #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrWhiteSpace(SpecificVariable))
+                builder.AppendLine($"Specific Variable: {SpecificVariable}\n");
+            base.BuildMarkdown(builder);
+        }
+        #endregion
     }
 
     public sealed class FolderFilePathsReaderDataQueryParameter : ReaderDataQueryParameterBase
@@ -419,6 +488,14 @@ namespace Expresso.Core
             FolderPath = reader.ReadString();
         }
         #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(FolderPath))
+                builder.AppendLine($"Folder Path: {FolderPath}\n");
+        }
+        #endregion
     }
 
     public sealed class ExpressorReaderDataQueryParameter : ReaderDataQueryParameterBase
@@ -456,6 +533,14 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
             ReaderName = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(ReaderName))
+                builder.AppendLine($"Reader Name: {ReaderName}\n");
         }
         #endregion
     }

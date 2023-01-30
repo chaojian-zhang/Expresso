@@ -86,6 +86,7 @@
                 <Separator/>
                 <MenuItem Header="Export CSV..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <MenuItem Header="Export as SQLite..." Click="MenuItemExportSQLite_Click" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
+                <MenuItem Header="Export Scripts..." Click="MenuItemExportScripts_Click" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <Separator/>
                 <MenuItem Header="Close"/>
                 <MenuItem Header="Exit"/>

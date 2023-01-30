@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows.Controls;
 using Expresso.PopUps;
+using System.Text;
 
 namespace Expresso
 {
@@ -509,7 +510,10 @@ namespace Expresso
             if(saveFileDialog.ShowDialog() == true)
             {
                 CurrentFilePath = saveFileDialog.FileName;
-                ApplicationData = new ApplicationData();
+                ApplicationData = new ApplicationData()
+                {
+                    Name = "New Analysis"
+                };
                 ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
@@ -604,6 +608,21 @@ namespace Expresso
             //connection.
             //connection.Close();
         }
+        private void MenuItemExportScripts_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new()
+            {
+                Filter = "Markdown (*.md)|*.md|All (*.*)|*.*",
+                AddExtension = true,
+                Title = "Choose location to save file"
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string destination = saveFileDialog.FileName;
+                int statistics = SaveApplicationDataScripts(ApplicationData, destination);
+                MessageBox.Show($"{statistics} entries saved to {destination}", "File Save Result");
+            }
+        }
         private void MenuItemEngineRun_Click(object sender, RoutedEventArgs e)
         {
             var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
@@ -647,6 +666,27 @@ namespace Expresso
         #endregion
 
         #region Routines
+        private int SaveApplicationDataScripts(ApplicationData applicationData, string destination)
+        {
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(destination);
+            string title = applicationData.Name;
+
+            StringBuilder markdownBuilder = new StringBuilder();
+            markdownBuilder.AppendLine($"# {(string.IsNullOrWhiteSpace(title) ? "Analysis" : title)} - {fileName}\n");
+            foreach (ApplicationDataReader reader in applicationData.DataReaders)
+            {
+                markdownBuilder.AppendLine($"## (Reader) {reader.Name}\n");
+                markdownBuilder.AppendLine($"{reader.Description}\n");
+                foreach (ApplicationDataQuery query in reader.DataQueries)
+                {
+                    markdownBuilder.AppendLine($"### {query.ServiceProvider}: {query.Name}\n");
+                    query.Parameters.BuildMarkdown(markdownBuilder);
+                }
+            }
+
+            System.IO.File.WriteAllText(destination, markdownBuilder.ToString());
+            return applicationData.DataReaders.Count;
+        }
         private static ApplicationData OpenFile(string filePath)
         {
             // Open file
