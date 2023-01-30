@@ -82,7 +82,7 @@
                 <MenuItem Header="_New..." Click="MenuItemFileNew_Click"/>
                 <MenuItem Header="_Open..." Click="MenuItemFileOpen_Click"/>
                 <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
-                <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
+                <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSaveAs_Click"/>
                 <Separator/>
                 <MenuItem Header="Export CSV..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
                 <MenuItem Header="Export as SQLite..." Click="MenuItemExportSQLite_Click" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
@@ -105,6 +105,8 @@
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
             </MenuItem>
+            <MenuItem Header="|" IsEnabled="False" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
+            <MenuItem Header="Save" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
         </Menu>
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

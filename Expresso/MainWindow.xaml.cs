@@ -537,6 +537,21 @@ namespace Expresso
             if (CurrentFilePath != null)
                 ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
         }
+        private void MenuItemFileSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new()
+            {
+                Filter = "Expresso (*.eso)|*.eso|All (*.*)|*.*",
+                AddExtension = true,
+                Title = "Choose location to save file as"
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                CurrentFilePath = saveFileDialog.FileName;
+                ApplicationDataSerializer.Save(CurrentFilePath, ApplicationData);
+                WindowTitle = $"Expresso - {CurrentFilePath}";
+            }
+        }
         private void MenuItemCreateProcessor_Click(object sender, RoutedEventArgs e)
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Processor;
