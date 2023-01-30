@@ -6,16 +6,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Csv;
-using System.Collections;
-using Microsoft.AnalysisServices.AdomdClient;
-using System.Data.SQLite;
-using System.Data.Entity.Infrastructure;
-using System.Windows;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Shapes;
+using Microsoft.Data.Sqlite;
 
 namespace Expresso.Core
 {
@@ -124,13 +116,13 @@ namespace Expresso.Core
             {
                 foreach (var commandString in commandStrings)
                 {
-                    SQLiteConnection sqliteConnection = new SQLiteConnection($"Data Source={FilePath}");
-                    sqliteConnection.Open();
+                    SqliteConnection SqliteConnection = new SqliteConnection($"Data Source={FilePath}");
+                    SqliteConnection.Open();
 
-                    var sqliteCommand = new SQLiteCommand(commandString, sqliteConnection);
-                    sqliteCommand.ExecuteNonQuery();
+                    var command = new SqliteCommand(commandString, SqliteConnection);
+                    command.ExecuteNonQuery();
 
-                    sqliteConnection.Close();
+                    SqliteConnection.Close();
                 }
                 return "Done.";
             }
