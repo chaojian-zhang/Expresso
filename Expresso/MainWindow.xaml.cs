@@ -4,25 +4,18 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Odbc;
 using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using Expresso.Services;
-using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Win32;
 using Expresso.Core;
-using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows.Controls;
-using System.Text;
 using Expresso.PopUps;
-using System.Reflection;
-using System.Diagnostics;
-using System.Reflection.Metadata;
 
 namespace Expresso
 {
@@ -127,6 +120,17 @@ namespace Expresso
         #endregion
 
         #region Events
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                CurrentFilePath = files[0];
+                ApplicationData = OpenFile(CurrentFilePath);
+                WindowTitle = $"Expresso - {CurrentFilePath}";
+            }
+        }
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
             =>MenuItemFileOpen_Click(null, null);
         private void DeleteReaderButton_Click(object sender, RoutedEventArgs e)

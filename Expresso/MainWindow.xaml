@@ -10,7 +10,8 @@
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Width="1024" Height="768"
-        DataContext="{Binding RelativeSource={RelativeSource self}}">
+        DataContext="{Binding RelativeSource={RelativeSource self}}"
+        AllowDrop="True" Drop="Window_Drop">
     <Window.Resources>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></conv:BooleanToVisibilityConverter>
         <conv:BooleanToVisibilityConverterInverted x:Key="BooleanToVisibilityConverterInverted"></conv:BooleanToVisibilityConverterInverted>
