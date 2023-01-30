@@ -1,12 +1,10 @@
 ﻿using Expresso.Components;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 
 namespace Expresso.Core
 {
@@ -29,7 +27,7 @@ namespace Expresso.Core
             if (inputTables.Select(t => t.TableName).Distinct().Count() != inputTables.Count)
                 throw new ArgumentException("Missing Data Table names.");
 
-            using SQLiteConnection connection = new SQLiteConnection("Data Source=:memory:");
+            using SqliteConnection connection = new SqliteConnection("Data Source=:memory:");
             connection.Open();
 
             foreach (ParcelDataGrid table in inputTables)
@@ -41,7 +39,7 @@ namespace Expresso.Core
                 formattedText = formattedText.Replace($"@Table{i + 1}", $"'{inputTables[i].TableName}'"); // Table names can't use parameters, so do it manually
 
             dataTable = new DataTable();
-            dataTable.Load(new SQLiteCommand(command, connection).ExecuteReader());
+            dataTable.Load(new SqliteCommand(command, connection).ExecuteReader());
 
             connection.Close();
             return new ParcelDataGrid(dataTable);
@@ -49,40 +47,13 @@ namespace Expresso.Core
         #endregion
 
         #region Helpers
-        public static void PopulateTable(this SQLiteConnection connection, ParcelDataGrid table)
+        public static void PopulateTable(this SqliteConnection connection, ParcelDataGrid table)
         {
-            SQLiteCommand cmd = connection.CreateCommand();
+            SqliteCommand cmd = connection.CreateCommand();
             cmd.CommandText = $"CREATE TABLE '{table.TableName}'({string.Join(',', table.Columns.Select(c => $"'{c.Header}'"))})";
             cmd.ExecuteNonQuery();
 
-            // Remark: The API is as shitty as it can get
-            using SQLiteTransaction transaction = connection.BeginTransaction();
-
-            string sql = $"select * from '{table.TableName}' limit 1";
-            using SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, connection);
-            adapter.InsertCommand = new SQLiteCommandBuilder(adapter).GetInsertCommand();
-
-            DataSet dataSet = new DataSet();
-            adapter.FillSchema(dataSet, SchemaType.Source, table.TableName);
-            adapter.Fill(dataSet, table.TableName);     // Load exiting table data (will be empty) 
-
-            // Insert data
-            DataTable dataTable = dataSet.Tables[table.TableName];
-            foreach (ExpandoObject row in table.Rows)
-            {
-                DataRow dataTableRow = dataTable.NewRow();
-                foreach (KeyValuePair<string, dynamic> pair in (IDictionary<string, dynamic>)row)
-                    dataTableRow[pair.Key] = pair.Value;
-                dataTable.Rows.Add(dataTableRow);
-            }
-            int result = adapter.Update(dataTable);
-
-            transaction.Commit();
-            dataSet.AcceptChanges();
-
-            // Release resources 
-            adapter.Dispose();
-            dataSet.Clear();
+            InMemorySQLIte.InsertDbData(connection, table.TableName, table);
         }
         #endregion
     }

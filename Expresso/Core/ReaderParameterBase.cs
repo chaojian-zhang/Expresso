@@ -9,7 +9,7 @@ using System.Reflection;
 using Csv;
 using System.Collections;
 using Microsoft.AnalysisServices.AdomdClient;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 
 namespace Expresso.Core
 {
@@ -247,13 +247,13 @@ namespace Expresso.Core
         {
             try
             {
-                using SQLiteConnection sqliteConnection = new SQLiteConnection($"Data Source={FilePath}");
-                sqliteConnection.Open();
+                using SqliteConnection SqliteConnection = new SqliteConnection($"Data Source={FilePath}");
+                SqliteConnection.Open();
 
                 var dataTable = new DataTable();
-                dataTable.Load(new SQLiteCommand(Query.TrimEnd(';'), sqliteConnection).ExecuteReader());
+                dataTable.Load(new SqliteCommand(Query.TrimEnd(';'), SqliteConnection).ExecuteReader());
 
-                sqliteConnection.Close();
+                SqliteConnection.Close();
                 return dataTable.ToCSV();
             }
             catch (Exception e)

@@ -591,7 +591,7 @@ namespace Expresso
         }
         private void MenuItemExportSQLite_Click(object sender, RoutedEventArgs e)
         {
-            //using SQLiteConnection connection = new SQLiteConnection("Data Source=:memory:");
+            //using SqliteConnection connection = new SqliteConnection("Data Source=:memory:");
             //connection.Open();
             //foreach (ApplicationDataReader item in ApplicationData.DataReaders)
             //{

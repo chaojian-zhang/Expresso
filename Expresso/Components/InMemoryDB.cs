@@ -2,11 +2,12 @@
 using Csv;
 using Expresso.Components;
 using Microsoft.AnalysisServices.AdomdClient;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.Odbc;
-using System.Data.SQLite;
 using System.Drawing;
 using System.Dynamic;
 using System.IO;
@@ -26,14 +27,14 @@ namespace Expresso.Components
     public class InMemorySQLIte
     {
         #region Construction
-        protected SQLiteConnection DB { get; private set; }
+        protected SqliteConnection DB { get; private set; }
         public InMemorySQLIte()
         {
             InitializeInMemoryDB();
 
             void InitializeInMemoryDB()
             {
-                DB = new SQLiteConnection("Data Source=:memory:");
+                DB = new SqliteConnection("Data Source=:memory:");
                 DB.Open();
                 // InMemoryDB.Close(); // We never do this
             }
@@ -47,16 +48,14 @@ namespace Expresso.Components
             {
                 if (sqlQuery.ToLower().Trim().StartsWith("select"))
                 {
-                    DataSet result = new DataSet();
                     string formattedQuery = sqlQuery.EndsWith(';') ? sqlQuery : sqlQuery + ';';
-                    using var adapter = new SQLiteDataAdapter(formattedQuery, DB);
-
-                    adapter.Fill(result);
-                    return result.Tables[0];
+                    DataTable table = new DataTable();
+                    table.Load(new SqliteCommand(formattedQuery, DB).ExecuteReader());
+                    return table;
                 }
                 else
                 {
-                    using var command = new SQLiteCommand(sqlQuery, DB);
+                    using var command = new SqliteCommand(sqlQuery, DB);
                     command.ExecuteNonQuery();
                     return null;
                 }
@@ -72,16 +71,14 @@ namespace Expresso.Components
             {
                 if (sqlQuery.ToLower().Trim().StartsWith("select"))
                 {
-                    DataSet result = new DataSet();
                     string formattedQuery = sqlQuery.EndsWith(';') ? sqlQuery : sqlQuery + ';';
-                    using var adapter = new SQLiteDataAdapter(formattedQuery, DB);
-
-                    adapter.Fill(result);
-                    return new ParcelDataGrid(result);
+                    DataTable table = new DataTable();
+                    table.Load(new SqliteCommand(formattedQuery, DB).ExecuteReader());
+                    return new ParcelDataGrid(table);
                 }
                 else
                 {
-                    using var command = new SQLiteCommand(sqlQuery, DB);
+                    using var command = new SqliteCommand(sqlQuery, DB);
                     command.ExecuteNonQuery();
                     return null;
                 }
@@ -102,43 +99,19 @@ namespace Expresso.Components
         }
         public void Import(IEnumerable<ICsvLine> csvLines, string tableName, out DataTable dataTable)
         {
-            SQLiteCommand cmd = DB.CreateCommand();
+            SqliteCommand cmd = DB.CreateCommand();
             cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', csvLines.First().Headers.Select(c => $"'{c}'"))})";
             cmd.ExecuteNonQuery();
 
-            SQLiteTransaction transaction = DB.BeginTransaction();
-
-            string sql = $"select * from '{tableName}' limit 1";
-            SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, DB);
-            adapter.InsertCommand = new SQLiteCommandBuilder(adapter).GetInsertCommand();
-
-            DataSet dataSet = new DataSet();
-            adapter.FillSchema(dataSet, SchemaType.Source, tableName);
-            adapter.Fill(dataSet, tableName);     // Load exiting table data (will be empty) 
-
-            // Insert data
-            dataTable = dataSet.Tables[tableName];
-            foreach (var csvLine in csvLines)
-            {
-                DataRow dataTableRow = dataTable.NewRow();
-                foreach (var header in csvLine.Headers)
-                    dataTableRow[header] = csvLine[header];
-                dataTable.Rows.Add(dataTableRow);
-            }
-            int result = adapter.Update(dataTable);
-
-            transaction.Commit();
-            dataSet.AcceptChanges();
-            // Release resources 
-            adapter.Dispose();
-            dataSet.Clear();
+            InsertDbData(DB, tableName, new ParcelDataGrid(csvLines));
+            dataTable = Execute($"select * from {tableName}");
         }
         public void Import(DataTable dataTable, string tableName)
         {
             if (dataTable.Rows.Count == 0)
             {
                 ParcelDataGrid emptyGrid = new ParcelDataGrid();
-                foreach (System.Data.DataColumn col in dataTable.Columns)
+                foreach (DataColumn col in dataTable.Columns)
                     emptyGrid.AddColumn(col.ColumnName);
                 Import(emptyGrid, tableName);
             }
@@ -153,36 +126,11 @@ namespace Expresso.Components
         }
         public void Import(ParcelDataGrid table, string tableName)
         {
-            SQLiteCommand cmd = DB.CreateCommand();
+            SqliteCommand cmd = DB.CreateCommand();
             cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', table.Columns.Select(c => $"'{c.Header}'"))})";
             cmd.ExecuteNonQuery();
 
-            SQLiteTransaction transaction = DB.BeginTransaction();
-
-            string sql = $"select * from '{tableName}' limit 1";
-            SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, DB);
-            adapter.InsertCommand = new SQLiteCommandBuilder(adapter).GetInsertCommand();
-
-            DataSet dataSet = new DataSet();
-            adapter.FillSchema(dataSet, SchemaType.Source, tableName);
-            adapter.Fill(dataSet, tableName);     // Load exiting table data (will be empty) 
-
-            // Insert data
-            DataTable dataTable = dataSet.Tables[tableName];
-            foreach (ExpandoObject row in table.Rows)
-            {
-                DataRow dataTableRow = dataTable.NewRow();
-                foreach (KeyValuePair<string, dynamic> pair in (IDictionary<string, dynamic>)row)
-                    dataTableRow[pair.Key] = pair.Value;
-                dataTable.Rows.Add(dataTableRow);
-            }
-            int result = adapter.Update(dataTable);
-
-            transaction.Commit();
-            dataSet.AcceptChanges();
-            // Release resources 
-            adapter.Dispose();
-            dataSet.Clear();
+            InsertDbData(DB, tableName, table);
         }
         public void ImportFromODBC(string databaseName, string query, string destinationTable)
         {
@@ -215,7 +163,7 @@ namespace Expresso.Components
         public void Push(DestinationDatabase target, string tableName, ParcelDataGrid dataframe, string dsn)
         {
             if (target == DestinationDatabase.InMemoryDB)
-                InsertInMemoryData(tableName, dataframe);
+                InsertDbData(DB, tableName, dataframe);
             else if (target == DestinationDatabase.Oracle)
                 InsertODBCData(tableName, dataframe, dsn);
             else
@@ -223,9 +171,9 @@ namespace Expresso.Components
         }
         internal void Export(string path = "export.sqlite")
         {
-            SQLiteConnection saveFile = new SQLiteConnection($"Data Source={path}");
+            SqliteConnection saveFile = new SqliteConnection($"Data Source={path}");
             saveFile.Open();
-            DB.BackupDatabase(saveFile, "main", "main", -1, null, 0);
+            DB.BackupDatabase(saveFile, "main", "main");
             saveFile.Close();
         }
         #endregion
@@ -252,53 +200,12 @@ namespace Expresso.Components
             // Convert to Datagrid
             return new ParcelDataGrid(CsvReader.ReadFromText(csv));
         }
-        public void InsertInMemoryData(string tableName, ParcelDataGrid table)
-        {
-            var columns = table.Columns;
-            var transaction = DB.BeginTransaction();
-            foreach (IDictionary<string, object> row in table.Rows)
-            {
-                var command = DB.CreateCommand();
-                command.Transaction = transaction;
-                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => c.Header))}) VALUES ({string.Join(',', columns.Select(c => $"@{c.Header}"))})";
-                foreach (string column in columns.Select(c => c.Header))
-                {
-                    var parameter = command.CreateParameter();
-                    parameter.ParameterName = $"@{column}";
-                    parameter.Value = row[column];
-                    command.Parameters.Add(parameter);
-                }
-
-                command.ExecuteNonQuery();
-            }
-            transaction.Commit();
-        }
         public static void InsertODBCData(string tableName, ParcelDataGrid table, string dsn)
         {
-            var columns = table.Columns;
-
             OdbcConnection odbcConnection = new OdbcConnection($"DSN={dsn}");
             odbcConnection.Open();
-
-            var transaction = odbcConnection.BeginTransaction();
-            foreach (IDictionary<string, object> row in table.Rows)
-            {
-                var command = odbcConnection.CreateCommand();
-                command.Transaction = transaction;
-                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => $"\"{c.Header}\""))}) VALUES ({string.Join(',', columns.Select(c => FormatValue(row[c.Header])))})";
-
-                command.ExecuteNonQuery();
-            }
-            transaction.Commit();
+            InsertDbData(odbcConnection, tableName, table);
             odbcConnection.Close();
-
-            string FormatValue(object value)
-            {
-                var text = value.ToString();
-                if (double.TryParse(text, out _))
-                    return text;
-                else return $"\"{text}\"";
-            }
         }
         public static DataTable ExecuteODBC(string sqlQuery, string dsn)
         {
@@ -355,6 +262,32 @@ namespace Expresso.Components
         }
         public ParcelDataGrid this[string name] => GetDataGrid(name);
         public bool ContainsTableOrView(string name) => TablesAndViews.Contains(name);
+        #endregion
+
+        #region Routines
+        public static void InsertDbData(DbConnection connection, string tableName, ParcelDataGrid table)
+        {
+            var columns = table.Columns;
+
+            var transaction = connection.BeginTransaction();
+            foreach (IDictionary<string, object> row in table.Rows)
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = $"INSERT INTO {tableName} ({string.Join(',', columns.Select(c => $"\"{c.Header}\""))}) VALUES ({string.Join(',', columns.Select(c => FormatValue(row[c.Header])))})";
+
+                command.ExecuteNonQuery();
+            }
+            transaction.Commit();
+
+            static string FormatValue(object value)
+            {
+                var text = value.ToString();
+                if (double.TryParse(text, out _))
+                    return text;
+                else return $"\"{text}\"";
+            }
+        }
         #endregion
     }
     #endregion
