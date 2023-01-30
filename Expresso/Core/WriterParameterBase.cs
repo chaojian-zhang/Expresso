@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.ObjectModel;
 using Microsoft.Data.Sqlite;
+using Expresso.Services;
 
 namespace Expresso.Core
 {
@@ -312,6 +313,85 @@ namespace Expresso.Core
                 return $"File written to {FilePath}";
             }
             return "Cannot find input.";
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(FilePath);
+            writer.Write(Transform);
+            writer.Write(InputTableNames.Count);
+            foreach (var item in InputTableNames)
+                writer.Write(item);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            FilePath = reader.ReadString();
+            Transform = reader.ReadString();
+            var inputDataNamesLength = reader.ReadInt32();
+            for (int i = 0; i < inputDataNamesLength; i++)
+                InputTableNames.Add(reader.ReadString());
+        }
+        #endregion
+    }
+
+    public sealed class OutputWriterExcelWriterParameter : WriterParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Write to Excel";
+        #endregion
+
+        #region Base Property
+        private string _FilePath = string.Empty;
+        private string _Transform = string.Empty;
+        private ObservableCollection<string> _InputTableNames = new();
+        #endregion
+
+        #region Data Binding Setup
+        public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
+        public string Transform { get => _Transform; set => SetField(ref _Transform, value); }
+        public ObservableCollection<string> InputTableNames { get => _InputTableNames; set => SetField(ref _InputTableNames, value); }
+        #endregion
+
+        #region Query Interface
+        public override string PerformAction(List<ParcelDataGrid> overwriteInputs)
+        {
+            List<ParcelDataGrid> writerInputs = FetchInputs(overwriteInputs, InputTableNames);
+            if (writerInputs.Count != 0)
+            {
+                if (string.IsNullOrEmpty(Transform))
+                    WriteResult(writerInputs);
+                else
+                {
+                    ParcelDataGrid finalDataGrid = writerInputs.ProcessDataGrids(Transform, out _);
+                    WriteResult(new List<ParcelDataGrid> { finalDataGrid });
+                }
+                return $"File written to {FilePath}";
+            }
+            return "Cannot find input.";
+
+            void WriteResult(List<ParcelDataGrid> writerInputs)
+            {
+                DataSet ds = new("New_DataSet")
+                {
+                    Locale = System.Threading.Thread.CurrentThread.CurrentCulture
+                };
+
+                foreach (ParcelDataGrid grid in writerInputs)
+                {
+                    DataTable dt = new(grid.TableName)
+                    {
+                        Locale = System.Threading.Thread.CurrentThread.CurrentCulture
+                    };
+
+                    ds.Tables.Add(grid.ToDataTable());
+                }
+
+                ExcelLibrary.DataSetHelper.CreateWorkbook(FilePath, ds);
+            }
         }
         #endregion
 

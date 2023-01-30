@@ -183,5 +183,74 @@ namespace Expresso.DataTemplates
 
         }
         #endregion
+
+        #region Event Handlers - ExcelWriterParameter
+        private void ExcelWriterChooseSaveLocationButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            OutputWriterExcelWriterParameter parameter = button.DataContext as OutputWriterExcelWriterParameter;
+
+            SaveFileDialog saveFileDialog = new()
+            {
+                Filter = "Excel XLS (*.xls)|*.xls|All (*.*)|*.*",
+                AddExtension = true,
+                Title = "Choose location to save file"
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                parameter.FilePath = saveFileDialog.FileName;
+            }
+        }
+        private void ExcelWriterAddInputButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            OutputWriterExcelWriterParameter parameter = button.DataContext as OutputWriterExcelWriterParameter;
+
+            parameter.InputTableNames.Add($"Table{parameter.InputTableNames.Count + 1}");
+        }
+        private void ExcelWriterRemoveInputButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            OutputWriterExcelWriterParameter parameter = button.DataContext as OutputWriterExcelWriterParameter;
+
+            if (parameter.InputTableNames.Count != 0)
+                parameter.InputTableNames.RemoveAt(parameter.InputTableNames.Count - 1);
+        }
+        private void ExcelWriterAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            OutputWriterExcelWriterParameter parameters = editor.DataContext as OutputWriterExcelWriterParameter;
+            if (parameters != null)
+                editor.Text = parameters.Transform;
+        }
+        private void ExcelWriterAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            OutputWriterExcelWriterParameter parameters = editor.DataContext as OutputWriterExcelWriterParameter;
+            editor.Text = parameters.Transform;
+        }
+        private void ExcelWriterAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            OutputWriterExcelWriterParameter parameters = editor.DataContext as OutputWriterExcelWriterParameter;
+            parameters.Transform = editor.Text;
+        }
+        private void ExcelWriterReaderNamePickButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            OutputWriterExcelWriterParameter parameter = button.DataContext as OutputWriterExcelWriterParameter;
+
+            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            string[] readerNames = currentApplicationData.DataReaders
+                .Select(r => r.Name).ToArray();
+            if (readerNames.Length != 0)
+            {
+                var pick = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to use as input:", readerNames.FirstOrDefault(), readerNames, "Writers can optionally take inputs from row processors in Workflow page.");
+                if (pick != null)
+                    parameter.InputTableNames.Add(pick);
+            }
+
+        }
+        #endregion
     }
 }

@@ -152,4 +152,57 @@
             </Grid>
         </DockPanel>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type core:OutputWriterExcelWriterParameter}">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label Content="File Path"/>
+                <Button DockPanel.Dock="Right" Content="Choose" Click="ExcelWriterChooseSaveLocationButton_Click"/>
+                <TextBox DockPanel.Dock="Right" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel>
+                            <Label Content="Inputs"/>
+                            <StackPanel>
+                                <Button Content="Add" Click="ExcelWriterAddInputButton_Click"/>
+                                <Button Content="Pick" Click="ExcelWriterReaderNamePickButton_Click"/>
+                                <Button Content="Remove" Click="ExcelWriterRemoveInputButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border BorderBrush="LightGray" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding InputTableNames}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True">
+                                            <Label DockPanel.Dock="Left" Content="Table Input" />
+                                            <TextBox DockPanel.Dock="Left" Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </DockPanel>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                <DockPanel  Grid.Column="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Content="Query"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="ExcelWriterAvalonTextEditor_DataContextChanged"
+                        Initialized="ExcelWriterAvalonTextEditor_Initialized"
+                        TextChanged="ExcelWriterAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
 </ResourceDictionary>

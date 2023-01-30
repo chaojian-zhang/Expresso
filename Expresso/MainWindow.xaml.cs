@@ -175,7 +175,7 @@ namespace Expresso
             
             string resultCSV = query.Parameters.MakeQuery();
             ResultPreview = resultCSV.CSVToConsoleTable();
-            ReaderResultsView = resultCSV.CSVToDataTable();
+            ReaderResultsView = resultCSV.CSVToDataView();
         }
         private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -186,7 +186,7 @@ namespace Expresso
             {
                 string resultCSV = reader.EvaluateTransform(out _, out _);
                 ResultPreview = resultCSV.CSVToConsoleTable();
-                ReaderResultsView = resultCSV.CSVToDataTable();
+                ReaderResultsView = resultCSV.CSVToDataView();
             }
         }
         private void WriterTestButton_Click(object sender, RoutedEventArgs e)

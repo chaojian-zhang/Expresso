@@ -302,6 +302,45 @@ namespace Expresso.Components
                 return $"\"{name.Trim()}\"";
             }
         }
+        internal DataTable ToDataTable()
+        {
+            Dictionary<string, int> repeatNameCounter = new Dictionary<string, int>();
+            List<string> headers = new List<string>();
+            if (OptionalRowHeaderColumn != null) headers.Add($"{PreProcessColumnNameForDisplay(OptionalRowHeaderColumn.Header, repeatNameCounter)},");
+            headers.AddRange(Columns
+                    .Select(c => PreProcessColumnNameForDisplay(c.Header, repeatNameCounter))
+                    .Select(n => EscapeDataGridViewInvalidCharacters(n)));
+
+            DataTable dataTable = new(TableName);
+            for (int i = 0; i < headers.Count; i++)
+            {
+                string header = headers[i];
+                dataTable.Columns.Add(new DataColumn(header, typeof(string)));
+            }
+
+            for (int row = 0; row < RowCount; row++)
+            {
+                List<object> rowValues = new List<object>();
+                if (OptionalRowHeaderColumn != null)
+                    rowValues.Add(OptionalRowHeaderColumn[row]);
+                for (int col = 0; col < ColumnCount; col++)
+                    rowValues.Add(Columns[col][row]);
+
+                DataRow dataRow = dataTable.NewRow();
+                dataRow.ItemArray = rowValues.ToArray();
+                dataTable.Rows.Add(dataRow);
+            }
+
+            return dataTable;
+
+            static string EscapeDataGridViewInvalidCharacters(string header)
+            {
+                var invalidChar = "()[]!@#$%^&*-_=\\/,. ".ToArray();
+                if (invalidChar.Any(c => header.Contains(c)))
+                    return $"\"{header}\"";
+                else return header;
+            }
+        }
         #endregion
 
         #region Dynamic Programming - Dynamic Fields Construction

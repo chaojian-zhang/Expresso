@@ -57,7 +57,9 @@ namespace Expresso.Services
                 return e.Message;
             }
         }
-        public static DataView CSVToDataTable(this string csv)
+        public static DataView CSVToDataView(this string csv)
+            => new(csv.CSVToDataTable());
+        public static DataTable CSVToDataTable(this string csv)
         {
             var reader = Csv.CsvReader.ReadFromText(csv, new Csv.CsvOptions()
             {
@@ -65,7 +67,7 @@ namespace Expresso.Services
                 AllowNewLineInEnclosedFieldValues = true
             }).ToArray();
 
-            var headers = reader.Length > 0 
+            var headers = reader.Length > 0
                 ? reader.First().Headers
                 : csv.Trim().Split(',');
             DataTable dataTable = new DataTable();
@@ -79,7 +81,7 @@ namespace Expresso.Services
                 dataTable.Rows.Add(dataRow);
             }
 
-            return new DataView(dataTable);
+            return dataTable;
 
             static string EscapeDataGridViewInvalidCharacters(string header)
             {
