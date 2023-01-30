@@ -105,8 +105,8 @@
             <MenuItem Header="Help">
                 <MenuItem Header="_About"/>
             </MenuItem>
-            <MenuItem Header="|" IsEnabled="False" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
-            <MenuItem Header="Save" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
+            <MenuItem Header="|" IsEnabled="False" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToVisibilityConverter}}"/>
+            <MenuItem Header="Save" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToVisibilityConverter}}" Click="MenuItemFileSave_Click"/>
         </Menu>
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
