@@ -42,7 +42,7 @@ namespace Expresso.Core
         {
             List<ParcelDataGrid> intermediateData = new();
             foreach (var query in reader.DataQueries)
-                intermediateData.Add(new ParcelDataGrid(query.Name, query.Parameters.MakeQuery()));
+                intermediateData.Add(new ParcelDataGrid(query.Name, query.Parameters.MakeQuery(), true));
 
             if (reader.DataQueries.Count == 0 )
             {

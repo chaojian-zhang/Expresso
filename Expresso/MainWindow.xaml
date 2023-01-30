@@ -132,15 +132,18 @@
                 <TabItem Header="Welcome">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
+                            <TextBlock TextAlignment="Center" Foreground="Red">
+                                <Run>This software is still in development; Backup/Export often in case of crash.</Run>
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
                                 <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Content="Create Reader" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateReader_Click"/>
                                 <Button Content="Create Writer" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWriter_Click"/>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Button Content="Create Row Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
                                 <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
                             </StackPanel>
@@ -674,7 +677,9 @@
                                 <DockPanel>
                                     <ListView ItemsSource="{Binding ApplicationData.Variables}">
                                         <ListView.ItemTemplate>
-                                            <DataTemplate></DataTemplate>
+                                            <DataTemplate>
+                                                <Label Content="{Binding Name}"/>
+                                            </DataTemplate>
                                         </ListView.ItemTemplate>
                                     </ListView>
                                 </DockPanel>
@@ -685,25 +690,26 @@
                                 <Label DockPanel.Dock="Top" Content="Pick Workflow"/>
                                 <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Workflows}">
                                     <ComboBox.ItemTemplate>
-                                        <DataTemplate></DataTemplate>
+                                        <DataTemplate>
+                                            <Label Content="{Binding Name}"/>
+                                        </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
-                                <Button DockPanel.Dock="Top" Content="Run!"/>
+                                <Button DockPanel.Dock="Top" Content="Run!" Width="160" Height="46" Foreground="White" Background="LightSeaGreen" Margin="4"/>
                                 <!--Workflow Preview-->
                                 <DockPanel LastChildFill="True">
-                                    <Label Content="Preview"/>
-                                    <TextBlock>
-                                        <Span>The workflow will execute N times for the following configurations.</Span>
-                                    </TextBlock>
-                                    <DataGrid/>
+                                    <Label DockPanel.Dock="Top" Content="Configurations Preview" Style="{StaticResource ContextKey}"/>
+                                    <Label DockPanel.Dock="Top" Content="The workflow will execute N times for the following configurations."/>
+                                    <DataGrid DockPanel.Dock="Bottom">
+                                    </DataGrid>
                                 </DockPanel>
                             </DockPanel>
                         </Grid>
                         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
                         <!--Log Panel-->
-                        <DockPanel LastChildFill="True">
-                            <Label Content="Logs"/>
-                            <TextBlock></TextBlock>
+                        <DockPanel Grid.Column="2" LastChildFill="True">
+                            <Label DockPanel.Dock="Top" Content="Logs" Style="{StaticResource ContextKey}"/>
+                            <TextBox DockPanel.Dock="Bottom" IsReadOnly="True"/>
                         </DockPanel>
                     </Grid>
                 </TabItem>

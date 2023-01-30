@@ -65,8 +65,11 @@ namespace Expresso.Services
                 AllowNewLineInEnclosedFieldValues = true
             }).ToArray();
 
+            var headers = reader.Length > 0 
+                ? reader.First().Headers
+                : csv.Trim().Split(',');
             DataTable dataTable = new DataTable();
-            foreach (string header in reader.First().Headers)
+            foreach (string header in headers)
                 dataTable.Columns.Add(new DataColumn(EscapeDataGridViewInvalidCharacters(header), typeof(string)));
 
             foreach (Csv.ICsvLine row in reader)

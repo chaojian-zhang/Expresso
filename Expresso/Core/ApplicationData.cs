@@ -19,10 +19,10 @@ namespace Expresso.Core
     public class ApplicationExecutionConditional : BaseNotifyPropertyChanged
     {
 
-        private string _Name;
+        private string _Name = string.Empty;
         private ConditionType _Type;
-        private string _Description;
-        private string _ReaderName;
+        private string _Description = string.Empty;
+        private string _ReaderName = string.Empty;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public ConditionType Type { get => _Type; set => SetField(ref _Type, value); }

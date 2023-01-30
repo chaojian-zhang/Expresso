@@ -185,12 +185,12 @@ namespace Expresso.Components
                 Columns.Add(col);
             }
         }
-        public ParcelDataGrid(string name, string csv)
-            : this(CsvReader.ReadFromText(csv))
+        public ParcelDataGrid(string name, string csv, bool noParsing)
+            : this(CsvReader.ReadFromText(csv), noParsing)
         {
             TableName = name;
         }
-        public ParcelDataGrid(IEnumerable<ICsvLine> csvLines)
+        public ParcelDataGrid(IEnumerable<ICsvLine> csvLines, bool noParsing = false)
         {
             string[] headers = null;
             foreach (ICsvLine line in csvLines)
@@ -206,7 +206,7 @@ namespace Expresso.Components
                 // Add data to columns
                 for (var i = 0; i < headers.Length; i++)
                 {
-                    Columns[i].Add(Preformatting(line[i]));
+                    Columns[i].Add(noParsing ? line[i] : Preformatting(line[i]));
                 }
             }
         }
