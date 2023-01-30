@@ -264,7 +264,7 @@ namespace Expresso
                 if (reader != null)
                 {
                     reader.EvaluateTransform(out ParcelDataGrid result, out _);
-                    switch (condition.Type)
+                    switch (Enum.Parse<ConditionType>(condition.Type))
                     {
                         case ConditionType.Binary:
                             MessageBox.Show($"{result.RowCount >= 1}", "Evaluation Result");

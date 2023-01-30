@@ -20,12 +20,12 @@ namespace Expresso.Core
     {
 
         private string _Name = string.Empty;
-        private ConditionType _Type;
+        private string _Type = nameof(ConditionType.Binary);
         private string _Description = string.Empty;
         private string _ReaderName = string.Empty;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
-        public ConditionType Type { get => _Type; set => SetField(ref _Type, value); }
+        public string Type { get => _Type; set => SetField(ref _Type, value); }
         public string Description { get => _Description; set => SetField(ref _Description, value); }
         public string ReaderName { get => _ReaderName; set => SetField(ref _ReaderName, value); }
     }

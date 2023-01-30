@@ -12,9 +12,18 @@ using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Data.Sqlite;
 using ExcelDataReader;
 using System.Text;
+using System.Security.Policy;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Expresso.Core
 {
+    public enum SupportedWebRequestMethod
+    {
+        GET,
+        POST
+    }
+
     public abstract class ReaderDataQueryParameterBase : BaseNotifyPropertyChanged
     {
         #region Reflection Service
@@ -561,6 +570,94 @@ namespace Expresso.Core
         {
             if (!string.IsNullOrEmpty(ReaderName))
                 builder.AppendLine($"Reader Name: {ReaderName}\n");
+        }
+        #endregion
+    }
+
+    public sealed class WebRequestReaderDataQueryParameter : ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Web Request";
+        #endregion
+
+        #region Base Property
+        private string _URL = string.Empty;
+        private string _Method = nameof(SupportedWebRequestMethod.GET);
+        #endregion
+
+        #region Data Binding Setup
+        public string URL { get => _URL; set => SetField(ref _URL, value); }
+        public string Method { get => _Method; set => SetField(ref _Method, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            // Remark-cz: Will make all MakeQuery into async by default in the future
+            return MakeQueryAsync().Result;
+        }
+        private async Task<string> MakeQueryAsync()
+        {
+            try
+            {
+                SupportedWebRequestMethod method = Enum.Parse<SupportedWebRequestMethod>(Method);
+                string responseBody = string.Empty;
+                switch (method)
+                {
+                    case SupportedWebRequestMethod.GET:
+                        responseBody = await MakeGETRequest(URL);
+                        break;
+                    case SupportedWebRequestMethod.POST:
+                        responseBody = await MakePOSTRequest(URL, Query);
+                        break;
+                    default:
+                        throw new ArgumentException($"Invalid method type: {method}");
+                }
+                return responseBody;
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+
+            static async Task<string> MakeGETRequest(string url)
+            {
+                using HttpClient client = new();
+                return await client.GetStringAsync(url);
+            }
+            static async Task<string> MakePOSTRequest(string url, string payload)
+            {
+                using HttpClient client = new();
+                using HttpResponseMessage response = await client.PostAsync(url, new StringContent(payload));
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(URL);
+            writer.Write(Method);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            URL = reader.ReadString();
+            Method = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            if (!string.IsNullOrEmpty(URL))
+                builder.AppendLine($"URL: {URL}  ");
+            if (!string.IsNullOrEmpty(Method))
+                builder.AppendLine($"Method: {Method}\n");
+            base.BuildMarkdown(builder);
         }
         #endregion
     }
