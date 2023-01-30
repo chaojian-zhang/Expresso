@@ -22,6 +22,7 @@ using System.Text;
 using Expresso.PopUps;
 using System.Reflection;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 
 namespace Expresso
 {
@@ -87,6 +88,13 @@ namespace Expresso
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
         public static string[] ReaderDataServiceProviderNames => ReaderDataQueryParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] WriterDataServiceProviderNames => WriterParameterBase.GetServiceProviders().Keys.ToArray();
+        public static string[] WorkflowActionTypes => new string[]
+        {
+            "Condition",
+            "Reader",
+            "Writer",
+            "Row Processor",
+        };
 
         private ICollection _ReaderResultsView;
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
@@ -104,6 +112,8 @@ namespace Expresso
         public ApplicationWorkflowStep CurrentSelectedWorkflowStep { get => _CurrentSelectedWorkflowStep; set => SetField(ref _CurrentSelectedWorkflowStep, value); }
         private ApplicationVariable _CurrentSelectedVariable;
         public ApplicationVariable CurrentSelectedVariable { get => _CurrentSelectedVariable; set => SetField(ref _CurrentSelectedVariable, value); }
+        private ApplicationExecutionConditional _CurrentSelectedCondition;
+        public ApplicationExecutionConditional CurrentSelectedCondition { get => _CurrentSelectedCondition; set => SetField(ref _CurrentSelectedCondition, value); }
         #endregion
 
         #region Syntax Highlighter
@@ -226,6 +236,46 @@ namespace Expresso
         }
         #endregion
 
+        #region Events - Conditionals
+        private void PickConditionSourceReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationExecutionConditional condition = button.DataContext as ApplicationExecutionConditional;
+
+            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            string[] readerNames = currentApplicationData.DataReaders
+                .Select(r => r.Name).ToArray();
+            if (readerNames.Length != 0)
+                condition.ReaderName = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "For binary conditions, readers that return non-zero rows are considered true; For switch conditions, the first element of the reader result will dictate subsequent step name.");
+        }
+        private void EvaluateCurrentConditionResultButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationExecutionConditional condition = button.DataContext as ApplicationExecutionConditional;
+
+            if (condition != null && !string.IsNullOrEmpty(condition.ReaderName))
+            {
+                var reader = ApplicationData.FindReaderWithName(condition.ReaderName);
+                if (reader != null)
+                {
+                    reader.EvaluateTransform(out ParcelDataGrid result, out _);
+                    switch (condition.Type)
+                    {
+                        case ConditionType.Binary:
+                            MessageBox.Show($"{result.RowCount >= 1}", "Evaluation Result");
+                            break;
+                        case ConditionType.Switch:
+                            MessageBox.Show($"{result.Columns[0][0]}", "Evaluation Result");
+                            break;
+                        default:
+                            throw new ArgumentNullException("Invalid condition type.");
+                    }
+                }
+                else MessageBox.Show($"Cannot find reader.", "Invalid Reader Name");
+            }
+        }
+        #endregion
+
         #region Events - Row Processors
         private void DeleteProcessorButton_Click(object sender, RoutedEventArgs e)
         {
@@ -344,7 +394,8 @@ namespace Expresso
 
             ApplicationWorkflowStep step = new ()
             {
-                Name = "Starting Step"
+                Name = "Starting Step",
+                ActionType = WorkflowActionTypes.First()
             };
             workflow.StartingSteps.Add(step);
         }
@@ -384,7 +435,8 @@ namespace Expresso
             {
                 ApplicationWorkflowStep nextStep = new ApplicationWorkflowStep()
                 {
-                    Name = "New"
+                    Name = "New",
+                    ActionType = WorkflowActionTypes.First()
                 };
                 step.NextSteps.Add(nextStep);
                 CurrentSelectedWorkflowStep = nextStep;
@@ -406,6 +458,38 @@ namespace Expresso
                         FindAndRemoveStep(childStep.NextSteps, stepToRemove);
                 }
             }
+        }
+        private void WorkflowStepPickActionItemButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflowStep step = button.DataContext as ApplicationWorkflowStep;
+
+            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            string[] entityNames = null;
+            switch (step.ActionType)
+            {
+                case "Condition":
+                    entityNames = currentApplicationData.Conditionals
+                        .Select(r => r.Name).ToArray();
+                    break;
+                case "Reader":
+                    entityNames = currentApplicationData.DataReaders
+                        .Select(r => r.Name).ToArray();
+                    break;
+                case "Writer":
+                    entityNames = currentApplicationData.OutputWriters
+                        .Select(r => r.Name).ToArray();
+                    break;
+                case "Row Processor":
+                    entityNames = currentApplicationData.Processors
+                        .Select(r => r.Name).ToArray();
+                    break;
+                default:
+                    throw new ArgumentException("Invalid Action Type.");
+            }
+
+            if (entityNames.Length != 0)
+                step.ActionItem = ComboChoiceDialog.Prompt($"Pick {step.ActionType}", $"Select {step.ActionType} to use:", entityNames.FirstOrDefault(), entityNames);
         }
         #endregion
 
@@ -475,7 +559,13 @@ namespace Expresso
         }
         private void MenuItemCreateCondition_Click(object sender, RoutedEventArgs e)
         {
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Condition;
 
+            ApplicationData.Conditionals.Add(new ApplicationExecutionConditional()
+            {
+                Name = "New Condition"
+            });
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Conditionals));
         }
         private void MenuItemCreateReader_Click(object sender, RoutedEventArgs e)
         {

@@ -61,9 +61,10 @@ namespace Expresso.Core
             writer.Write(data.Conditionals.Count);
             foreach (var condition in data.Conditionals)
             {
+                writer.Write(condition.Name);
                 writer.Write((byte)condition.Type);
-                writer.Write(condition.Specification);
-                writer.Write(condition.Parameter);
+                writer.Write(condition.Description);
+                writer.Write(condition.ReaderName);
             }
 
             writer.Write(data.DataReaders.Count);
@@ -170,9 +171,10 @@ namespace Expresso.Core
                 {
                     ApplicationExecutionConditional conditional = new()
                     {
-                        Type = (ApplicationExecutionConditional.ConditionType)reader.ReadByte(),
-                        Specification = reader.ReadString(),
-                        Parameter = reader.ReadString(),
+                        Name = reader.ReadString(),
+                        Type = (ConditionType)reader.ReadByte(),
+                        Description = reader.ReadString(),
+                        ReaderName = reader.ReadString(),
                     };
 
                     applicationData.Conditionals.Add(conditional);

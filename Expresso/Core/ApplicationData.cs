@@ -11,21 +11,23 @@ using static Expresso.Core.ApplicationExecutionConditional;
 
 namespace Expresso.Core
 {
+    public enum ConditionType
+    {
+        Binary,
+        Switch
+    }
     public class ApplicationExecutionConditional : BaseNotifyPropertyChanged
     {
-        public enum ConditionType
-        {
-            Binary,
-            Switch
-        }
 
+        private string _Name;
         private ConditionType _Type;
-        private string _Specification;
-        private string _Parameter;
+        private string _Description;
+        private string _ReaderName;
 
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
         public ConditionType Type { get => _Type; set => SetField(ref _Type, value); }
-        public string Specification { get => _Specification; set => SetField(ref _Specification, value); }
-        public string Parameter { get => _Parameter; set => SetField(ref _Parameter, value); }
+        public string Description { get => _Description; set => SetField(ref _Description, value); }
+        public string ReaderName { get => _ReaderName; set => SetField(ref _ReaderName, value); }
     }
     public class ApplicationWorkflowStep : BaseNotifyPropertyChanged
     {

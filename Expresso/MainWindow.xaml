@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib" 
         xmlns:conv="clr-namespace:Expresso.Converters"
         xmlns:core="clr-namespace:Expresso.Core"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -17,6 +18,12 @@
         <conv:ObjectToBooleanConverterInverted x:Key="ObjectToBooleanConverterInverted"></conv:ObjectToBooleanConverterInverted>
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
+
+        <ObjectDataProvider x:Key="ApplicationConditionTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:ConditionType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
 
         <Style TargetType="Control">
             <Setter Property="ToolTipService.ShowDuration" Value="6000"/>
@@ -190,7 +197,54 @@
                 </TabItem>
                 <!--Conditions Tab-->
                 <TabItem Header="Condition" Visibility="{Binding ApplicationData.Conditionals, Converter={StaticResource ObjectToVisibilityConverter}}">
-
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel Grid.Column="0" LastChildFill="True">
+                            <Label DockPanel.Dock="Top" Content="Conditions"/>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                                <Button Content="Add"/>
+                                <Button Content="Remove"/>
+                            </StackPanel>
+                            <ListView DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Conditionals}" SelectedItem="{Binding CurrentSelectedCondition}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <Label Content="{Binding Type}"/>
+                                            <Label Content="{Binding Name}" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </DockPanel>
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                        <StackPanel Grid.Column="2" DataContext="{Binding CurrentSelectedCondition}" Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}}">
+                            <Label Content="Condition Settings"/>
+                            <DockPanel>
+                                <Label Content="Name"/>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Label Content="Type"/>
+                                <ComboBox ItemsSource="{Binding Source={StaticResource ApplicationConditionTypes}}" SelectedItem="{Binding Type}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Label DockPanel.Dock="Left" Content="Reader Name"/>
+                                <Button DockPanel.Dock="Right" Content="Pick" Click="PickConditionSourceReaderButton_Click"/>
+                                <TextBox DockPanel.Dock="Left" Text="{Binding ReaderName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
+                            </DockPanel>
+                            <StackPanel>
+                                <Label DockPanel.Dock="Top" Content="Description"/>
+                                <TextBox DockPanel.Dock="Bottom" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" MinHeight="250"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <Button Content="Evaluate" Click="EvaluateCurrentConditionResultButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </TabItem>
                 <!--Reader Tab-->
                 <TabItem Header="Reader" Visibility="{Binding ApplicationData.DataReaders, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -578,7 +632,7 @@
                                         </DockPanel>
                                         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                                         <!--Workflow Step Properties Panel-->
-                                        <StackPanel Grid.Row="2" DataContext="{Binding CurrentSelectedWorkflowStep, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                        <StackPanel Grid.Row="2" DataContext="{Binding CurrentSelectedWorkflowStep, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}}">
                                             <Label Content="Step Properties" />
                                             <DockPanel>
                                                 <Label Content="Name"/>
@@ -586,10 +640,11 @@
                                             </DockPanel>
                                             <DockPanel>
                                                 <Label Content="Action"/>
-                                                <TextBox Text="{Binding ActionType, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <ComboBox ItemsSource="{Binding WorkflowActionTypes, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" SelectedValue="{Binding ActionType}"/>
                                             </DockPanel>
                                             <DockPanel>
                                                 <Label Content="Action"/>
+                                                <Button DockPanel.Dock="Right" Content="Pick" Click="WorkflowStepPickActionItemButton_Click"/>
                                                 <TextBox Text="{Binding ActionItem, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DockPanel>
                                         </StackPanel>
