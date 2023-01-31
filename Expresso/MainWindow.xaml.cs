@@ -201,6 +201,7 @@ namespace Expresso
                 ApplicationDataSerializer.Save(autoSavePath, ApplicationData, isAutoSave: true);
 
                 // In case no changes are made, don't create auto save file
+                // Remark-cz: For slightly faster implementation, we can compare directly in-memory streams instead of actually writing to file first
                 if (System.IO.File.Exists(CurrentFilePath) && CompareFileEquals(CurrentFilePath, autoSavePath))
                     System.IO.File.Delete(autoSavePath);
             }
