@@ -818,7 +818,7 @@
                     MouseLeave="HelpAboutPanel_MouseLeave">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Parcel"/>
+                        <Label Content="Expresso"/>
                         <Label Content="{x:Static main:Program.ProgramVersion}"/>
                         <Label Content=" - "/>
                         <Label Content="{x:Static main:Program.Nickname}"/>
@@ -830,6 +830,22 @@
                         <Label Content="Build No."/>
                         <Label Content="{x:Static main:Program.BuildID}"/>
                     </StackPanel>
+                    <TextBlock FontSize="12">
+                        <Run>V1 Features: </Run> <LineBreak/>
+                        • Variables <LineBreak/>
+                        • Conditions <LineBreak/>
+                        • Readers <LineBreak/>
+                        • Writers <LineBreak/>
+                        • Row Processors <LineBreak/>
+                        • Workflows <LineBreak/>
+                         <LineBreak/>
+                        <Run>V2 Features: </Run> <LineBreak/>
+                        • Column Operators <LineBreak/>
+                        • Visualization <LineBreak/>
+                         <LineBreak/>
+                        <Run>V3 Features: </Run> <LineBreak/>
+                        • Numerical Optimization <LineBreak/>
+                    </TextBlock>
                 </StackPanel>
             </Border>
         </Grid>
