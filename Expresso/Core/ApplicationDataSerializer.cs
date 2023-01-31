@@ -59,6 +59,16 @@ namespace Expresso.Core
             writer.Write(data.CreationTime.ToString("yyyy-MM-dd"));
             writer.Write(isAutoSave ? data.LastModifiedTime.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"));
 
+            writer.Write(data.Variables.Count);
+            foreach (ApplicationVariable variable in data.Variables)
+            {
+                writer.Write(variable.Name);
+                writer.Write((byte)variable.ValueType);
+                writer.Write((byte)variable.SourceType);
+                writer.Write(variable.Source);
+                writer.Write(variable.ArrayJoinSeparator);
+            }
+
             writer.Write(data.Conditionals.Count);
             foreach (var condition in data.Conditionals)
             {
@@ -90,15 +100,6 @@ namespace Expresso.Core
                 writer.Write(outputWriter.Name);
                 writer.Write(outputWriter.ServiceProvider);
                 outputWriter.Parameters.WriteToStream(writer);
-            }
-
-            writer.Write(data.Variables.Count);
-            foreach (ApplicationVariable variable in data.Variables)
-            {
-                writer.Write(variable.Name);
-                writer.Write((byte)variable.Type);
-                writer.Write(variable.Value);
-                writer.Write(variable.IsIterator);
             }
 
             writer.Write(data.Processors.Count);
@@ -168,6 +169,23 @@ namespace Expresso.Core
             };
 
             {
+                var variableCount = reader.ReadInt32();
+                for (int i = 0; i < variableCount; i++)
+                {
+                    ApplicationVariable variable = new()
+                    {
+                        Name = reader.ReadString(),
+                        ValueType = (VariableValueType)reader.ReadByte(),
+                        SourceType = (VariableSourceType)reader.ReadByte(),
+                        Source = reader.ReadString(),
+                        ArrayJoinSeparator = reader.ReadString(),
+                    };
+
+                    applicationData.Variables.Add(variable);
+                }
+            }
+
+            {
                 var conditionalCount = reader.ReadInt32();
                 for (int i = 0; i < conditionalCount; i++)
                 {
@@ -231,22 +249,6 @@ namespace Expresso.Core
 
                     outputWriter.Parameters = paramters;
                     applicationData.OutputWriters.Add(outputWriter);
-                }
-            }
-
-            {
-                var variableCount = reader.ReadInt32();
-                for (int i = 0; i < variableCount; i++)
-                {
-                    ApplicationVariable variable = new()
-                    {
-                        Name = reader.ReadString(),
-                        Type = (ApplicationVariable.VariableType)reader.ReadByte(),
-                        Value = reader.ReadString(),
-                        IsIterator = reader.ReadBoolean(),
-                    };
-
-                    applicationData.Variables.Add(variable);
                 }
             }
 

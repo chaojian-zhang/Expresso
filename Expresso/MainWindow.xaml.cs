@@ -175,7 +175,10 @@ namespace Expresso
         }
         private void VariablesAddVariableButton_Click(object sender, RoutedEventArgs e)
         {
-            CurrentSelectedVariable = new ApplicationVariable();
+            CurrentSelectedVariable = new ApplicationVariable()
+            {
+                Name = $"variable{ApplicationData.Variables.Count + 1}"
+            };
             ApplicationData.Variables.Add(CurrentSelectedVariable);
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
         }
@@ -230,6 +233,16 @@ namespace Expresso
                 ApplicationData = OpenFile(CurrentFilePath);
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
+        }
+        #endregion
+
+        #region Events - Variables
+        private void VariablePickSourceReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] readerNames = ApplicationData.DataReaders
+                .Select(r => r.Name).ToArray();
+            if (readerNames.Length != 0)
+                CurrentSelectedVariable.Source = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames);
         }
         #endregion
 
@@ -646,7 +659,10 @@ namespace Expresso
         {
             MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Variable;
 
-            CurrentSelectedVariable = new ApplicationVariable();
+            CurrentSelectedVariable = new ApplicationVariable()
+            {
+                Name = $"variable{ApplicationData.Variables.Count + 1}"
+            };
             ApplicationData.Variables.Add(CurrentSelectedVariable);
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
         }

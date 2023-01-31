@@ -9,6 +9,19 @@ namespace Expresso.Core
         Binary,
         Switch
     }
+    public enum VariableValueType
+    {
+        SingleValue,
+        MultiValueArray,
+        Iterator
+    }
+    public enum VariableSourceType
+    {
+        Fixed,
+        Reader,
+        CustomList
+    }
+
     public class ApplicationExecutionConditional : BaseNotifyPropertyChanged
     {
 
@@ -142,23 +155,17 @@ namespace Expresso.Core
     }
     public class ApplicationVariable: BaseNotifyPropertyChanged
     {
-        public enum VariableType
-        {
-            Fixed,
-            CustomString,
-            Integer,
-            PickFromReaderQuery
-        }
-
         private string _Name = string.Empty;
-        private VariableType _Type;
-        private string _Value = string.Empty;
-        private bool _IsIterator = false;
+        private VariableValueType _ValueType;
+        private VariableSourceType _SourceType;
+        private string _Source = string.Empty;
+        private string _ArrayJoinSeparator = ", ";
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
-        public VariableType Type { get => _Type; set => SetField(ref _Type, value); }
-        public string Value { get => _Value; set => SetField(ref _Value, value); }
-        public bool IsIterator { get => _IsIterator; set => SetField(ref _IsIterator, value); }
+        public VariableValueType ValueType { get => _ValueType; set => SetField(ref _ValueType, value); }
+        public VariableSourceType SourceType { get => _SourceType; set => SetField(ref _SourceType, value); }
+        public string Source { get => _Source; set => SetField(ref _Source, value); }
+        public string ArrayJoinSeparator { get => _ArrayJoinSeparator; set => SetField(ref _ArrayJoinSeparator, value); }
     }
     public class ApplicationData: BaseNotifyPropertyChanged
     {
