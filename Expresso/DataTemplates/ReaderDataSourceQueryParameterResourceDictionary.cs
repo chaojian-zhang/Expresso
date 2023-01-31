@@ -151,5 +151,41 @@ namespace Expresso.DataTemplates
             }
         }
         #endregion
+
+        #region Event Handlers - Program Output
+        private void ReaderDataQueryProgramOutputOpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ProgramOutputReaderDataQueryParameter parameter = button.DataContext as ProgramOutputReaderDataQueryParameter;
+
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "Executable Files (*.exe)|*.exe|All (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                parameter.FilePathOrName = openFileDialog.FileName;
+            }
+        }
+        private void ReaderProgramOutputEnvironmentVariableAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ProgramOutputReaderDataQueryParameter queryParameters = editor.DataContext as ProgramOutputReaderDataQueryParameter;
+            if (queryParameters != null)
+                editor.Text = queryParameters.EnvironmentVariables;
+        }
+        private void ReaderProgramOutputEnvironmentVariableAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ProgramOutputReaderDataQueryParameter queryParameters = editor.DataContext as ProgramOutputReaderDataQueryParameter;
+            editor.Text = queryParameters.EnvironmentVariables;
+        }
+        private void ReaderProgramOutputEnvironmentVariableAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ProgramOutputReaderDataQueryParameter queryParameters = editor.DataContext as ProgramOutputReaderDataQueryParameter;
+            queryParameters.EnvironmentVariables = editor.Text;
+        }
+        #endregion
     }
 }

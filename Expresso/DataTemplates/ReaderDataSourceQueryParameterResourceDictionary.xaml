@@ -193,4 +193,49 @@
             </DockPanel>
         </DockPanel>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type core:ProgramOutputReaderDataQueryParameter}">
+        <DockPanel LastChildFill="True">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="File Path or Name"/>
+                <Button DockPanel.Dock="Right" Content="Open" Click="ReaderDataQueryProgramOutputOpenFileButton_Click"/>
+                <TextBox DockPanel.Dock="Left" Text="{Binding FilePathOrName, UpdateSourceTrigger=PropertyChanged}" ToolTip="Enter path or name of program. If only name is given, the program must be available under current PATH. The standard output of the program will be treated as CSV. Make sure the program doesn't read from standard input."/>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Label Content="Arguments"/>
+                <TextBox Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+            <Grid DockPanel.Dock="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="7*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="3*" />
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0">
+                    <Label DockPanel.Dock="Top" Content="EnvironmentVariables"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True" ToolTip="Seperate each variable with new line. Example: NAME=VALUE"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True"
+                        Initialized="ReaderProgramOutputEnvironmentVariableAvalonTextEditor_Initialized"
+                        DataContextChanged="ReaderProgramOutputEnvironmentVariableAvalonTextEditor_DataContextChanged"
+                        TextChanged="ReaderProgramOutputEnvironmentVariableAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                <DockPanel Grid.Row="2">
+                    <Label DockPanel.Dock="Top" Content="Transform"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True"
+                        Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
+                        DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
+                        TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
 </ResourceDictionary>

@@ -15,6 +15,7 @@ using System.Text;
 using System.Security.Policy;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Expresso.Core
 {
@@ -650,6 +651,111 @@ namespace Expresso.Core
             if (!string.IsNullOrEmpty(URL))
                 builder.AppendLine($"URL: {URL}  ");
             builder.AppendLine($"Method: {Method}\n");
+            base.BuildMarkdown(builder);
+        }
+        #endregion
+    }
+
+    public sealed class ProgramOutputReaderDataQueryParameter : ReaderDataQueryParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Program Output";
+        #endregion
+
+        #region Base Property
+        private string _FilePathOrName = string.Empty;
+        private string _Arguments = string.Empty;
+        private string _EnvironmentVariables = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string FilePathOrName { get => _FilePathOrName; set => SetField(ref _FilePathOrName, value); }
+        public string Arguments { get => _Arguments; set => SetField(ref _Arguments, value); }
+        public string EnvironmentVariables { get => _EnvironmentVariables; set => SetField(ref _EnvironmentVariables, value); }
+        #endregion
+
+        #region Query Interface
+        public override string MakeQuery()
+        {
+            try
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = FilePathOrName,
+                        Arguments = Arguments,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+                foreach (var env in EnvironmentVariables
+                            .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .ToDictionary(line => line.Substring(0, line.IndexOf('=')), line => line.Substring(line.IndexOf('=') + 1)))
+                {
+                    process.StartInfo.EnvironmentVariables[env.Key] = env.Value;
+                }
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (!string.IsNullOrWhiteSpace(error))
+                    return $"Result,Message\nError,\"{error}\"";
+
+                string csv = output;
+                if (!string.IsNullOrWhiteSpace(Query))
+                {
+                    var current = ApplicationDataHelper.GetCurrentApplicationData();
+                    string tableName = current.FindReaderFromParameters(this).Name;
+                    return SQLiteHelper.TransformCSV(tableName, csv, Query, out _, out _);
+                }
+                else return csv;
+            }
+            catch (Exception e)
+            {
+                return $"Result,Message\nError,\"{e.Message}\"";
+            }
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(FilePathOrName);
+            writer.Write(Arguments);
+            writer.Write(EnvironmentVariables);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            FilePathOrName = reader.ReadString();
+            Arguments = reader.ReadString();
+            EnvironmentVariables = reader.ReadString();
+        }
+        #endregion
+
+        #region Script Exporting Interface
+        public override void BuildMarkdown(StringBuilder builder)
+        {
+            List<string> lines = new List<string>();
+            if (!string.IsNullOrEmpty(FilePathOrName))
+                lines.Add(FilePathOrName);
+            if (!string.IsNullOrEmpty(Arguments))
+                lines.Add(Arguments);
+            if (!string.IsNullOrEmpty(EnvironmentVariables))
+                lines.Add(EnvironmentVariables);
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (i == lines.Count - 1)
+                    builder.AppendLine($"{lines[i]}\n");
+                else
+                    builder.AppendLine($"{lines[i]}  ");
+            }
             base.BuildMarkdown(builder);
         }
         #endregion
