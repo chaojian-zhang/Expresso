@@ -159,6 +159,7 @@ namespace Expresso.Core
         {
             ApplicationData applicationData = new()
             {
+                FileVersion = reader.ReadString(),
                 Name = reader.ReadString(),
                 Description = reader.ReadString(),
                 Iteration = reader.ReadInt64(),

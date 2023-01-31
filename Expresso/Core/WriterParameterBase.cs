@@ -84,7 +84,8 @@ namespace Expresso.Core
                 if (reader != null)
                 {
                     reader.EvaluateTransform(out ParcelDataGrid readerOutput, out _);
-                    writerInputs.Add(readerOutput);
+                    if(readerOutput != null)
+                        writerInputs.Add(readerOutput);
                 }
             }
 
@@ -233,7 +234,7 @@ namespace Expresso.Core
         public override string PerformAction(List<ParcelDataGrid> overwriteInputs)
         {
             var writerInputs = FetchInputs(overwriteInputs, InputTableNames);
-            if (writerInputs.Count != 0)
+            if (writerInputs.Count != 0 || InputTableNames.Count == 0)
             {
                 try
                 {
@@ -251,7 +252,7 @@ namespace Expresso.Core
                     return "Error: " + e.Message;
                 }
             }
-            return "Cannot find input.";
+            return "Cannot find input or inputs evaluate to empty.";
         }
         #endregion
 
@@ -301,7 +302,7 @@ namespace Expresso.Core
         public override string PerformAction(List<ParcelDataGrid> overwriteInputs)
         {
             List<ParcelDataGrid> writerInputs = FetchInputs(overwriteInputs, InputTableNames);
-            if (writerInputs.Count != 0)
+            if (writerInputs.Count != 0 || InputTableNames.Count == 0)
             {
                 if (string.IsNullOrEmpty(Transform))
                     File.WriteAllText(FilePath, writerInputs.Last().ToCSV());
@@ -312,7 +313,7 @@ namespace Expresso.Core
                 }
                 return $"File written to {FilePath}";
             }
-            return "Cannot find input.";
+            return "Cannot find input or inputs evaluate to empty.";
         }
         #endregion
 
@@ -360,7 +361,7 @@ namespace Expresso.Core
         public override string PerformAction(List<ParcelDataGrid> overwriteInputs)
         {
             List<ParcelDataGrid> writerInputs = FetchInputs(overwriteInputs, InputTableNames);
-            if (writerInputs.Count != 0)
+            if (writerInputs.Count != 0 || InputTableNames.Count == 0)
             {
                 if (string.IsNullOrEmpty(Transform))
                     WriteResult(writerInputs);
@@ -371,7 +372,7 @@ namespace Expresso.Core
                 }
                 return $"File written to {FilePath}";
             }
-            return "Cannot find input.";
+            return "Cannot find input or inputs evaluate to empty.";
 
             void WriteResult(List<ParcelDataGrid> writerInputs)
             {

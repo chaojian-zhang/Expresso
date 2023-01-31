@@ -674,7 +674,22 @@
                                         <TreeView SelectedItemChanged="WorkflowTreeView_SelectedItemChanged" ItemsSource="{Binding StartingSteps}">
                                             <TreeView.Resources>
                                                 <HierarchicalDataTemplate DataType="{x:Type core:ApplicationWorkflowStep}" ItemsSource="{Binding NextSteps}">
-                                                    <TextBlock Text="{Binding Name}" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                        <Label Content=" [" Margin="0" Padding="0"/>
+                                                        <Label Content="{Binding ActionType}" VerticalAlignment="Center" Margin="0" Padding="0">
+                                                            <Label.Resources>
+                                                                <!--Deals with binding of non-string type-->
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="FontSize" Value="12"/>
+                                                                </Style>
+                                                            </Label.Resources>
+                                                        </Label>
+                                                        <Label Content="]" Margin="0" Padding="0"/>
+                                                        <Label Content=" [" Margin="0" Padding="0"/>
+                                                        <Label Content="{Binding ActionItem}" Margin="0" Padding="0"/>
+                                                        <Label Content="]" Margin="0" Padding="0"/>
+                                                    </StackPanel>
                                                 </HierarchicalDataTemplate>
                                             </TreeView.Resources>
                                         </TreeView>

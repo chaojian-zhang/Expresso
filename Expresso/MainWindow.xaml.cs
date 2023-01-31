@@ -284,7 +284,7 @@ namespace Expresso
                     switch (condition.Type)
                     {
                         case ConditionType.Binary:
-                            MessageBox.Show($"{result.RowCount >= 1}", "Evaluation Result");
+                            MessageBox.Show($"{result != null && result.RowCount >= 1}", "Evaluation Result");
                             break;
                         case ConditionType.Switch:
                             MessageBox.Show($"{result.Columns[0][0]}", "Evaluation Result");
