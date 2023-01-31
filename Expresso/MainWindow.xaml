@@ -8,6 +8,7 @@
         xmlns:conv="clr-namespace:Expresso.Converters"
         xmlns:core="clr-namespace:Expresso.Core"
         xmlns:main="clr-namespace:Expresso"
+        xmlns:comp="clr-namespace:Expresso.Components"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Width="1024" Height="768"
@@ -76,13 +77,22 @@
         <CommandBinding Command="New" CanExecute="FileNewCommand_CanExecute" Executed="FileNewCommand_Executed" />
         <CommandBinding Command="Open" CanExecute="FileOpenCommand_CanExecute" Executed="FileOpenCommand_Executed" />
         <CommandBinding Command="Save" CanExecute="FileSaveCommand_CanExecute" Executed="FileSaveCommand_Executed" />
+
+        <CommandBinding Command="comp:ExpressoCommands.CreateVariableCommand" CanExecute="CreateVariableCommand_CanExecute" Executed="CreateVariableCommand_Executed"/>
+        <CommandBinding Command="comp:ExpressoCommands.CreateConditionCommand" CanExecute="CreateConditionCommand_CanExecute" Executed="CreateConditionCommand_Executed"/>
+        <CommandBinding Command="comp:ExpressoCommands.CreateReaderCommand" CanExecute="CreateReaderCommand_CanExecute" Executed="CreateReaderCommand_Executed"/>
+        <CommandBinding Command="comp:ExpressoCommands.CreateWriterCommand" CanExecute="CreateWriterCommand_CanExecute" Executed="CreateWriterCommand_Executed"/>
+        <CommandBinding Command="comp:ExpressoCommands.CreateRowProcessorCommand" CanExecute="CreateRowProcessorCommand_CanExecute" Executed="CreateRowProcessorCommand_Executed"/>
+        <CommandBinding Command="comp:ExpressoCommands.CreateWorkflowCommand" CanExecute="CreateWorkflowCommand_CanExecute" Executed="CreateWorkflowCommand_Executed"/>
+        
+        <CommandBinding Command="comp:ExpressoCommands.RunEngineCommand" CanExecute="RunEngineCommand_CanExecute" Executed="RunEngineCommand_Executed"/>
     </Window.CommandBindings>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New..." Click="MenuItemFileNew_Click"/>
-                <MenuItem Header="_Open..." Click="MenuItemFileOpen_Click"/>
-                <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSave_Click"/>
+                <MenuItem Header="_New..." Command="New"/>
+                <MenuItem Header="_Open..." Command="Open"/>
+                <MenuItem Header="Save" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Command="Save"/>
                 <MenuItem Header="Save As..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}" Click="MenuItemFileSaveAs_Click"/>
                 <Separator/>
                 <MenuItem Header="Export CSV..." IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}"/>
@@ -93,15 +103,15 @@
                 <MenuItem Header="Exit"/>
             </MenuItem>
             <MenuItem Header="_Create" IsEnabled="{Binding CurrentFilePath,Converter={StaticResource ObjectToBooleanConverter}}">
-                <MenuItem Header="_Variable..." Click="MenuItemCreateVariable_Click"/>
-                <MenuItem Header="_Condition..." Click="MenuItemCreateCondition_Click"/>
-                <MenuItem Header="_Reader..." Click="MenuItemCreateReader_Click"/>
-                <MenuItem Header="_Writer..." Click="MenuItemCreateWriter_Click"/>
-                <MenuItem Header="_Row Processor..." Click="MenuItemCreateProcessor_Click"/>
-                <MenuItem Header="Work_flow..." Click="MenuItemCreateWorkflow_Click"/>
+                <MenuItem Header="_Variable..." Command="comp:ExpressoCommands.CreateVariableCommand"/>
+                <MenuItem Header="_Condition..." Command="comp:ExpressoCommands.CreateConditionCommand"/>
+                <MenuItem Header="_Reader..." Command="comp:ExpressoCommands.CreateReaderCommand"/>
+                <MenuItem Header="_Writer..." Command="comp:ExpressoCommands.CreateWriterCommand"/>
+                <MenuItem Header="_Row Processor..." Command="comp:ExpressoCommands.CreateRowProcessorCommand"/>
+                <MenuItem Header="Work_flow..." Command="comp:ExpressoCommands.CreateWorkflowCommand"/>
             </MenuItem>
             <MenuItem Header="_Engine">
-                <MenuItem Header="Run..." Click="MenuItemEngineRun_Click"/>
+                <MenuItem Header="Run..." Command="comp:ExpressoCommands.RunEngineCommand"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="_About" Click="MenuItemHelpAbout_Click"/>
@@ -444,7 +454,11 @@
                                                          TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                                          SpellCheck.IsEnabled="True"/>
                                             </DockPanel>
-                                            <Button Content="Delete" Click="DeleteReaderButton_Click"/>
+                                            <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                                                <Button Content="Delete" Click="DeleteReaderButton_Click"/>
+                                                <Button Content="Export" Click="ExportReaderButton_Click"/>
+                                                <Button Content="Add" Click="MenuItemCreateReader_Click"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
                                 </Grid>
@@ -806,6 +820,11 @@
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Parcel"/>
                         <Label Content="{x:Static main:Program.ProgramVersion}"/>
+                        <Label Content=" - "/>
+                        <Label Content="{x:Static main:Program.Nickname}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <Label Content="{x:Static main:Program.Catchphrase}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Build No."/>

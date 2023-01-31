@@ -69,7 +69,7 @@ namespace Expresso.Core
         public static void PopulateTable(this SqliteConnection connection, ParcelDataGrid table)
         {
             SqliteCommand cmd = connection.CreateCommand();
-            cmd.CommandText = $"CREATE TABLE '{table.TableName}'({string.Join(',', table.Columns.Select(c => $"'{c.Header}'"))})";
+            cmd.CommandText = $"CREATE TABLE '{table.TableName}'({string.Join(',', table.Columns.Select(c => $"\"{c.Header}\""))})";
             cmd.ExecuteNonQuery();
 
             InMemorySQLIte.InsertDbData(connection, table.TableName, table);

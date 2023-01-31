@@ -23,7 +23,7 @@ namespace Expresso.PopUps
         }
 
         #region Construction
-        public PromptDialog(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null)
+        public PromptDialog(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null, string alternativeOkButtonLabel = null, string alternativeCancelButtonLabel = null)
         {
             InitializeComponent();
             Loaded += new RoutedEventHandler(PromptDialogLoaded);
@@ -42,6 +42,11 @@ namespace Expresso.PopUps
                 ExplanationText.Text = furtherExplanation;
                 ExplanationText.Visibility = Visibility.Visible;
             }
+
+            if (!string.IsNullOrEmpty(alternativeOkButtonLabel))
+                OkButton.Content = "_" + alternativeOkButtonLabel;
+            if (!string.IsNullOrEmpty(alternativeCancelButtonLabel))
+                CancelButton.Content = "_" + alternativeCancelButtonLabel;
         }
         #endregion
 
@@ -80,9 +85,9 @@ namespace Expresso.PopUps
         #endregion
 
         #region Interface Method
-        public static string Prompt(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null)
+        public static string Prompt(string question, string title, string defaultValue = "", InputType inputType = InputType.Text, string furtherExplanation = null, string alternativeOkButtonLabel = null, string alternativeCancelButtonLabel = null)
         {
-            PromptDialog inst = new(question, title, defaultValue, inputType, furtherExplanation);
+            PromptDialog inst = new(question, title, defaultValue, inputType, furtherExplanation, alternativeOkButtonLabel, alternativeCancelButtonLabel);
             inst.ShowDialog();
             if (inst.DialogResult == true)
                 return inst.ResponseText;

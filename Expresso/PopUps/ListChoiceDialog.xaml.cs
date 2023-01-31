@@ -3,20 +3,20 @@ using System.Windows.Input;
 
 namespace Expresso.PopUps
 {
-    public partial class ComboChoiceDialog : Window
+    public partial class ListChoiceDialog : Window
     {
         #region Construction
-        public ComboChoiceDialog(string title, string text, string defaultValue, string[] options, string furtherExplanation = null, string alternativeOkButtonLabel = null, string alternativeCancelButtonLabel = null)
+        public ListChoiceDialog(string title, string text, string defaultValue, string[] options, string furtherExplanation = null, string alternativeOkButtonLabel = null, string alternativeCancelButtonLabel = null)
         {
             InitializeComponent();
-            Loaded += new RoutedEventHandler(ComboChoiceDialogLoaded);
+            Loaded += new RoutedEventHandler(ListChoiceDialogLoaded);
 
             DisplayText.Text = text;
             Title = title;
 
             foreach (var option in options)
-                OptionComboBox.Items.Add(option);
-            OptionComboBox.SelectedValue = defaultValue;
+                OptionsListBox.Items.Add(option);
+            OptionsListBox.SelectedValue = defaultValue;
 
             if (!string.IsNullOrEmpty(furtherExplanation))
             {
@@ -32,13 +32,13 @@ namespace Expresso.PopUps
         #endregion
 
         #region Properties
-        public string ResponseText => OptionComboBox.SelectedValue as string;
+        public string ResponseText => OptionsListBox.SelectedValue as string;
         #endregion
 
         #region Events
-        void ComboChoiceDialogLoaded(object sender, RoutedEventArgs e)
+        void ListChoiceDialogLoaded(object sender, RoutedEventArgs e)
         {
-            OptionComboBox.Focus();
+            OptionsListBox.Focus();
         }
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
@@ -53,7 +53,7 @@ namespace Expresso.PopUps
         #region Interface Method
         public static string Prompt(string title, string text, string defaultValue, string[] options, string furtherExplanation = null, string alternativeOkButtonLabel = null, string alternativeCancelButtonLabel = null)
         {
-            ComboChoiceDialog inst = new(title, text, defaultValue, options, furtherExplanation, alternativeOkButtonLabel, alternativeCancelButtonLabel);
+            ListChoiceDialog inst = new(title, text, defaultValue, options, furtherExplanation, alternativeOkButtonLabel, alternativeCancelButtonLabel);
             inst.ShowDialog();
             if (inst.DialogResult == true)
                 return inst.ResponseText;

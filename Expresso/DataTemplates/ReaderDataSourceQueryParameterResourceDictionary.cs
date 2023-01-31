@@ -1,9 +1,13 @@
-﻿using Expresso.Core;
+﻿using Expresso.Components;
+using Expresso.Core;
 using Expresso.PopUps;
 using ICSharpCode.AvalonEdit;
+using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -53,6 +57,28 @@ namespace Expresso.DataTemplates
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
                 parameter.ReaderName = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "Notice you cannot pick readers that references the current reader.");
+        }
+        #endregion
+
+        #region Event Handlers - SQLite
+        private void ReaderDataQuerySQLiteShowAvailableTablesButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            SQLiteReaderDataQueryParameter parameter = button.DataContext as SQLiteReaderDataQueryParameter;
+
+            if (System.IO.File.Exists(parameter.FilePath))
+            {
+                using SqliteConnection SqliteConnection = new SqliteConnection($"Data Source={parameter.FilePath}");
+                SqliteConnection.Open();
+                var dataTable = new DataTable();
+                dataTable.Load(new SqliteCommand("SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name", SqliteConnection).ExecuteReader());
+                SqliteConnection.Close();
+                string[] tableNames = dataTable.Rows.Select(r => r[0].ToString()).ToArray();
+
+                string response = ListChoiceDialog.Prompt("Preview Tables", "Click \"Copy Name\" to copy selected table", tableNames.FirstOrDefault(), tableNames, null, "Copy Name");
+                if (response != null)
+                    Clipboard.SetText(response);
+            }
         }
         private void ReaderDataQuerySQLiteTypeOpenFileButton_Click(object sender, RoutedEventArgs e)
         {

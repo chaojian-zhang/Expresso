@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="PopUps\ListChoiceDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="PopUps\ComboChoiceDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

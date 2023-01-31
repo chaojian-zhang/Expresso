@@ -100,7 +100,7 @@ namespace Expresso.Components
         public void Import(IEnumerable<ICsvLine> csvLines, string tableName, out DataTable dataTable)
         {
             SqliteCommand cmd = DB.CreateCommand();
-            cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', csvLines.First().Headers.Select(c => $"'{c}'"))})";
+            cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', csvLines.First().Headers.Select(c => $"\"{c}\""))})";
             cmd.ExecuteNonQuery();
 
             InsertDbData(DB, tableName, new ParcelDataGrid(csvLines));
@@ -127,7 +127,7 @@ namespace Expresso.Components
         public void Import(ParcelDataGrid table, string tableName)
         {
             SqliteCommand cmd = DB.CreateCommand();
-            cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', table.Columns.Select(c => $"'{c.Header}'"))})";
+            cmd.CommandText = $"CREATE TABLE '{tableName}'({string.Join(',', table.Columns.Select(c => $"\"{c.Header}\""))})";
             cmd.ExecuteNonQuery();
 
             InsertDbData(DB, tableName, table);

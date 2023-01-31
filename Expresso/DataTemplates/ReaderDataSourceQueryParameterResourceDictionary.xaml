@@ -47,12 +47,18 @@
     <DataTemplate DataType="{x:Type core:MicrosoftAnalysisServiceDataQueryParameter}">
         <DockPanel LastChildFill="True">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Label Content="DSN"/>
-                <TextBox Text="{Binding ConnectionString, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Connection String"/>
+                <TextBox Text="{Binding ConnectionString, UpdateSourceTrigger=PropertyChanged}" ToolTip="Enter the complete connection string for Microsoft Analysis Service. Notice this generally requires specific protocol version."/>
             </DockPanel>
-            <DockPanel DockPanel.Dock="Top" Height="250">
-                <Label DockPanel.Dock="Top" Content="Query"/>
-                <avalonEdit:TextEditor 
+            <Grid DockPanel.Dock="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="7*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="3*" />
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0">
+                    <Label DockPanel.Dock="Top" Content="Query"/>
+                    <avalonEdit:TextEditor 
                     DockPanel.Dock="Bottom" Margin="5"
                     BorderThickness="2" BorderBrush="Beige"
                     ShowLineNumbers="True"
@@ -61,19 +67,21 @@
                     Initialized="ReaderDataSourceQueryAvalonTextEditor_Initialized"
                     DataContextChanged="ReaderDataSourceQueryAvalonTextEditor_DataContextChanged"
                     TextChanged="ReaderDataSourceQueryAvalonTextEditor_OnTextChanged"/>
-            </DockPanel>
-            <DockPanel DockPanel.Dock="Bottom">
-                <Label DockPanel.Dock="Top" Content="Transform"/>
-                <avalonEdit:TextEditor 
-                    DockPanel.Dock="Bottom" Margin="5"
-                    BorderThickness="2" BorderBrush="Beige"
-                    ShowLineNumbers="True"
-                    SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
-                    FontSize="10pt" FontFamily="Consolas" WordWrap="True"
-                    Initialized="ReaderAnalysisServiceTransformAvalonTextEditor_Initialized"
-                    DataContextChanged="ReaderAnalysisServiceTransformAvalonTextEditor_DataContextChanged"
-                    TextChanged="ReaderAnalysisServiceTransformAvalonTextEditor_OnTextChanged"/>
-            </DockPanel>
+                </DockPanel>
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                <DockPanel Grid.Row="2">
+                    <Label DockPanel.Dock="Top" Content="Transform"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True" ToolTip="Perform an immediate transform using SQL on MDX query result."
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True"
+                        Initialized="ReaderAnalysisServiceTransformAvalonTextEditor_Initialized"
+                        DataContextChanged="ReaderAnalysisServiceTransformAvalonTextEditor_DataContextChanged"
+                        TextChanged="ReaderAnalysisServiceTransformAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
         </DockPanel>
     </DataTemplate>
     <DataTemplate DataType="{x:Type core:CSVReaderDataQueryParameter}">
@@ -123,7 +131,10 @@
                 <TextBox DockPanel.Dock="Left" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>
             <DockPanel>
-                <Label DockPanel.Dock="Top" Content="Query"/>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Label Content="Query"/>
+                    <Button Content="↳" ToolTip="View available table names." Background="Transparent" BorderThickness="0" Padding="0" Width="18" Margin="0" Click="ReaderDataQuerySQLiteShowAvailableTablesButton_Click"/>
+                </StackPanel>
                 <avalonEdit:TextEditor 
                     DockPanel.Dock="Bottom" Margin="5"
                     BorderThickness="2" BorderBrush="Beige"

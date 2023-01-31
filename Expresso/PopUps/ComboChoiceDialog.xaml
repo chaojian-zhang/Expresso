@@ -20,8 +20,8 @@
         <TextBlock Name="DisplayText" Margin="5"/>
         <ComboBox Name="OptionComboBox"/>
         <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Right">
-            <Button Content="_Ok" IsDefault="True" Margin="5" Name="btnOk" Click="OkButton_Click" />
-            <Button Content="_Cancel" IsCancel="True" Margin="5" Name="btnCancel" Click="CancelBUtton_Click" />
+            <Button Content="_Ok" IsDefault="True" Margin="5" Name="OkButton" Click="OkButton_Click" />
+            <Button Content="_Cancel" IsCancel="True" Margin="5" Name="CancelButton" Click="CancelBUtton_Click" />
         </StackPanel>
         <TextBlock Name="ExplanationText" Margin="5" Visibility="Collapsed"/>
     </StackPanel>

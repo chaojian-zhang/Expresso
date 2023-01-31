@@ -17,6 +17,7 @@ using System.Collections;
 using System.Windows.Controls;
 using Expresso.PopUps;
 using System.Text;
+using System.Reflection.Metadata;
 
 namespace Expresso
 {
@@ -151,61 +152,6 @@ namespace Expresso
         }
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
             => MenuItemFileOpen_Click(null, null);
-        private void DeleteReaderButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
-
-            if (ApplicationData.DataReaders.Remove(reader))
-                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.DataReaders));
-
-            if (ApplicationData.DataReaders.Count == 0)
-                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
-        }
-        private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
-
-            var newQuery = new ApplicationDataQuery()
-            {
-                Name = $"Query{reader.DataQueries.Count + 1}",
-                ServiceProvider = ReaderDataServiceProviderNames.First()
-            };
-            reader.DataQueries.Add(newQuery);
-            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
-            newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
-        }
-        private void DeleteDataQueryButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.Tag as ApplicationDataReader;
-            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-
-            reader.DataQueries.Remove(query);
-            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
-        }
-        private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
-            
-            string resultCSV = query.Parameters.MakeQuery();
-            ResultPreview = resultCSV.CSVToConsoleTable();
-            ReaderResultsView = resultCSV.CSVToDataView();
-        }
-        private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
-
-            if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
-            {
-                string resultCSV = reader.EvaluateTransform(out _, out _);
-                ResultPreview = resultCSV.CSVToConsoleTable();
-                ReaderResultsView = resultCSV.CSVToDataView();
-            }
-        }
         private void WriterTestButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -294,6 +240,84 @@ namespace Expresso
                     }
                 }
                 else MessageBox.Show($"Cannot find reader.", "Invalid Reader Name");
+            }
+        }
+        #endregion
+
+        #region Events - Readers
+        private void ExportReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            string csv = reader.EvaluateTransform(out _, out _);
+            if (!string.IsNullOrEmpty(csv))
+            {
+                SaveFileDialog saveFileDialog = new()
+                {
+                    Filter = "CSV (*.csv)|*.csv|All (*.*)|*.*",
+                    AddExtension = true,
+                    Title = "Choose location to save file"
+                };
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    System.IO.File.WriteAllText(saveFileDialog.FileName, csv);
+                }
+            }
+        }
+        private void DeleteReaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            if (ApplicationData.DataReaders.Remove(reader))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.DataReaders));
+
+            if (ApplicationData.DataReaders.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
+        private void AddDataQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            var newQuery = new ApplicationDataQuery()
+            {
+                Name = $"Query{reader.DataQueries.Count + 1}",
+                ServiceProvider = ReaderDataServiceProviderNames.First()
+            };
+            reader.DataQueries.Add(newQuery);
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+            newQuery.NotifyPropertyChanged(nameof(ApplicationDataQuery.Parameters));
+        }
+        private void DeleteDataQueryButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.Tag as ApplicationDataReader;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+
+            reader.DataQueries.Remove(query);
+            reader.NotifyPropertyChanged(nameof(ApplicationDataReader.DataQueries));
+        }
+        private void ReaderQuerySubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataQuery query = button.DataContext as ApplicationDataQuery;
+
+            string resultCSV = query.Parameters.MakeQuery();
+            ResultPreview = resultCSV.CSVToConsoleTable();
+            ReaderResultsView = resultCSV.CSVToDataView();
+        }
+        private void ReaderTransformSubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationDataReader reader = button.DataContext as ApplicationDataReader;
+
+            if (reader != null && !string.IsNullOrWhiteSpace(reader.Transform))
+            {
+                string resultCSV = reader.EvaluateTransform(out _, out _);
+                ResultPreview = resultCSV.CSVToConsoleTable();
+                ReaderResultsView = resultCSV.CSVToDataView();
             }
         }
         #endregion
@@ -682,6 +706,36 @@ namespace Expresso
             => MenuItemFileSave_Click(null, null);
         private void FileSaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
             => e.CanExecute = CurrentFilePath != null;
+
+        private void CreateVariableCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateVariableCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateVariable_Click(null, null);
+        private void CreateConditionCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateConditionCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateCondition_Click(null, null);
+        private void CreateReaderCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateReaderCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateReader_Click(null, null);
+        private void CreateWriterCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateWriterCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateWriter_Click(null, null);
+        private void CreateRowProcessorCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateRowProcessorCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateProcessor_Click(null, null);
+        private void CreateWorkflowCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+            => e.CanExecute = CurrentFilePath != null;
+        private void CreateWorkflowCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemCreateWorkflow_Click(null, null);
+
+        private void RunEngineCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+            => MenuItemEngineRun_Click(null, null);
+        private void RunEngineCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e) 
+            => e.CanExecute = CurrentFilePath != null && ApplicationData.Workflows.Count > 0;
         #endregion
 
         #region Data Binding

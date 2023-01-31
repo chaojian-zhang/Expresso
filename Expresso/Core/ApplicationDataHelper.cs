@@ -62,11 +62,11 @@ namespace Expresso.Core
             string resultCSV = null;
             try
             {
-                var query = reader.Transform;
-                if (string.IsNullOrEmpty(query))
-                    query = $"select * from {reader.DataQueries.Last().Name}";
+                var transformQuery = reader.Transform;
+                if (string.IsNullOrEmpty(transformQuery))
+                    transformQuery = $"select * from {reader.DataQueries.Last().Name}";
 
-                dataGrid = intermediateData.ProcessDataGrids(query, out table);
+                dataGrid = intermediateData.ProcessDataGrids(transformQuery, out table);
                 dataGrid.TableName = table.TableName = reader.Name;
                 resultCSV = dataGrid.ToCSV();
             }
