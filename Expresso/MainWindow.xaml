@@ -146,7 +146,12 @@
                 <!--Welcome Tab-->
                 <TabItem Header="Welcome">
                     <Grid>
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="8*" />
+                            <ColumnDefinition Width="7" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock TextAlignment="Center" Foreground="Red">
                                 <Run>This software is still in development; Backup/Export often in case of crash.</Run>
@@ -165,26 +170,28 @@
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
-                        <Border x:Name="DocumentPropertiesPanel" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                        <Border x:Name="DocumentPropertiesPanel" 
+                                Grid.Column="2"
                                 BorderThickness="1" BorderBrush="LightGray" 
-                                Margin="4" Padding="5" Visibility="Collapsed"
+                                Padding="5"
                                 CornerRadius="2" Background="LightBlue">
                             <StackPanel>
                                 <Label Content="Document Properties"/>
-                                <StackPanel Orientation="Horizontal">
+                                <DockPanel>
                                     <Label Content="Name" Width="70"/>
-                                    <TextBox Text="{Binding ApplicationData.Name, UpdateSourceTrigger=PropertyChanged}" Width="160"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Text="{Binding ApplicationData.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                </DockPanel>
+                                <DockPanel>
                                     <Label Content="Description" Width="70"/>
-                                    <TextBox Text="{Binding ApplicationData.Description, UpdateSourceTrigger=PropertyChanged}" Width="160"
+                                    <TextBox Text="{Binding ApplicationData.Description, UpdateSourceTrigger=PropertyChanged}"
                                          Height="250"
                                          TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
                                          SpellCheck.IsEnabled="True"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
+                                </DockPanel>
+                                <DockPanel>
                                     <Label Content="Iteration" Width="100"/>
-                                    <Label Content="{Binding ApplicationData.Iteration}" Width="120">
+                                    <Label Content="{Binding ApplicationData.Iteration}">
                                         <Label.Resources>
                                             <!--Deals with binding of non-string type-->
                                             <Style TargetType="TextBlock">
@@ -192,10 +199,10 @@
                                             </Style>
                                         </Label.Resources>
                                     </Label>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
+                                </DockPanel>
+                                <DockPanel>
                                     <Label Content="Creation Time" Width="100"/>
-                                    <Label Content="{Binding ApplicationData.CreationTime}" Width="120">
+                                    <Label Content="{Binding ApplicationData.CreationTime}">
                                         <Label.Resources>
                                             <!--Deals with binding of non-string type-->
                                             <Style TargetType="TextBlock">
@@ -203,10 +210,9 @@
                                             </Style>
                                         </Label.Resources>
                                     </Label>
-                                </StackPanel>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
-                        <ToggleButton HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Padding="10" Content="Document Properties" Click="ToggleDocumentPropertiesButton_Click"/>
                     </Grid>
                 </TabItem>
                 <!--Variable Tab-->

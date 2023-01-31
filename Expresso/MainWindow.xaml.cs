@@ -133,12 +133,6 @@ namespace Expresso
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
         }
-        private void ToggleDocumentPropertiesButton_Click(object sender, RoutedEventArgs e)
-        {
-            DocumentPropertiesPanel.Visibility = (DocumentPropertiesPanel.Visibility == Visibility.Visible)
-                ? Visibility.Collapsed
-                : Visibility.Visible;
-        }
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e)
         {
             HelpAboutPanel.Visibility = (HelpAboutPanel.Visibility == Visibility.Visible)
