@@ -50,6 +50,10 @@ namespace Expresso.Core
         public string Query { get => _Query; set => SetField(ref _Query, value); }
         #endregion
 
+        #region Accessor
+        public string QueryInterpolated => Query.InterpolateVariables();
+        #endregion
+
         #region Static Metadata Properties
         public static string DisplayName => "Base Query";
         #endregion
@@ -99,15 +103,19 @@ namespace Expresso.Core
         public string DSN { get => _DSN; set => SetField(ref _DSN, value); }
         #endregion
 
+        #region Accessor
+        public string DSNInterpolated => DSN.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
             try
             {
-                var odbcConnection = new OdbcConnection($"DSN={DSN}");
+                var odbcConnection = new OdbcConnection($"DSN={DSNInterpolated}");
                 odbcConnection.Open();
                 var dataTable = new DataTable();
-                dataTable.Load(new OdbcCommand(Query, odbcConnection).ExecuteReader());
+                dataTable.Load(new OdbcCommand(QueryInterpolated, odbcConnection).ExecuteReader());
                 odbcConnection.Close();
                 return dataTable.ToCSV();
             }
@@ -157,14 +165,19 @@ namespace Expresso.Core
         public string Transform { get => _Transform; set => SetField(ref _Transform, value); }
         #endregion
 
+        #region Accessor
+        public string ConnectionStringInterpolated => ConnectionString.InterpolateVariables();
+        public string TransformInterpolated => Transform.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
             try
             {
-                using AdomdConnection conn = new(ConnectionString);
+                using AdomdConnection conn = new(ConnectionStringInterpolated);
                 conn.Open();
-                using AdomdCommand cmd = new(Query.TrimEnd(';'), conn);
+                using AdomdCommand cmd = new(QueryInterpolated.TrimEnd(';'), conn);
                 string mdxResult = cmd.ExecuteCellSet().CellSetToTableNew().ToCSVFull();
                 conn.Close();
 
@@ -172,7 +185,7 @@ namespace Expresso.Core
                 {
                     var current = ApplicationDataHelper.GetCurrentApplicationData();
                     string tableName = current.FindReaderDataQueryFromParameters(this).Name;
-                    return SQLiteHelper.TransformCSV(tableName, mdxResult, Transform, out _, out _);
+                    return SQLiteHelper.TransformCSV(tableName, mdxResult, TransformInterpolated, out _, out _);
                 }
                 else return mdxResult;
             }
@@ -222,16 +235,20 @@ namespace Expresso.Core
         public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
         #endregion
 
+        #region Accessor
+        public string FilePathInterpolated => FilePath.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
-            string csv = File.ReadAllText(_FilePath);
+            string csv = File.ReadAllText(FilePathInterpolated);
 
             if (!string.IsNullOrWhiteSpace(Query))
             {
                 var current = ApplicationDataHelper.GetCurrentApplicationData();
                 string tableName = current.FindReaderFromParameters(this).Name;
-                return SQLiteHelper.TransformCSV(tableName, csv, Query, out _, out _);
+                return SQLiteHelper.TransformCSV(tableName, csv, QueryInterpolated, out _, out _);
             }
             else return csv;
         }
@@ -276,10 +293,15 @@ namespace Expresso.Core
         public string Worksheet { get => _Worksheet; set => SetField(ref _Worksheet, value); }
         #endregion
 
+        #region Accessor
+        public string FilePathInterpolated => FilePath.InterpolateVariables();
+        public string WorksheetInterpolated => Worksheet.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
-            using FileStream stream = File.Open(FilePath, FileMode.Open, FileAccess.Read);
+            using FileStream stream = File.Open(FilePathInterpolated, FileMode.Open, FileAccess.Read);
             using IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream);
             DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration()
             {
@@ -292,7 +314,7 @@ namespace Expresso.Core
             if (string.IsNullOrWhiteSpace(Worksheet))
                 return result.Tables[0].ToCSV();
             else 
-                return result.Tables[Worksheet].ToCSV();
+                return result.Tables[WorksheetInterpolated].ToCSV();
         }
         #endregion
 
@@ -337,16 +359,21 @@ namespace Expresso.Core
         public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
         #endregion
 
+
+        #region Accessor
+        public string FilePathInterpolated => FilePath.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
             try
             {
-                using SqliteConnection SqliteConnection = new SqliteConnection($"Data Source={FilePath}");
+                using SqliteConnection SqliteConnection = new SqliteConnection($"Data Source={FilePathInterpolated}");
                 SqliteConnection.Open();
 
                 var dataTable = new DataTable();
-                dataTable.Load(new SqliteCommand(Query.TrimEnd(';'), SqliteConnection).ExecuteReader());
+                dataTable.Load(new SqliteCommand(QueryInterpolated.TrimEnd(';'), SqliteConnection).ExecuteReader());
 
                 SqliteConnection.Close();
                 return dataTable.ToCSV();
@@ -395,10 +422,14 @@ namespace Expresso.Core
         public string SpecificVariable { get => _SpecificVariable; set => SetField(ref _SpecificVariable, value); }
         #endregion
 
+        #region Accessor
+        public string SpecificVariableInterpolated => SpecificVariable.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
-            if (string.IsNullOrWhiteSpace(SpecificVariable))
+            if (string.IsNullOrWhiteSpace(SpecificVariableInterpolated))
             {
                 string[] headers = new string[]
                 {
@@ -418,7 +449,7 @@ namespace Expresso.Core
             }
             else
             {
-                string variable = Environment.GetEnvironmentVariable(SpecificVariable);
+                string variable = Environment.GetEnvironmentVariable(SpecificVariableInterpolated);
                 if (variable == null)
                     return "Environment Variable,Value";
 
@@ -481,6 +512,10 @@ namespace Expresso.Core
         public string FolderPath { get => _FolderPath; set => SetField(ref _FolderPath, value); }
         #endregion
 
+        #region Accessor
+        public string FolderPathInterpolated => FolderPath.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
@@ -493,7 +528,7 @@ namespace Expresso.Core
             };
 
             List<string[]> lines = new();
-            foreach (FileSystemInfo item in new DirectoryInfo(FolderPath).EnumerateFileSystemInfos())
+            foreach (FileSystemInfo item in new DirectoryInfo(FolderPathInterpolated).EnumerateFileSystemInfos())
                 lines.Add(new string[]
                 {
                     item.FullName,
@@ -542,11 +577,15 @@ namespace Expresso.Core
         public string ReaderName { get => _ReaderName; set => SetField(ref _ReaderName, value); }
         #endregion
 
+        #region Accessor
+        public string ReaderNameInterpolated => ReaderName.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
             var current = ApplicationDataHelper.GetCurrentApplicationData();
-            var reader = current.FindReaderWithName(ReaderName);
+            var reader = current.FindReaderWithName(ReaderNameInterpolated);
             if (reader != null)
                 return reader.EvaluateTransform(out _, out _);
             else return $"Result,Message\nError,Cannot find reader.";
@@ -591,6 +630,10 @@ namespace Expresso.Core
         public SupportedWebRequestMethod Method { get => _Method; set => SetField(ref _Method, value); }
         #endregion
 
+        #region Accessor
+        public string URLInterpolated => URL.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
@@ -604,8 +647,8 @@ namespace Expresso.Core
                 string responseBody = string.Empty;
                 responseBody = Method switch
                 {
-                    SupportedWebRequestMethod.GET => await MakeGETRequest(URL),
-                    SupportedWebRequestMethod.POST => await MakePOSTRequest(URL, Query),
+                    SupportedWebRequestMethod.GET => await MakeGETRequest(URLInterpolated),
+                    SupportedWebRequestMethod.POST => await MakePOSTRequest(URLInterpolated, Query),
                     _ => throw new ArgumentException($"Invalid method type: {Method}"),
                 };
                 return responseBody;
@@ -674,6 +717,12 @@ namespace Expresso.Core
         public string EnvironmentVariables { get => _EnvironmentVariables; set => SetField(ref _EnvironmentVariables, value); }
         #endregion
 
+        #region Accessor
+        public string FilePathOrNameInterpolated => FilePathOrName.InterpolateVariables();
+        public string ArgumentsInterpolated => Arguments.InterpolateVariables();
+        public string EnvironmentVariablesInterpolated => EnvironmentVariables.InterpolateVariables();
+        #endregion
+
         #region Query Interface
         public override string MakeQuery()
         {
@@ -683,15 +732,15 @@ namespace Expresso.Core
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = FilePathOrName,
-                        Arguments = Arguments,
+                        FileName = FilePathOrNameInterpolated,
+                        Arguments = ArgumentsInterpolated,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
                         CreateNoWindow = true
                     }
                 };
-                foreach (var env in EnvironmentVariables
+                foreach (var env in EnvironmentVariablesInterpolated
                             .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                             .ToDictionary(line => line.Substring(0, line.IndexOf('=')), line => line.Substring(line.IndexOf('=') + 1)))
                 {
@@ -710,7 +759,7 @@ namespace Expresso.Core
                 {
                     var current = ApplicationDataHelper.GetCurrentApplicationData();
                     string tableName = current.FindReaderFromParameters(this).Name;
-                    return SQLiteHelper.TransformCSV(tableName, csv, Query, out _, out _);
+                    return SQLiteHelper.TransformCSV(tableName, csv, QueryInterpolated, out _, out _);
                 }
                 else return csv;
             }

@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -46,6 +47,50 @@ namespace Expresso.Core
         #endregion
 
         #region Evaluators
+        public static string InterpolateVariables(this string templateString)
+        {
+            var applicationData = GetCurrentApplicationData();
+            var variables = applicationData.Variables;
+
+            return Regex.Replace(templateString, "${(.+?)}", match =>
+            {
+                string variableName = match.Groups[1].Value;
+                ApplicationVariable variable = variables.FirstOrDefault(v => v.Name == variableName);
+                if (variable != null)
+                    return variable.EvaluateVariable().First();
+                else return string.Empty;
+            });
+        }
+        public static string[] EvaluateVariable(this ApplicationVariable variable)
+        {
+            switch (variable.ValueType)
+            {
+                case VariableValueType.SingleValue:
+                    return new string[] { variable.DefaultValue };
+                case VariableValueType.MultiValueArray:
+                case VariableValueType.Iterator:
+                    switch (variable.SourceType)
+                    {
+                        case VariableSourceType.Fixed:
+                        case VariableSourceType.CustomList:
+                            return variable.Source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        case VariableSourceType.Reader:
+                            var reader = GetCurrentApplicationData().FindReaderWithName(variable.Source);
+                            if (reader != null)
+                            {
+                                reader.EvaluateTransform(out ParcelDataGrid data, out _);
+                                if (data != null)
+                                    return data.Columns[0].GetDataAs<string>().ToArray();
+                                else return new string[] { };
+                            }
+                            else throw new ApplicationException($"Cannot find reader: {variable.Source}");
+                        default:
+                            throw new ArgumentException($"Invalid source type: {variable.SourceType}.");
+                    }
+                default:
+                    throw new ArgumentException($"Invalid variable type: {variable.ValueType}.");
+            }
+        }
         public static string EvaluateTransform(this ApplicationDataReader reader, out ParcelDataGrid dataGrid, out DataTable table)
         {
             List<ParcelDataGrid> intermediateData = new();
