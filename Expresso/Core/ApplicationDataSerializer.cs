@@ -133,6 +133,7 @@ namespace Expresso.Core
                     writer.Write(input.AsName);
                 }
                 writer.Write(step.Action);
+                step.Parameters.WriteToStream(writer);
                 writer.Write(step.Outputs.Count);
                 foreach (var output in step.Outputs)
                 {
@@ -310,6 +311,7 @@ namespace Expresso.Core
                 }
                 {
                     step.Action = reader.ReadString();
+                    step.Parameters.ReadFromStream(reader);
                 }
                 {
                     int outputsCount = reader.ReadInt32();

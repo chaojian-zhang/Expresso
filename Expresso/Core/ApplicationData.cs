@@ -62,13 +62,26 @@ namespace Expresso.Core
         private string _Name = string.Empty;
         private ObservableCollection<ParameterMapping> _Inputs = new();
         private string _Action = string.Empty;
+        private RowProcessorParameterBase _Parameters = null;
         private ObservableCollection<ParameterMapping> _Outputs = new();
         private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
         private bool _IsFinalOutput = false;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
-        public string Action { get => _Action; set => SetField(ref _Action, value); }
+        public string Action
+        {
+            get => _Action;
+            set
+            {
+                if (_Action != value)
+                    _Parameters = (RowProcessorParameterBase)Activator.CreateInstance(RowProcessorParameterBase.GetServiceProviders()[value]);
+
+                SetField(ref _Action, value);
+                NotifyPropertyChanged(nameof(Parameters));
+            }
+        }
+        public RowProcessorParameterBase Parameters { get => _Parameters; set => SetField(ref _Parameters, value); }
         public ObservableCollection<ParameterMapping> Outputs { get => _Outputs; set => SetField(ref _Outputs, value); }
         public bool IsFinalOutput { get => _IsFinalOutput; set => SetField(ref _IsFinalOutput, value); }
         public ObservableCollection<ApplicationProcessorStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }

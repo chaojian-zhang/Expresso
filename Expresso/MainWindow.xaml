@@ -606,8 +606,7 @@
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
                                                 <Label Content="Data Service Provider"/>
-                                                <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                                </ComboBox>
+                                                <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
                                             </StackPanel>
                                         </StackPanel>
                                         <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
@@ -641,6 +640,7 @@
                                         <RowDefinition Height="5" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
+                                    <!--Steps Hierarchy-->
                                     <Grid Grid.Row="0" >
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -648,6 +648,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <DockPanel Grid.Column="0" LastChildFill="True">
+                                            <!--Step Hierarchy Editing Operations-->
                                             <StackPanel DockPanel.Dock="Bottom"
                                                     HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                                     Orientation="Horizontal">
@@ -664,6 +665,7 @@
                                                 <Button Content="Test" Click="TestProcessorButton_Click" 
                                                         Background="SteelBlue" Foreground="White" BorderBrush="DarkBlue" BorderThickness="2" />
                                             </StackPanel>
+                                            <!--Steps Tree View-->
                                             <Label DockPanel.Dock="Top" Content="Processor Steps"/>
                                             <TreeView SelectedItemChanged="ProcessorTreeView_SelectedItemChanged" ItemsSource="{Binding StartingSteps}">
                                                 <TreeView.Resources>
@@ -674,8 +676,9 @@
                                             </TreeView>
                                         </DockPanel>
                                         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                                        <!--Processor Properties-->
                                         <DockPanel Grid.Column="2">
-                                            <Label DockPanel.Dock="Top" Content="Processor"/>
+                                            <Label DockPanel.Dock="Top" Content="Processor Properties" Style="{StaticResource ContextKey}"/>
                                             <DockPanel DockPanel.Dock="Top"  LastChildFill="True" Margin="2">
                                                 <Label Content="Name"/>
                                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
@@ -689,6 +692,7 @@
                                         </DockPanel>
                                     </Grid>
                                     <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
+                                    <!--Step Details-->
                                     <TabControl Grid.Row="2" ItemsSource="{Binding ListingOfAllSteps}" Tag="{Binding}" SelectedIndex="{Binding ProcessorStepTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                         <TabControl.ItemTemplate>
                                             <DataTemplate>
@@ -698,6 +702,7 @@
                                         <TabControl.ContentTemplate>
                                             <DataTemplate>
                                                 <DockPanel LastChildFill="True">
+                                                    <!--Step Editing Operations-->
                                                     <StackPanel DockPanel.Dock="Top">
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
                                                             <Button Content="Add Input" Click="AddProcessorStepInputButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
@@ -709,9 +714,12 @@
                                                             <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                     </StackPanel>
+                                                    <!--Step Configurations-->
                                                     <DockPanel LastChildFill="True">
-                                                        <DockPanel DockPanel.Dock="Left">
-                                                            <ListView ItemsSource="{Binding Inputs}">
+                                                        <!--Step Inputs-->
+                                                        <DockPanel DockPanel.Dock="Left" Visibility="{Binding Inputs, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                            <Label DockPanel.Dock="Top" Content="Inputs"/>
+                                                            <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding Inputs}">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <StackPanel Orientation="Horizontal">
@@ -723,8 +731,10 @@
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
                                                         </DockPanel>
-                                                        <DockPanel DockPanel.Dock="Right">
-                                                            <ListView ItemsSource="{Binding Outputs}">
+                                                        <!--Step Outputs-->
+                                                        <DockPanel DockPanel.Dock="Right" Visibility="{Binding Inputs, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                            <Label DockPanel.Dock="Top" Content="Outputs"/>
+                                                            <ListView DockPanel.Dock="Bottom" ItemsSource="{Binding Outputs}">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <StackPanel Orientation="Horizontal">
@@ -736,15 +746,33 @@
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
                                                         </DockPanel>
+                                                        <!--Step Action-->
                                                         <DockPanel DockPanel.Dock="Right">
-                                                            <Grid>
-                                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                    <Label Content="Name"/>
-                                                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
-                                                                    <Label Content="Action"/>
-                                                                    <TextBox Text="{Binding Action, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
+                                                            <DockPanel LastChildFill="True" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                <Border DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top"
+                                                                        BorderThickness="2" BorderBrush="LightGray">
+                                                                    <StackPanel Orientation="Vertical" Margin="4">
+                                                                        <Label Content="Name"/>
+                                                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="128"/>
+                                                                        <Label Content="Action"/>
+                                                                        <ComboBox SelectedValue="{Binding Action}" MinWidth="128" ItemsSource="{Binding RowProcessorActionNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center"
+                                                                            Margin="8">
+                                                                    <Label Content="{Binding Action}" Margin="0" Padding="0"/>
+                                                                    <Label Content=" Configuration" Margin="0" Padding="0"/>
                                                                 </StackPanel>
-                                                            </Grid>
+                                                                <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
+                                                                    <ContentPresenter.Resources>
+                                                                        <ResourceDictionary>
+                                                                            <ResourceDictionary.MergedDictionaries>
+                                                                                <ResourceDictionary Source="DataTemplates\RowProcessorActionParameterResourceDictionary.xaml"/>
+                                                                            </ResourceDictionary.MergedDictionaries>
+                                                                        </ResourceDictionary>
+                                                                    </ContentPresenter.Resources>
+                                                                </ContentPresenter>
+                                                            </DockPanel>
                                                         </DockPanel>
                                                     </DockPanel>
                                                 </DockPanel>

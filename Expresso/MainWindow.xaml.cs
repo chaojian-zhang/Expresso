@@ -74,6 +74,7 @@ namespace Expresso
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
         public static string[] ReaderDataServiceProviderNames => ReaderDataQueryParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] WriterDataServiceProviderNames => WriterParameterBase.GetServiceProviders().Keys.ToArray();
+        public static string[] RowProcessorActionNames => RowProcessorParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] WorkflowActionTypes => new string[]
         {
             "Condition",
@@ -373,7 +374,8 @@ namespace Expresso
 
             ApplicationProcessorStep step = new ApplicationProcessorStep()
             {
-                Name = "Root"
+                Name = "Root",
+                Action = RowProcessorActionNames.First()
             };
             processor.StartingSteps.Add(step);
             processor.ListingOfAllSteps.Add(step);

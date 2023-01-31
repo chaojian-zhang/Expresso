@@ -59,6 +59,11 @@ namespace Expresso.Core
         public string Replacement { get => _Replacement; set => SetField(ref _Replacement, value); }
         #endregion
 
+        #region Accessor
+        public string PatternInterpolated => Pattern.InterpolateVariables();
+        public string ReplacementInterpolated => Replacement.InterpolateVariables();
+        #endregion
+
         #region Serialization Interface
         public override void WriteToStream(BinaryWriter writer)
         {

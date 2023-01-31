@@ -359,7 +359,6 @@ namespace Expresso.Core
         public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
         #endregion
 
-
         #region Accessor
         public string FilePathInterpolated => FilePath.InterpolateVariables();
         #endregion
