@@ -648,7 +648,7 @@ namespace Expresso.Core
                 responseBody = Method switch
                 {
                     SupportedWebRequestMethod.GET => await MakeGETRequest(URLInterpolated),
-                    SupportedWebRequestMethod.POST => await MakePOSTRequest(URLInterpolated, Query),
+                    SupportedWebRequestMethod.POST => await MakePOSTRequest(URLInterpolated, QueryInterpolated),
                     _ => throw new ArgumentException($"Invalid method type: {Method}"),
                 };
                 return responseBody;

@@ -42,17 +42,6 @@ namespace Expresso
         }
         #endregion
 
-        #region Properties
-        /// <summary>
-        /// For caching remote data queries, used by specific data query readers
-        /// </summary>
-        private static DatabaseContext GlobalDatabaseContext = new DatabaseContext();
-        /// <summary>
-        /// For general management of file-scope readers
-        /// </summary>
-        private DatabaseContext SessionDatabaseContext;
-        #endregion
-
         #region Handlers
         private enum MainTabControlTabIndexMapping
         {
@@ -93,14 +82,13 @@ namespace Expresso
 
         private ICollection _ReaderResultsView;
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
-        private ApplicationData _ApplicationData;
         public ApplicationData ApplicationData 
         { 
-            get => _ApplicationData; 
+            get => ApplicationDataHelper.GetCurrentApplicationData(); 
             set
             {
-                SetField(ref _ApplicationData, value);
-                SessionDatabaseContext = new DatabaseContext();
+                ApplicationDataHelper.SetCurrentApplicationData(value);
+                NotifyPropertyChanged(nameof(ApplicationData));
             }
         }
         private ApplicationWorkflowStep _CurrentSelectedWorkflowStep;

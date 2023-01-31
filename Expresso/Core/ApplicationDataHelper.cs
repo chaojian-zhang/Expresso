@@ -8,16 +8,32 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using YamlDotNet.Core.Tokens;
 
 namespace Expresso.Core
 {
     internal static class ApplicationDataHelper
     {
+        #region Singleton
+        /// <summary>
+        /// For caching remote data queries, used by specific data query readers
+        /// </summary>
+        private static DatabaseContext _GlobalDatabaseContext = new DatabaseContext();
+        /// <summary>
+        /// For general management of file-scope readers
+        /// </summary>
+        private static DatabaseContext _SessionDatabaseContext;
+
+        private static ApplicationData _ApplicationData;
+        #endregion
+
         #region Getters
         public static ApplicationData GetCurrentApplicationData()
+            => _ApplicationData;
+        public static void SetCurrentApplicationData(ApplicationData value)
         {
-            MainWindow window = Application.Current.MainWindow as MainWindow;
-            return window.ApplicationData;
+            _ApplicationData = value;
+            _SessionDatabaseContext = new DatabaseContext();
         }
         #endregion
 
@@ -52,7 +68,7 @@ namespace Expresso.Core
             var applicationData = GetCurrentApplicationData();
             var variables = applicationData.Variables;
 
-            return Regex.Replace(templateString, "${(.+?)}", match =>
+            return Regex.Replace(templateString, @"\${(.+?)}", match =>
             {
                 string variableName = match.Groups[1].Value;
                 ApplicationVariable variable = variables.FirstOrDefault(v => v.Name == variableName);
