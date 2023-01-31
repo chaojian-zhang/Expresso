@@ -160,12 +160,14 @@ namespace Expresso.Core
         private VariableSourceType _SourceType;
         private string _Source = string.Empty;
         private string _ArrayJoinSeparator = ", ";
+        private string _DefaultValue = string.Empty;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public VariableValueType ValueType { get => _ValueType; set => SetField(ref _ValueType, value); }
         public VariableSourceType SourceType { get => _SourceType; set => SetField(ref _SourceType, value); }
         public string Source { get => _Source; set => SetField(ref _Source, value); }
         public string ArrayJoinSeparator { get => _ArrayJoinSeparator; set => SetField(ref _ArrayJoinSeparator, value); }
+        public string DefaultValue { get => _DefaultValue; set => SetField(ref _DefaultValue, value); }
     }
     public class ApplicationData: BaseNotifyPropertyChanged
     {

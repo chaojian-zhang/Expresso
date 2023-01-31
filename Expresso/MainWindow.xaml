@@ -264,7 +264,7 @@
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
                                     <DockPanel DockPanel.Dock="Top">
-                                        <Label Content="Name" Width="70"/>
+                                        <Label Content="Name" Width="100"/>
                                         <TextBox Text="{Binding CurrentSelectedVariable.Name, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
                                     <DockPanel DockPanel.Dock="Top">
@@ -296,17 +296,16 @@
                                             <Style TargetType="DockPanel">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.SourceType}" Value="Fixed">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding CurrentSelectedVariable.SourceType}" Value="CustomList">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </DockPanel.Style>
-                                        <Label Content="Source" Width="70"/>
-                                        <TextBox Text="{Binding CurrentSelectedVariable.Source, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <Label Content="Source" Width="100"/>
+                                        <TextBox 
+                                            Text="{Binding CurrentSelectedVariable.Source, UpdateSourceTrigger=PropertyChanged}"
+                                            AcceptsReturn="True" AcceptsTab="True" Height="200" VerticalScrollBarVisibility="Auto"/>
                                     </DockPanel>
                                     <DockPanel DockPanel.Dock="Top">
                                         <DockPanel.Style>
@@ -319,7 +318,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </DockPanel.Style>
-                                        <Label Content="Source" Width="70"/>
+                                        <Label Content="Source" Width="100"/>
                                         <Button DockPanel.Dock="Right" Content="Pick" Click="VariablePickSourceReaderButton_Click"/>
                                         <TextBox Text="{Binding CurrentSelectedVariable.Source, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
@@ -336,6 +335,10 @@
                                         </DockPanel.Style>
                                         <Label Content="Array Join Seperator" Width="120"/>
                                         <TextBox Text="{Binding CurrentSelectedVariable.ArrayJoinSeparator, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DockPanel>
+                                    <DockPanel DockPanel.Dock="Top">
+                                        <Label Content="Default Value" Width="100"/>
+                                        <TextBox Text="{Binding CurrentSelectedVariable.DefaultValue, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
                                 </StackPanel>
                                 <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>

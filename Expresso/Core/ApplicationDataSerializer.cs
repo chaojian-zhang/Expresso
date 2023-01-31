@@ -67,6 +67,7 @@ namespace Expresso.Core
                 writer.Write((byte)variable.SourceType);
                 writer.Write(variable.Source);
                 writer.Write(variable.ArrayJoinSeparator);
+                writer.Write(variable.DefaultValue);
             }
 
             writer.Write(data.Conditionals.Count);
@@ -179,6 +180,7 @@ namespace Expresso.Core
                         SourceType = (VariableSourceType)reader.ReadByte(),
                         Source = reader.ReadString(),
                         ArrayJoinSeparator = reader.ReadString(),
+                        DefaultValue = reader.ReadString()
                     };
 
                     applicationData.Variables.Add(variable);
