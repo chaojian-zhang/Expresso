@@ -954,6 +954,14 @@
                         <Run>V3 Features: </Run> <LineBreak/>
                         • Numerical Optimization <LineBreak/>
                     </TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Created by Charles Zhang, 2023"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock>
+                            Main page: <Hyperlink NavigateUri="https://charles-zhang.itch.io/Expresso" RequestNavigate="AboutPageHyperlink_RequestNavigate">Itch.io</Hyperlink> 
+                        </TextBlock>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Grid>

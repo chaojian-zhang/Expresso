@@ -18,6 +18,8 @@ using System.Windows.Controls;
 using Expresso.PopUps;
 using System.Text;
 using System.Reflection.Metadata;
+using System.Diagnostics;
+using System.Windows.Documents;
 
 namespace Expresso
 {
@@ -66,7 +68,7 @@ namespace Expresso
 
         private string _CurrentFilePath;
         public string CurrentFilePath { get => _CurrentFilePath; set => SetField(ref _CurrentFilePath, value); }
-        private string _WindowTitle = "Expressor (Idle)";
+        private string _WindowTitle = "Expresso (Idle)";
         public string WindowTitle { get => _WindowTitle; set => SetField(ref _WindowTitle, value); }
         private string _ResultPreview;
         public string ResultPreview { get => _ResultPreview; set => SetField(ref _ResultPreview, value); }
@@ -566,6 +568,19 @@ namespace Expresso
 
             if (entityNames.Length != 0)
                 step.ActionItem = ComboChoiceDialog.Prompt($"Pick {step.ActionType}", $"Select {step.ActionType} to use:", entityNames.FirstOrDefault(), entityNames);
+        }
+        #endregion
+
+        #region Events - About Panel
+        private void AboutPageHyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Hyperlink hyperLink = (Hyperlink)sender;
+            string navigateUri = hyperLink.NavigateUri.ToString();
+            Process.Start(new ProcessStartInfo(navigateUri)
+            {
+                UseShellExecute = true
+            });
+            e.Handled = true;
         }
         #endregion
 
