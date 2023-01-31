@@ -137,8 +137,17 @@ namespace Expresso
             DocumentPropertiesPanel.Visibility = (DocumentPropertiesPanel.Visibility == Visibility.Visible)
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-
-
+        }
+        private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e)
+        {
+            HelpAboutPanel.Visibility = (HelpAboutPanel.Visibility == Visibility.Visible)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+        private void HelpAboutPanel_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (HelpAboutPanel.Visibility == Visibility.Visible)
+                HelpAboutPanel.Visibility = Visibility.Collapsed;
         }
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
             => MenuItemFileOpen_Click(null, null);

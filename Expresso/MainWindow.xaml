@@ -7,6 +7,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib" 
         xmlns:conv="clr-namespace:Expresso.Converters"
         xmlns:core="clr-namespace:Expresso.Core"
+        xmlns:main="clr-namespace:Expresso"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Width="1024" Height="768"
@@ -103,7 +104,7 @@
                 <MenuItem Header="Run..." Click="MenuItemEngineRun_Click"/>
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="_About"/>
+                <MenuItem Header="_About" Click="MenuItemHelpAbout_Click"/>
             </MenuItem>
             <MenuItem Header="|" IsEnabled="False" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToVisibilityConverter}}"/>
             <MenuItem Header="Save" Visibility="{Binding CurrentFilePath,Converter={StaticResource ObjectToVisibilityConverter}}" Click="MenuItemFileSave_Click"/>
@@ -780,6 +781,23 @@
                     </Grid>
                 </TabItem>
             </TabControl>
+            <Border x:Name="HelpAboutPanel" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                BorderThickness="1" BorderBrush="LightYellow" 
+                                Margin="4" Padding="5" Visibility="Collapsed"
+                                Width="600" Height="400"
+                                CornerRadius="2" Background="LightBlue"
+                    MouseLeave="HelpAboutPanel_MouseLeave">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Parcel"/>
+                        <Label Content="{x:Static main:Program.ProgramVersion}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Build No."/>
+                        <Label Content="{x:Static main:Program.BuildID}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
     </DockPanel>
 </Window>
