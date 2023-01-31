@@ -122,17 +122,6 @@ namespace Expresso
         #endregion
 
         #region Events
-        private void Window_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-                CurrentFilePath = files[0];
-                ApplicationData = OpenFile(CurrentFilePath);
-                WindowTitle = $"Expresso - {CurrentFilePath}";
-            }
-        }
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e)
         {
             HelpAboutPanel.Visibility = (HelpAboutPanel.Visibility == Visibility.Visible)
@@ -195,6 +184,51 @@ namespace Expresso
             ApplicationData.Variables.Remove(CurrentSelectedVariable);
             CurrentSelectedVariable = null;
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Variables));
+        }
+        #endregion
+
+        #region Events - Window
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (CurrentFilePath != null)
+            {
+                string folder = System.IO.Path.GetDirectoryName(CurrentFilePath);
+                string name = System.IO.Path.GetFileNameWithoutExtension(CurrentFilePath);
+                string extension = System.IO.Path.GetExtension(CurrentFilePath);
+                string autoSaveName = $"{name}_AutoSave";
+
+                string autoSavePath = System.IO.Path.Combine(folder, $"{autoSaveName}{extension}");
+                ApplicationDataSerializer.Save(autoSavePath, ApplicationData, isAutoSave: true);
+
+                // In case no changes are made, don't create auto save file
+                if (System.IO.File.Exists(CurrentFilePath) && CompareFileEquals(CurrentFilePath, autoSavePath))
+                    System.IO.File.Delete(autoSavePath);
+            }
+
+            static bool CompareFileEquals(string path1, string path2)
+            {
+                byte[] file1 = System.IO.File.ReadAllBytes(path1);
+                byte[] file2 = System.IO.File.ReadAllBytes(path2);
+                if (file1.Length == file2.Length)
+                {
+                    for (int i = 0; i < file1.Length; i++)
+                        if (file1[i] != file2[i])
+                            return false;
+                    return true;
+                }
+                return false;
+            }
+        }
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                CurrentFilePath = files[0];
+                ApplicationData = OpenFile(CurrentFilePath);
+                WindowTitle = $"Expresso - {CurrentFilePath}";
+            }
         }
         #endregion
 

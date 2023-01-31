@@ -17,22 +17,22 @@ namespace Expresso.Core
     public static class ApplicationDataSerializer
     {
         #region Methods
-        public static void Save(string filepath, ApplicationData data, bool compressed = true)
+        public static void Save(string filepath, ApplicationData data, bool compressed = true, bool isAutoSave = false)
         {
             if (compressed)
             {
                 using LZ4EncoderStream stream = LZ4Stream.Encode(File.Create(filepath));
                 using BinaryWriter writer = new(stream, Encoding.UTF8, false);
-                WriteToStream(writer, data);
+                WriteToStream(writer, data, isAutoSave);
             }
             else
             {
                 using FileStream stream = File.Open(filepath, FileMode.Create);
                 using BinaryWriter writer = new(stream, Encoding.UTF8, false);
-                WriteToStream(writer, data);
+                WriteToStream(writer, data, isAutoSave);
             }
         }
-        public static ApplicationData Load(string filepath, bool compressed = true)
+        public static ApplicationData Load(string filepath, bool compressed = true, bool isAutoSave = false)
         {
             if (compressed)
             {
@@ -50,14 +50,14 @@ namespace Expresso.Core
         #endregion
 
         #region Routines
-        private static void WriteToStream(BinaryWriter writer, ApplicationData data)
+        private static void WriteToStream(BinaryWriter writer, ApplicationData data, bool isAutoSave = false)
         {
             writer.Write(data.FileVersion);
             writer.Write(data.Name);
             writer.Write(data.Description);
-            writer.Write(++data.Iteration);
+            writer.Write(isAutoSave ? data.Iteration : ++data.Iteration);
             writer.Write(data.CreationTime.ToString("yyyy-MM-dd"));
-            writer.Write(DateTime.Now.ToString("yyyy-MM-dd"));
+            writer.Write(isAutoSave ? data.LastModifiedTime.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"));
 
             writer.Write(data.Conditionals.Count);
             foreach (var condition in data.Conditionals)
