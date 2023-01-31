@@ -296,6 +296,12 @@
                                             <Style TargetType="DockPanel">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.SourceType}" Value="Fixed">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="SingleValue">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding CurrentSelectedVariable.SourceType}" Value="CustomList">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                     </DataTrigger>
@@ -325,10 +331,10 @@
                                     <DockPanel DockPanel.Dock="Top">
                                         <DockPanel.Style>
                                             <Style TargetType="DockPanel">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Setter Property="Visibility" Value="Visible"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="MultiValueArray">
-                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="SingleValue">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -337,6 +343,16 @@
                                         <TextBox Text="{Binding CurrentSelectedVariable.ArrayJoinSeparator, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
                                     <DockPanel DockPanel.Dock="Top">
+                                        <DockPanel.Style>
+                                            <Style TargetType="DockPanel">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="SingleValue">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DockPanel.Style>
                                         <Label Content="Default Value" Width="100"/>
                                         <TextBox Text="{Binding CurrentSelectedVariable.DefaultValue, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
