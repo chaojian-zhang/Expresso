@@ -2,9 +2,12 @@
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:core="clr-namespace:Expresso.Core"
-                    xmlns:service="clr-namespace:Expresso.Services"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib" 
                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit">
-    <ObjectDataProvider x:Key="WebRequestMethodTypes" ObjectType="{x:Type service:EnumProvider}" MethodName="GetWebRequestMethodTypes">
+    <ObjectDataProvider x:Key="WebRequestMethodTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="core:SupportedWebRequestMethod" />
+        </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
 
     <DataTemplate DataType="{x:Type core:ReaderDataQueryParameterBase}">
@@ -153,7 +156,15 @@
         <DockPanel LastChildFill="True">
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
                 <Label DockPanel.Dock="Left" Content="URL"/>
-                <ComboBox DockPanel.Dock="Right"  ItemsSource="{Binding Source={StaticResource WebRequestMethodTypes}}" SelectedItem="{Binding Method}" Width="64"/>
+                <ComboBox DockPanel.Dock="Right"  ItemsSource="{Binding Source={StaticResource WebRequestMethodTypes}}" SelectedItem="{Binding Method}" Width="64">
+                    <ComboBox.Resources>
+                        <!--Deals with binding of non-string type-->
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Foreground" Value="DarkBlue"/>
+                        </Style>
+                    </ComboBox.Resources>
+                </ComboBox>
                 <Label DockPanel.Dock="Right" Content="Method"/>
                 <TextBox DockPanel.Dock="Left" Text="{Binding URL, UpdateSourceTrigger=PropertyChanged}"/>
             </DockPanel>

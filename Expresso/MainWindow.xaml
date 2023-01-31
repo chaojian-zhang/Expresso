@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Expresso"
-        xmlns:service="clr-namespace:Expresso.Services"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib" 
         xmlns:conv="clr-namespace:Expresso.Converters"
         xmlns:core="clr-namespace:Expresso.Core"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -20,7 +20,10 @@
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
 
-        <ObjectDataProvider x:Key="ApplicationConditionTypes" ObjectType="{x:Type service:EnumProvider}" MethodName="GetConditionTypes">
+        <ObjectDataProvider x:Key="ApplicationConditionTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:ConditionType" />
+            </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
         <Style TargetType="Control">
@@ -131,24 +134,68 @@
                 </TabControl.ItemContainerStyle>
                 <!--Welcome Tab-->
                 <TabItem Header="Welcome">
-                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock TextAlignment="Center" Foreground="Red">
+                    <Grid>
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock TextAlignment="Center" Foreground="Red">
                                 <Run>This software is still in development; Backup/Export often in case of crash.</Run>
-                            </TextBlock>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
-                                <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Create Variable" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateVariable_Click"/>
+                                    <Button Content="Create Condition" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateCondition_Click"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Create Reader" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateReader_Click"/>
+                                    <Button Content="Create Writer" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWriter_Click"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Create Row Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
+                                    <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="Create Reader" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateReader_Click"/>
-                                <Button Content="Create Writer" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWriter_Click"/>
+                        </Grid>
+                        <Border x:Name="DocumentPropertiesPanel" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                BorderThickness="1" BorderBrush="LightGray" 
+                                Margin="4" Padding="5" Visibility="Collapsed"
+                                CornerRadius="2" Background="LightBlue">
+                            <StackPanel>
+                                <Label Content="Document Properties"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Name" Width="70"/>
+                                    <TextBox Text="{Binding ApplicationData.Name, UpdateSourceTrigger=PropertyChanged}" Width="160"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Description" Width="70"/>
+                                    <TextBox Text="{Binding ApplicationData.Description, UpdateSourceTrigger=PropertyChanged}" Width="160"
+                                         Height="250"
+                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                         SpellCheck.IsEnabled="True"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Iteration" Width="100"/>
+                                    <Label Content="{Binding ApplicationData.Iteration}" Width="120">
+                                        <Label.Resources>
+                                            <!--Deals with binding of non-string type-->
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontSize" Value="12"/>
+                                            </Style>
+                                        </Label.Resources>
+                                    </Label>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Creation Time" Width="100"/>
+                                    <Label Content="{Binding ApplicationData.CreationTime}" Width="120">
+                                        <Label.Resources>
+                                            <!--Deals with binding of non-string type-->
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontSize" Value="12"/>
+                                            </Style>
+                                        </Label.Resources>
+                                    </Label>
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Content="Create Row Processor" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateProcessor_Click"/>
-                                <Button Content="Create Workflow" Style="{StaticResource WelcomeButton}" Click="MenuItemCreateWorkflow_Click"/>
-                            </StackPanel>
-                        </StackPanel>
+                        </Border>
+                        <ToggleButton HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Padding="10" Content="Document Properties" Click="ToggleDocumentPropertiesButton_Click"/>
                     </Grid>
                 </TabItem>
                 <!--Variable Tab-->
@@ -217,7 +264,15 @@
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <DockPanel>
-                                            <Label Content="{Binding Type}"/>
+                                            <Label Content="{Binding Type}">
+                                                <Label.Resources>
+                                                    <!--Deals with binding of non-string type-->
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="FontSize" Value="12"/>
+                                                        <Setter Property="Foreground" Value="DarkBlue"/>
+                                                    </Style>
+                                                </Label.Resources>
+                                            </Label>
                                             <Label Content="{Binding Name}" VerticalAlignment="Center"/>
                                         </DockPanel>
                                     </DataTemplate>
@@ -233,7 +288,15 @@
                             </DockPanel>
                             <DockPanel>
                                 <Label Content="Type"/>
-                                <ComboBox ItemsSource="{Binding Source={StaticResource ApplicationConditionTypes}}" SelectedItem="{Binding Type}"/>
+                                <ComboBox ItemsSource="{Binding Source={StaticResource ApplicationConditionTypes}}" SelectedItem="{Binding Type}">
+                                    <ComboBox.Resources>
+                                        <!--Deals with binding of non-string type-->
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="Foreground" Value="DarkBlue"/>
+                                        </Style>
+                                    </ComboBox.Resources>
+                                </ComboBox>
                             </DockPanel>
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Reader Name"/>
@@ -242,7 +305,9 @@
                             </DockPanel>
                             <StackPanel>
                                 <Label DockPanel.Dock="Top" Content="Description"/>
-                                <TextBox DockPanel.Dock="Bottom" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" MinHeight="250"/>
+                                <TextBox DockPanel.Dock="Bottom" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" MinHeight="250"
+                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                         SpellCheck.IsEnabled="True"/>
                             </StackPanel>
                             <StackPanel>
                                 <Button Content="Evaluate" Click="EvaluateCurrentConditionResultButton_Click"/>
@@ -374,9 +439,9 @@
                                             <DockPanel LastChildFill="True" Margin="2">
                                                 <Label Content="Description"/>
                                                 <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                             Height="250"
-                                             TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
-                                             SpellCheck.IsEnabled="True"/>
+                                                         Height="250"
+                                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                                         SpellCheck.IsEnabled="True"/>
                                             </DockPanel>
                                             <Button Content="Delete" Click="DeleteReaderButton_Click"/>
                                         </StackPanel>

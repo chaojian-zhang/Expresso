@@ -132,8 +132,16 @@ namespace Expresso
                 WindowTitle = $"Expresso - {CurrentFilePath}";
             }
         }
+        private void ToggleDocumentPropertiesButton_Click(object sender, RoutedEventArgs e)
+        {
+            DocumentPropertiesPanel.Visibility = (DocumentPropertiesPanel.Visibility == Visibility.Visible)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+
+
+        }
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-            =>MenuItemFileOpen_Click(null, null);
+            => MenuItemFileOpen_Click(null, null);
         private void DeleteReaderButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -264,7 +272,7 @@ namespace Expresso
                 if (reader != null)
                 {
                     reader.EvaluateTransform(out ParcelDataGrid result, out _);
-                    switch (Enum.Parse<ConditionType>(condition.Type))
+                    switch (condition.Type)
                     {
                         case ConditionType.Binary:
                             MessageBox.Show($"{result.RowCount >= 1}", "Evaluation Result");

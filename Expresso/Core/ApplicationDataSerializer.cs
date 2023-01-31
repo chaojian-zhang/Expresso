@@ -52,6 +52,7 @@ namespace Expresso.Core
         #region Routines
         private static void WriteToStream(BinaryWriter writer, ApplicationData data)
         {
+            writer.Write(data.FileVersion);
             writer.Write(data.Name);
             writer.Write(data.Description);
             writer.Write(++data.Iteration);
@@ -62,7 +63,7 @@ namespace Expresso.Core
             foreach (var condition in data.Conditionals)
             {
                 writer.Write(condition.Name);
-                writer.Write(condition.Type);
+                writer.Write((byte)condition.Type);
                 writer.Write(condition.Description);
                 writer.Write(condition.ReaderName);
             }
@@ -172,7 +173,7 @@ namespace Expresso.Core
                     ApplicationExecutionConditional conditional = new()
                     {
                         Name = reader.ReadString(),
-                        Type = reader.ReadString(),
+                        Type = (ConditionType)reader.ReadByte(),
                         Description = reader.ReadString(),
                         ReaderName = reader.ReadString(),
                     };

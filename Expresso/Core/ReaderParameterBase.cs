@@ -582,12 +582,12 @@ namespace Expresso.Core
 
         #region Base Property
         private string _URL = string.Empty;
-        private string _Method = nameof(SupportedWebRequestMethod.GET);
+        private SupportedWebRequestMethod _Method;
         #endregion
 
         #region Data Binding Setup
         public string URL { get => _URL; set => SetField(ref _URL, value); }
-        public string Method { get => _Method; set => SetField(ref _Method, value); }
+        public SupportedWebRequestMethod Method { get => _Method; set => SetField(ref _Method, value); }
         #endregion
 
         #region Query Interface
@@ -600,19 +600,13 @@ namespace Expresso.Core
         {
             try
             {
-                SupportedWebRequestMethod method = Enum.Parse<SupportedWebRequestMethod>(Method);
                 string responseBody = string.Empty;
-                switch (method)
+                responseBody = Method switch
                 {
-                    case SupportedWebRequestMethod.GET:
-                        responseBody = await MakeGETRequest(URL);
-                        break;
-                    case SupportedWebRequestMethod.POST:
-                        responseBody = await MakePOSTRequest(URL, Query);
-                        break;
-                    default:
-                        throw new ArgumentException($"Invalid method type: {method}");
-                }
+                    SupportedWebRequestMethod.GET => await MakeGETRequest(URL),
+                    SupportedWebRequestMethod.POST => await MakePOSTRequest(URL, Query),
+                    _ => throw new ArgumentException($"Invalid method type: {Method}"),
+                };
                 return responseBody;
             }
             catch (Exception e)
@@ -640,13 +634,13 @@ namespace Expresso.Core
         {
             base.WriteToStream(writer);
             writer.Write(URL);
-            writer.Write(Method);
+            writer.Write((byte)Method);
         }
         public override void ReadFromStream(BinaryReader reader)
         {
             base.ReadFromStream(reader);
             URL = reader.ReadString();
-            Method = reader.ReadString();
+            Method = (SupportedWebRequestMethod)reader.ReadByte();
         }
         #endregion
 
@@ -655,8 +649,7 @@ namespace Expresso.Core
         {
             if (!string.IsNullOrEmpty(URL))
                 builder.AppendLine($"URL: {URL}  ");
-            if (!string.IsNullOrEmpty(Method))
-                builder.AppendLine($"Method: {Method}\n");
+            builder.AppendLine($"Method: {Method}\n");
             base.BuildMarkdown(builder);
         }
         #endregion

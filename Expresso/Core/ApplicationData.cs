@@ -1,13 +1,6 @@
 ﻿using Expresso.Components;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
-using static Expresso.Core.ApplicationExecutionConditional;
 
 namespace Expresso.Core
 {
@@ -20,12 +13,12 @@ namespace Expresso.Core
     {
 
         private string _Name = string.Empty;
-        private string _Type = nameof(ConditionType.Binary);
+        private ConditionType _Type;
         private string _Description = string.Empty;
         private string _ReaderName = string.Empty;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
-        public string Type { get => _Type; set => SetField(ref _Type, value); }
+        public ConditionType Type { get => _Type; set => SetField(ref _Type, value); }
         public string Description { get => _Description; set => SetField(ref _Description, value); }
         public string ReaderName { get => _ReaderName; set => SetField(ref _ReaderName, value); }
     }
@@ -170,6 +163,7 @@ namespace Expresso.Core
     public class ApplicationData: BaseNotifyPropertyChanged
     {
         #region Metadata
+        private string _FileVersion = Program.ProgramVersion;
         private string _Name = "New Docment";
         private string _Description = string.Empty;
         private long _Iteration = 0;
@@ -187,6 +181,7 @@ namespace Expresso.Core
         #endregion
 
         #region Data Bindings
+        public string FileVersion { get => _FileVersion; set => SetField(ref _FileVersion, value); }
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public string Description { get => _Description; set => SetField(ref _Description, value); }
         public long Iteration { get => _Iteration; set => SetField(ref _Iteration, value); }
