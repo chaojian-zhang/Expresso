@@ -232,7 +232,7 @@ namespace Expresso
         private void MainGUITabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DependencyGraph.IsSelected)
-                UpdateDependencyGraph();
+                DependencyGraphContentPresenter.Content = new DependencyAnalyzer().Analyze(ApplicationData);
 
             // Don't mark it as handled so all other data binding processes etc. happen as usual
         }
@@ -853,72 +853,6 @@ namespace Expresso
         #endregion
 
         #region Routines
-        private void UpdateDependencyGraph()
-        {
-            StringBuilder dependencyLog = new StringBuilder();
-
-            // Name Conflicts
-            FindNameConflicts(dependencyLog, "Variable", ApplicationData.Variables.Select(r => r.Name));
-            FindNameConflicts(dependencyLog, "Condition", ApplicationData.Conditionals.Select(r => r.Name));
-            FindNameConflicts(dependencyLog, "Reader", ApplicationData.DataReaders.Select(r => r.Name));
-            FindNameConflicts(dependencyLog, "Writer", ApplicationData.OutputWriters.Select(r => r.Name));
-            FindNameConflicts(dependencyLog, "Row Processor", ApplicationData.Processors.Select(r => r.Name));
-            FindNameConflicts(dependencyLog, "Workflow", ApplicationData.Workflows.Select(r => r.Name));
-
-            // Variable Dependancies on Readers
-            foreach (var variable in ApplicationData.Variables)
-            {
-                if (variable.SourceType == VariableSourceType.Reader)
-                    ReportReaderStatus(dependencyLog, "Variable", variable.Name, variable.Source);
-            }
-            // Condition Dependancies on Readers
-            foreach (var condition in ApplicationData.Conditionals)
-                ReportReaderStatus(dependencyLog, "Condition", condition.Name, condition.ReaderName);
-            // Reader Dependancies on Readers
-            foreach (var reader in ApplicationData.DataReaders)
-            {
-                foreach (var query in reader.DataQueries
-                    .Where(q => q.ServiceProvider == ExpressorReaderDataQueryParameter.DisplayName))
-                {
-                    var parameter = query.Parameters as ExpressorReaderDataQueryParameter;
-                    ReportReaderStatus(dependencyLog, "Reader Query", $"{reader.Name} - {query.Name}", parameter.ReaderName);
-                }
-            }
-            // Workflow Dependancies on Everything Else Other Than Workflows
-            foreach (var workflow in ApplicationData.Workflows)
-            {
-                dependencyLog.AppendLine("[Workflow] Not implemented.");
-            }
-            // Workflow Dependancies on Workflows
-            foreach (var workflow in ApplicationData.Workflows)
-            {
-                dependencyLog.AppendLine("[Workflow] Not implemented.");
-            }
-
-            DependencyGraphStatsTextBlock.Text = dependencyLog.ToString();
-
-            static void FindNameConflicts(StringBuilder builder, string category, IEnumerable<string> names)
-            {
-                var repetition = names.GroupBy(x => x)
-                    .Where(g => g.Count() > 1)
-                    .Select(y => y.Key)
-                    .ToArray();
-                if (repetition.Length != 0)
-                    builder.AppendLine($"Naming Conflict - {category}: {string.Join(", ", repetition)}");
-            }
-            void ReportReaderStatus(StringBuilder builder, string category, string entityName, string readerName)
-            {
-                if (string.IsNullOrWhiteSpace(readerName))
-                    builder.AppendLine($"[{category}] {entityName} <- Empty Reader Name");
-                else
-                {
-                    bool canBeFound = ApplicationData.DataReaders.Any(r => r.Name == readerName);
-                    string missingStatus = canBeFound ? string.Empty : " Cannot be found.";
-                    builder.AppendLine($"[{category}] {entityName} <- {readerName}" + missingStatus);
-                }
-            }
-        }
-
         private int SaveApplicationDataScripts(ApplicationData applicationData, string destination)
         {
             string fileName = System.IO.Path.GetFileNameWithoutExtension(destination);

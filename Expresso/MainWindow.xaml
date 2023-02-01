@@ -995,7 +995,86 @@
                 </TabItem>
                 <!--Dependency Graph Tab-->
                 <TabItem x:Name="DependencyGraph" Header="Dependency Graph" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <TextBlock x:Name="DependencyGraphStatsTextBlock"/>
+                    <ContentPresenter x:Name="DependencyGraphContentPresenter">
+                        <ContentPresenter.ContentTemplate>
+                            <DataTemplate DataType="{x:Type core:DependencyGraph}">
+                                <DataTemplate.Resources>
+                                    <Style TargetType="Label">
+                                        <Setter Property="Margin" Value="0"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                    </Style>
+                                </DataTemplate.Resources>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <!--Stats-->
+                                        <StackPanel Visibility="{Binding Stats, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                            <Label Content="Entity Counts" Style="{StaticResource ContextKey}"/>
+                                            <ItemsControl ItemsSource="{Binding Stats}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="{Binding EntityType}" FontStyle="Italic"/>
+                                                            <Label Content=": " FontStyle="Italic"/>
+                                                            <Label Content="{Binding Count}" FontStyle="Italic">
+                                                                <Label.Resources>
+                                                                    <!--Deals with binding of non-string type-->
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="FontSize" Value="12"/>
+                                                                        <Setter Property="Foreground" Value="Black"/>
+                                                                        <Setter Property="FontStyle" Value="Italic"/>
+                                                                    </Style>
+                                                                </Label.Resources>
+                                                            </Label>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <!--General Issues-->
+                                        <StackPanel Visibility="{Binding Messages, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                            <Label Content="Issues" Style="{StaticResource ContextKey}"/>
+                                            <ItemsControl ItemsSource="{Binding Messages}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="{Binding Headline}" Foreground="{Binding Color}"/>
+                                                            <StackPanel Orientation="Horizontal" Visibility="{Binding Subheadline, Converter={StaticResource ObjectToBooleanConverter}}">
+                                                                <Label Content="-" Foreground="{Binding Color}"/>
+                                                                <Label Content="{Binding Subheadline}" Foreground="{Binding Color}"/>
+                                                            </StackPanel>
+                                                            <Label Content=": " Foreground="{Binding Color}"/>
+                                                            <Label Content="{Binding Message}" Foreground="{Binding Color}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <!--Dependencies-->
+                                        <StackPanel Visibility="{Binding Dependencies, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                            <Label Content="Dependencies" Style="{StaticResource ContextKey}"/>
+                                            <ItemsControl ItemsSource="{Binding Dependencies}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="[" Foreground="{Binding Color}"/>
+                                                            <Label Content="{Binding EntityType}" Foreground="{Binding Color}"/>
+                                                            <Label Content="] " Foreground="{Binding Color}"/>
+                                                            <Label Content="{Binding Referencer}" Foreground="{Binding Color}"/>
+                                                            <Label Content=" &lt;- " Foreground="{Binding Color}"/>
+                                                            <Label Content="{Binding Referencee}" Foreground="{Binding Color}"/>
+                                                            <Border CornerRadius="2" Background="{Binding AdditionalStatus.Color}" Padding="2" Visibility="{Binding AdditionalStatus, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                                <Label Content="{Binding AdditionalStatus.Message}" Foreground="White"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </DataTemplate>
+                        </ContentPresenter.ContentTemplate>
+                    </ContentPresenter>
                 </TabItem>
             </TabControl>
             <Border x:Name="HelpAboutPanel" HorizontalAlignment="Center" VerticalAlignment="Center"
