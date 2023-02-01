@@ -763,19 +763,24 @@
                                                                         <Label Content="{Binding Action}" Margin="0" Padding="0"/>
                                                                         <Label Content=" Configuration" Margin="0" Padding="0"/>
                                                                     </StackPanel>
-                                                                    
                                                                 </StackPanel>
+                                                                <!--Action Inputs & Outputs Interface Specification-->
                                                                 <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding Parameters}">
-                                                                    <!--Interface Documentation-->
                                                                     <StackPanel Visibility="{Binding Inputs, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                                                        <Label Content="Inputs"/>
+                                                                        <Label Content="Inputs" FontWeight="Bold"/>
                                                                         <ItemsControl ItemsSource="{Binding Inputs}" HorizontalAlignment="Center"/>
                                                                     </StackPanel>
                                                                     <StackPanel Visibility="{Binding Outputs, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                                                        <Label Content="Outputs"/>
+                                                                        <Label Content="Outputs" FontWeight="Bold"/>
                                                                         <ItemsControl ItemsSource="{Binding Outputs}" HorizontalAlignment="Center"/>
                                                                     </StackPanel>
                                                                 </StackPanel>
+                                                                <!--Action Documentation-->
+                                                                <TextBlock DockPanel.Dock="Bottom" Margin="4"
+                                                                           DataContext="{Binding Parameters}" Text="{Binding Documentation}" 
+                                                                           TextAlignment="Center" Foreground="DarkGray" FontStyle="Italic"
+                                                                           Visibility="{Binding Documentation, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+                                                                <!--Action Data Template-->
                                                                 <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}" HorizontalAlignment="Center">
                                                                     <ContentPresenter.Resources>
                                                                         <ResourceDictionary>

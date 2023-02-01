@@ -50,6 +50,7 @@ namespace Expresso.Core
         #region Documentation Interface
         public static string[] Inputs => Array.Empty<string>();
         public static string[] Outputs => Array.Empty<string>();
+        public static string Documentation => null;
         #endregion
     }
 
@@ -308,6 +309,13 @@ namespace Expresso.Core
         #region Documentation Interface
         public static new string[] Inputs => new string[] { "Any" };
         public static new string[] Outputs => new string[] { "Result" };
+        public static new string Documentation => 
+            """
+            Evaluates inputs using mathematical expressions.
+            Supported operators: + - * / ^
+            Supported functions: Sqrt, Sin, Cos
+            All inputs must be numerical values.
+            """;
         #endregion
     }
 }
