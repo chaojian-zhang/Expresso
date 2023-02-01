@@ -48,7 +48,7 @@ namespace Expresso.DataTemplates
             Button button = sender as Button;
             ExpressorReaderDataQueryParameter parameter = button.DataContext as ExpressorReaderDataQueryParameter;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             ApplicationDataReader currentReader = currentApplicationData.FindReaderFromParameters(parameter);
             IEnumerable<ApplicationDataReader> directDependants = currentApplicationData.DataReaders.Where(r => r.DataQueries.Any(q => q.Parameters is ExpressorReaderDataQueryParameter exp && exp.ReaderName == currentReader.Name));
             string[] readerNames = currentApplicationData.DataReaders

@@ -69,7 +69,7 @@ namespace Expresso.Core
         #region Helpers
         protected List<ParcelDataGrid> FetchInputs(List<ParcelDataGrid> overwriteInputs, IEnumerable<string> inputTableNames)
         {
-            var current = ApplicationDataHelper.GetCurrentApplicationData();
+            var current = ExpressoApplicationContext.ApplicationData;
 
             List<ParcelDataGrid> writerInputs = new List<ParcelDataGrid>();
             foreach (string name in inputTableNames)

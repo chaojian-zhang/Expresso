@@ -14,6 +14,15 @@ Has three launch modes:
 2. Launch executable with a workflow file; This mode allow interactive input specification.
 3. Launch executable with a workflow file and all variable names and values. This executes the workflow in headless mode.
 
+### Expresso Best Practice
+
+**Namving Conventions**
+
+Generally, don''t use space and special symbols in names.
+
+* Variables: Use `lowerCamelCase` for variable names.
+* Readers: Use `CamelCase` for reader names.
+
 ### Application Workflow Architectures
 
 #### Readers-Variables-Conditions-Writers

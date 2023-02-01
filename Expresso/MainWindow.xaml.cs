@@ -31,6 +31,9 @@ namespace Expresso
         #region Constructor
         public MainWindow()
         {
+            // Hide console
+            Win32.HideConsoleWindow();
+
             // Support SQL syntax highlight
             using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Expresso.Resources.sql.xshd.xml"))
             {
@@ -87,10 +90,10 @@ namespace Expresso
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
         public ApplicationData ApplicationData 
         { 
-            get => ApplicationDataHelper.GetCurrentApplicationData(); 
+            get => ExpressoApplicationContext.ApplicationData; 
             set
             {
-                ApplicationDataHelper.SetCurrentApplicationData(value);
+                ExpressoApplicationContext.Context.SetCurrentApplicationData(value);
                 NotifyPropertyChanged(nameof(ApplicationData));
             }
         }
@@ -243,7 +246,7 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationExecutionConditional condition = button.DataContext as ApplicationExecutionConditional;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] readerNames = currentApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
@@ -498,8 +501,7 @@ namespace Expresso
         {
             Button button = sender as Button;
             ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
-
-            throw new NotImplementedException();
+            workflow.ExecuteWorkflow();
         }
 
         private void WorkflowTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -547,7 +549,7 @@ namespace Expresso
             Button button = sender as Button;
             ApplicationWorkflowStep step = button.DataContext as ApplicationWorkflowStep;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] entityNames = null;
             switch (step.ActionType)
             {
@@ -734,7 +736,7 @@ namespace Expresso
         }
         private void MenuItemEngineRun_Click(object sender, RoutedEventArgs e)
         {
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] readerNames = currentApplicationData.Workflows
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)

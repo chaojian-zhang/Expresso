@@ -8,13 +8,43 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using YamlDotNet.Core.Tokens;
 
 namespace Expresso.Core
 {
-    internal static class ApplicationDataHelper
+    internal class ExpressoApplicationContext
     {
         #region Singleton
+        private ExpressoApplicationContext()
+        {
+        }
+        private static ExpressoApplicationContext _Singleton;
+        public static ExpressoApplicationContext Context
+        {
+            get
+            {
+                if (_Singleton != null) 
+                    return _Singleton;
+                else throw new InvalidOperationException("Application context not initialized. Make sure initialize context once and only once.");
+            }
+        }
+        public static ExpressoApplicationContext Initialize()
+        {
+            _Singleton = new ExpressoApplicationContext();
+            return _Singleton;
+        }
+        #endregion
+
+        #region Runtime Data
+        private ApplicationData _ApplicationData;
+        public static ApplicationData ApplicationData => Context._ApplicationData;
+        public void SetCurrentApplicationData(ApplicationData value)
+        {
+            _ApplicationData = value;
+            _SessionDatabaseContext = new DatabaseContext();
+        }
+        #endregion
+
+        #region Data Caching Context
         /// <summary>
         /// For caching remote data queries, used by specific data query readers
         /// </summary>
@@ -23,20 +53,11 @@ namespace Expresso.Core
         /// For general management of file-scope readers
         /// </summary>
         private static DatabaseContext _SessionDatabaseContext;
-
-        private static ApplicationData _ApplicationData;
         #endregion
+    }
 
-        #region Getters
-        public static ApplicationData GetCurrentApplicationData()
-            => _ApplicationData;
-        public static void SetCurrentApplicationData(ApplicationData value)
-        {
-            _ApplicationData = value;
-            _SessionDatabaseContext = new DatabaseContext();
-        }
-        #endregion
-
+    internal static class ApplicationDataHelper
+    {
         #region Look-ups
         public static ApplicationDataReader FindReaderWithName(this ApplicationData data, string name)
         {
@@ -63,9 +84,13 @@ namespace Expresso.Core
         #endregion
 
         #region Evaluators
+        public static void ExecuteWorkflow(this ApplicationWorkflow workflow)
+        {
+            throw new NotImplementedException();
+        }
         public static string InterpolateVariables(this string templateString)
         {
-            var applicationData = GetCurrentApplicationData();
+            var applicationData = ExpressoApplicationContext.ApplicationData;
             var variables = applicationData.Variables;
 
             return Regex.Replace(templateString, @"\${(.+?)}", match =>
@@ -91,7 +116,7 @@ namespace Expresso.Core
                         case VariableSourceType.CustomList:
                             return variable.Source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                         case VariableSourceType.Reader:
-                            var reader = GetCurrentApplicationData().FindReaderWithName(variable.Source);
+                            var reader = ExpressoApplicationContext.ApplicationData.FindReaderWithName(variable.Source);
                             if (reader != null)
                             {
                                 reader.EvaluateTransform(out ParcelDataGrid data, out _);

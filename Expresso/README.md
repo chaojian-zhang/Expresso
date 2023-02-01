@@ -8,11 +8,6 @@ Self-contained, modularized.
 2. V2: Visualization, Algorithms Toolbox (Reader and Processor)
 3. V3: Large numerical data optimization
 
-# Expresso Best Practice
+## Technical Note
 
-## Namving Conventions
-
-Generally, don''t use space and special symbols in names.
-
-* Variables: Use `lowerCamelCase` for variable names.
-* Readers: Use `CamelCase` for reader names.
+* Normal (GUI) application evaluates all queries on-demand, while during workflow execution and headless mode, query results are cached.

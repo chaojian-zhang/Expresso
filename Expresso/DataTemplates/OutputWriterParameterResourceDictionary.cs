@@ -103,7 +103,7 @@ namespace Expresso.DataTemplates
             Button button = sender as Button;
             OutputWriterODBCWriterParameter parameter = button.DataContext as OutputWriterODBCWriterParameter;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] readerNames = currentApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
@@ -171,7 +171,7 @@ namespace Expresso.DataTemplates
             Button button = sender as Button;
             OutputWriterCSVWriterParameter parameter = button.DataContext as OutputWriterCSVWriterParameter;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] readerNames = currentApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
@@ -240,7 +240,7 @@ namespace Expresso.DataTemplates
             Button button = sender as Button;
             OutputWriterExcelWriterParameter parameter = button.DataContext as OutputWriterExcelWriterParameter;
 
-            var currentApplicationData = ApplicationDataHelper.GetCurrentApplicationData();
+            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] readerNames = currentApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)

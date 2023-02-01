@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
@@ -35,7 +35,6 @@
     <PackageReference Include="Sprache.Calc" Version="1.1.0" />
     <PackageReference Include="System.Data.Odbc" Version="7.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
-    <PackageReference Include="YamlDotNet" Version="12.3.1" />
   </ItemGroup>
 
   <ItemGroup>

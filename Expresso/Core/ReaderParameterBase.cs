@@ -183,7 +183,7 @@ namespace Expresso.Core
 
                 if (!string.IsNullOrWhiteSpace(Transform))
                 {
-                    var current = ApplicationDataHelper.GetCurrentApplicationData();
+                    var current = ExpressoApplicationContext.ApplicationData;
                     string tableName = current.FindReaderDataQueryFromParameters(this).Name;
                     return SQLiteHelper.TransformCSV(tableName, mdxResult, TransformInterpolated, out _, out _);
                 }
@@ -246,7 +246,7 @@ namespace Expresso.Core
 
             if (!string.IsNullOrWhiteSpace(Query))
             {
-                var current = ApplicationDataHelper.GetCurrentApplicationData();
+                var current = ExpressoApplicationContext.ApplicationData;
                 string tableName = current.FindReaderFromParameters(this).Name;
                 return SQLiteHelper.TransformCSV(tableName, csv, QueryInterpolated, out _, out _);
             }
@@ -583,7 +583,7 @@ namespace Expresso.Core
         #region Query Interface
         public override string MakeQuery()
         {
-            var current = ApplicationDataHelper.GetCurrentApplicationData();
+            var current = ExpressoApplicationContext.ApplicationData;
             var reader = current.FindReaderWithName(ReaderNameInterpolated);
             if (reader != null)
                 return reader.EvaluateTransform(out _, out _);
@@ -756,7 +756,7 @@ namespace Expresso.Core
                 string csv = output;
                 if (!string.IsNullOrWhiteSpace(Query))
                 {
-                    var current = ApplicationDataHelper.GetCurrentApplicationData();
+                    var current = ExpressoApplicationContext.ApplicationData;
                     string tableName = current.FindReaderFromParameters(this).Name;
                     return SQLiteHelper.TransformCSV(tableName, csv, QueryInterpolated, out _, out _);
                 }
