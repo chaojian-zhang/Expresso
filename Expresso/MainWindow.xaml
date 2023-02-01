@@ -471,6 +471,7 @@
                                                 Visibility="{Binding ShowResultAsDataGrid, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                             <TextBox 
                                                 Text="{Binding ResultPreview, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                                                FontFamily="Consolas"
                                                 IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                                                 Visibility="{Binding ShowResultAsDataGrid, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource BooleanToVisibilityConverterInverted}}"/>
                                             <ToggleButton 
