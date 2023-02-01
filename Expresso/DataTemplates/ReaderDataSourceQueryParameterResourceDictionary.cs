@@ -56,7 +56,11 @@ namespace Expresso.DataTemplates
                 .Except(directDependants)
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
-                parameter.ReaderName = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "Notice you cannot pick readers that references the current reader.");
+            {
+                string pick = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "Notice you cannot pick readers that references the current reader.");
+                if (pick != null)
+                    parameter.ReaderName = pick;
+            }
         }
         #endregion
 

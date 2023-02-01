@@ -78,13 +78,6 @@ namespace Expresso
         public static string[] ReaderDataServiceProviderNames => ReaderDataQueryParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] WriterDataServiceProviderNames => WriterParameterBase.GetServiceProviders().Keys.ToArray();
         public static string[] RowProcessorActionNames => RowProcessorParameterBase.GetServiceProviders().Keys.ToArray();
-        public static string[] WorkflowActionTypes => new string[]
-        {
-            "Condition",
-            "Reader",
-            "Writer",
-            "Row Processor",
-        };
 
         private ICollection _ReaderResultsView;
         public ICollection ReaderResultsView { get => _ReaderResultsView; set => SetField(ref _ReaderResultsView, value); }
@@ -236,7 +229,11 @@ namespace Expresso
             string[] readerNames = ApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
-                CurrentSelectedVariable.Source = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames);
+            {
+                string pick = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames);
+                if (pick != null)
+                    CurrentSelectedVariable.Source = pick;
+            }
         }
         #endregion
 
@@ -250,7 +247,11 @@ namespace Expresso
             string[] readerNames = currentApplicationData.DataReaders
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
-                condition.ReaderName = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "For binary conditions, readers that return non-zero rows are considered true; For switch conditions, the first element of the reader result will dictate subsequent step name.");
+            {
+                string pick = ComboChoiceDialog.Prompt("Pick Reader", "Select reader to read data from:", readerNames.FirstOrDefault(), readerNames, "For binary conditions, readers that return non-zero rows are considered true; For switch conditions, the first element of the reader result will dictate subsequent step name.");
+                if (pick != null)
+                    condition.ReaderName = pick;
+            }
         }
         private void EvaluateCurrentConditionResultButton_Click(object sender, RoutedEventArgs e)
         {
@@ -480,8 +481,7 @@ namespace Expresso
 
             ApplicationWorkflowStep step = new ()
             {
-                Name = "Starting Step",
-                ActionType = WorkflowActionTypes.First()
+                Name = "Starting Step"
             };
             workflow.StartingSteps.Add(step);
         }
@@ -501,7 +501,7 @@ namespace Expresso
         {
             Button button = sender as Button;
             ApplicationWorkflow workflow = button.DataContext as ApplicationWorkflow;
-            workflow.ExecuteWorkflow();
+            workflow.ExecuteWorkflow(null);
         }
 
         private void WorkflowTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -520,11 +520,9 @@ namespace Expresso
             {
                 ApplicationWorkflowStep nextStep = new ApplicationWorkflowStep()
                 {
-                    Name = "New",
-                    ActionType = WorkflowActionTypes.First()
+                    Name = "New"
                 };
                 step.NextSteps.Add(nextStep);
-                CurrentSelectedWorkflowStep = nextStep;
             }
         }
         private void RemoveWorkflowStepButton_Click(object sender, RoutedEventArgs e)
@@ -548,25 +546,32 @@ namespace Expresso
         {
             Button button = sender as Button;
             ApplicationWorkflowStep step = button.DataContext as ApplicationWorkflowStep;
+            ApplicationWorkflow workflow = button.Tag as ApplicationWorkflow;
 
             var currentApplicationData = ExpressoApplicationContext.ApplicationData;
             string[] entityNames = null;
             switch (step.ActionType)
             {
-                case "Condition":
+                case WorkflowActionType.Condition:
                     entityNames = currentApplicationData.Conditionals
                         .Select(r => r.Name).ToArray();
                     break;
-                case "Reader":
+                case WorkflowActionType.Reader:
                     entityNames = currentApplicationData.DataReaders
                         .Select(r => r.Name).ToArray();
                     break;
-                case "Writer":
+                case WorkflowActionType.Writer:
                     entityNames = currentApplicationData.OutputWriters
                         .Select(r => r.Name).ToArray();
                     break;
-                case "Row Processor":
+                case WorkflowActionType.RowProcessor:
                     entityNames = currentApplicationData.Processors
+                        .Select(r => r.Name).ToArray();
+                    break;
+                case WorkflowActionType.Workflow:
+                    entityNames = currentApplicationData.Workflows
+                        .Except(new[] { workflow })
+                        .Where(w => !ContainsWorkflowReference(w.StartingSteps, workflow.Name))
                         .Select(r => r.Name).ToArray();
                     break;
                 default:
@@ -574,7 +579,30 @@ namespace Expresso
             }
 
             if (entityNames.Length != 0)
-                step.ActionItem = ComboChoiceDialog.Prompt($"Pick {step.ActionType}", $"Select {step.ActionType} to use:", entityNames.FirstOrDefault(), entityNames);
+            {
+                string pick = ComboChoiceDialog.Prompt($"Pick {step.ActionType}", $"Select {step.ActionType} to use:", entityNames.FirstOrDefault(), entityNames);
+                if (pick != null)
+                    step.ActionItem = pick;
+            }
+            else
+            {
+                if (step.ActionType == WorkflowActionType.Workflow)
+                    MessageBox.Show($"There is no suitable {step.ActionType} to pick from. Create a {step.ActionType} first. Notice that you cannot pick workflows that contains steps that references current workflow.", "No Suitable Pick");
+                else
+                    MessageBox.Show($"There is no suitable {step.ActionType} to pick from. Create a {step.ActionType} first.", "No Suitable Pick");
+            }
+
+            static bool ContainsWorkflowReference(ObservableCollection<ApplicationWorkflowStep> workflowSteps, string searchName)
+            {
+                foreach (ApplicationWorkflowStep step in workflowSteps)
+                {
+                    if (step.ActionType == WorkflowActionType.Workflow && step.ActionItem == searchName)
+                        return true;
+                    else if (ContainsWorkflowReference(step.NextSteps, searchName))
+                        return true;
+                }
+                return false;
+            }
         }
         #endregion
 
@@ -736,14 +764,17 @@ namespace Expresso
         }
         private void MenuItemEngineRun_Click(object sender, RoutedEventArgs e)
         {
-            var currentApplicationData = ExpressoApplicationContext.ApplicationData;
+            var currentApplicationData = ApplicationData;
             string[] readerNames = currentApplicationData.Workflows
                 .Select(r => r.Name).ToArray();
             if (readerNames.Length != 0)
             {
-                var pick = ComboChoiceDialog.Prompt("Pick Workflow", "Select workflow to run:", readerNames.FirstOrDefault(), readerNames);
+                string pick = ComboChoiceDialog.Prompt("Pick Workflow", "Select workflow to run:", readerNames.FirstOrDefault(), readerNames);
                 if (pick != null)
-                    throw new NotImplementedException();
+                {
+                    var workflow = ApplicationData.Workflows.FirstOrDefault(w => w.Name == pick);
+                    workflow.ExecuteWorkflow(new ConsoleReport());
+                }
             }
         }
         #endregion

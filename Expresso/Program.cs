@@ -1,4 +1,5 @@
-﻿using Expresso.Core;
+﻿using Expresso.Components;
+using Expresso.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -62,14 +63,15 @@ namespace Expresso
                         \/      \/|__|               \/     \/     \/       
                 """ + Environment.NewLine +
                 $"""
-                Expresso {ProgramVersion,-20}   {"by Charles Zhang, 2023",40}
+                Expresso {ProgramVersion,-20}   {"by Charles Zhang",30}
                 {Nickname} - {Catchphrase}
                 Build ID {BuildID}
+                Inception: 2023
                 """);
             }
             // Remark-cz: Since we are showing welcome, don't let it just flash away; Give people some time to read
             // But don't make it too long to affect their work
-            System.Threading.Thread.Sleep(1200);
+            System.Threading.Thread.Sleep(800);
 
             ExpressoApplicationContext.Initialize();
             var app = new App();
@@ -155,7 +157,7 @@ namespace Expresso
 
             ExpressoApplicationContext.Context.SetCurrentApplicationData(appData);
             var workflow = appData.Workflows.FirstOrDefault(w => w.Name == workflowName);
-            workflow.ExecuteWorkflow();
+            workflow.ExecuteWorkflow(new ConsoleReport());
         }
         #endregion
     }
@@ -172,6 +174,14 @@ namespace Expresso
 
             if (hConsole != IntPtr.Zero)
                 ShowWindow(hConsole, 0); // 0 = SW_HIDE
+        }
+    }
+
+    internal class ConsoleReport : IWorkflowStatusReporter
+    {
+        public void Update(string status)
+        {
+            Console.WriteLine(status);
         }
     }
 }

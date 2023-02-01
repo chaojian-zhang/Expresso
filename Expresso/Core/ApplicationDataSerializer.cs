@@ -151,7 +151,7 @@ namespace Expresso.Core
             void WriteWorkflowStep(BinaryWriter writer, ApplicationWorkflowStep step)
             {
                 writer.Write(step.Name);
-                writer.Write(step.ActionType);
+                writer.Write((byte)step.ActionType);
                 writer.Write(step.ActionItem);
                 writer.Write(step.NextSteps.Count);
                 foreach (var next in step.NextSteps)
@@ -343,7 +343,7 @@ namespace Expresso.Core
 
                 {
                     step.Name = reader.ReadString();
-                    step.ActionType = reader.ReadString();
+                    step.ActionType = (WorkflowActionType)reader.ReadByte();
                     step.ActionItem = reader.ReadString();
                 }
                 {

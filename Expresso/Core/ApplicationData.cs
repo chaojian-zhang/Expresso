@@ -21,6 +21,15 @@ namespace Expresso.Core
         Reader,
         CustomList
     }
+    public enum WorkflowActionType
+    {
+        SequenceGroup,
+        Condition,
+        Reader,
+        Writer,
+        RowProcessor,
+        Workflow
+    }
 
     public class ApplicationExecutionConditional : BaseNotifyPropertyChanged
     {
@@ -38,12 +47,12 @@ namespace Expresso.Core
     public class ApplicationWorkflowStep : BaseNotifyPropertyChanged
     {
         private string _Name = string.Empty;
-        private string _ActionType = string.Empty;
+        private WorkflowActionType _ActionType;
         private string _ActionItem = string.Empty;
         private ObservableCollection<ApplicationWorkflowStep> _NextSteps = new();
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
-        public string ActionType { get => _ActionType; set => SetField(ref _ActionType, value); }
+        public WorkflowActionType ActionType { get => _ActionType; set => SetField(ref _ActionType, value); }
         public string ActionItem { get => _ActionItem; set => SetField(ref _ActionItem, value); }
         public ObservableCollection<ApplicationWorkflowStep> NextSteps { get => _NextSteps; set => SetField(ref _NextSteps, value); }
     }

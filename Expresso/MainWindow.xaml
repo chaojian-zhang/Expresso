@@ -21,6 +21,8 @@
         <conv:ObjectToBooleanConverterInverted x:Key="ObjectToBooleanConverterInverted"></conv:ObjectToBooleanConverterInverted>
         <conv:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"></conv:ObjectToVisibilityConverter>
         <conv:ObjectToVisibilityConverterInverted x:Key="ObjectToVisibilityConverterInverted"></conv:ObjectToVisibilityConverterInverted>
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter"></conv:StringToVisibilityConverter>
+        <conv:StringToVisibilityConverterInverted x:Key="StringToVisibilityConverterInverted"></conv:StringToVisibilityConverterInverted>
 
         <ObjectDataProvider x:Key="ApplicationConditionTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
             <ObjectDataProvider.MethodParameters>
@@ -35,6 +37,11 @@
         <ObjectDataProvider x:Key="VariableSourceTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="core:VariableSourceType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="WorkflowActionTypes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:WorkflowActionType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
@@ -843,20 +850,24 @@
                                             <TreeView.Resources>
                                                 <HierarchicalDataTemplate DataType="{x:Type core:ApplicationWorkflowStep}" ItemsSource="{Binding NextSteps}">
                                                     <StackPanel Orientation="Horizontal">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Label Content="[" Margin="0" Padding="0"/>
+                                                            <Label Content="{Binding ActionType}" VerticalAlignment="Center" Margin="0" Padding="0">
+                                                                <Label.Resources>
+                                                                    <!--Deals with binding of non-string type-->
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="FontSize" Value="12"/>
+                                                                    </Style>
+                                                                </Label.Resources>
+                                                            </Label>
+                                                            <Label Content="] " Margin="0" Padding="0"/>
+                                                        </StackPanel>
                                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                                        <Label Content=" [" Margin="0" Padding="0"/>
-                                                        <Label Content="{Binding ActionType}" VerticalAlignment="Center" Margin="0" Padding="0">
-                                                            <Label.Resources>
-                                                                <!--Deals with binding of non-string type-->
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="FontSize" Value="12"/>
-                                                                </Style>
-                                                            </Label.Resources>
-                                                        </Label>
-                                                        <Label Content="]" Margin="0" Padding="0"/>
-                                                        <Label Content=" [" Margin="0" Padding="0"/>
-                                                        <Label Content="{Binding ActionItem}" Margin="0" Padding="0"/>
-                                                        <Label Content="]" Margin="0" Padding="0"/>
+                                                        <StackPanel Orientation="Horizontal" Visibility="{Binding ActionItem, Converter={StaticResource StringToVisibilityConverter}}">
+                                                            <Label Content=" (" Margin="0" Padding="0"/>
+                                                            <Label Content="{Binding ActionItem}" Margin="0" Padding="0"/>
+                                                            <Label Content=")" Margin="0" Padding="0"/>
+                                                        </StackPanel>
                                                     </StackPanel>
                                                 </HierarchicalDataTemplate>
                                             </TreeView.Resources>
@@ -885,20 +896,38 @@
                                         </DockPanel>
                                         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                                         <!--Workflow Step Properties Panel-->
-                                        <StackPanel Grid.Row="2" DataContext="{Binding CurrentSelectedWorkflowStep, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}}">
+                                        <StackPanel Grid.Row="2" DataContext="{Binding CurrentSelectedWorkflowStep, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}}" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Grid}}}">
                                             <Label Content="Step Properties" />
                                             <DockPanel>
-                                                <Label Content="Name"/>
+                                                <Label Content="Name" Width="45"/>
                                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DockPanel>
                                             <DockPanel>
-                                                <Label Content="Action"/>
-                                                <ComboBox ItemsSource="{Binding WorkflowActionTypes, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" SelectedValue="{Binding ActionType}"/>
+                                                <Label Content="Type" Width="45"/>
+                                                <ComboBox ItemsSource="{Binding Source={StaticResource WorkflowActionTypes}}" SelectedItem="{Binding ActionType}">
+                                                    <ComboBox.Resources>
+                                                        <!--Deals with binding of non-string type-->
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="FontSize" Value="12"/>
+                                                            <Setter Property="Foreground" Value="Black"/>
+                                                        </Style>
+                                                    </ComboBox.Resources>
+                                                </ComboBox>
                                             </DockPanel>
                                             <DockPanel>
-                                                <Label Content="Action"/>
-                                                <Button DockPanel.Dock="Right" Content="Pick" Click="WorkflowStepPickActionItemButton_Click"/>
-                                                <TextBox Text="{Binding ActionItem, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <DockPanel.Style>
+                                                    <Style TargetType="DockPanel">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ActionType}" Value="SequenceGroup">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </DockPanel.Style>
+                                                <Label Content="Action" Width="45"/>
+                                                <Button DockPanel.Dock="Right" Content="Pick" Click="WorkflowStepPickActionItemButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type StackPanel}}}"/>
+                                                <TextBox Text="{Binding ActionItem, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
                                             </DockPanel>
                                         </StackPanel>
                                     </Grid>

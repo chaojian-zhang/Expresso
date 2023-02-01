@@ -84,7 +84,7 @@ namespace Expresso.Core
         #endregion
 
         #region Evaluators
-        public static void ExecuteWorkflow(this ApplicationWorkflow workflow)
+        public static void ExecuteWorkflow(this ApplicationWorkflow workflow, IWorkflowStatusReporter statusReporter)
         {
             throw new NotImplementedException();
         }
