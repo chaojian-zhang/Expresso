@@ -32,41 +32,20 @@ namespace Expresso.Core
 
     public static class ProcessorStepActionEvaluator
     {
-        #region Action Handler Mapping
-        private static readonly Dictionary<string, Func<Dictionary<string, string>, Dictionary<string, string>>> ActionHandlers = new()
-        {
-            { "Print", HandlePrintAction }
-        };
-        #endregion
-
         #region Method
         public static Dictionary<string, string> EvaluateStep(ApplicationProcessorStep step, Dictionary<string, string> inputs)
         {
-            if (!ActionHandlers.ContainsKey(step.Action))
-                return null;
+            Dictionary<string, string> currentOutputs = step.Outputs.Pack(step.Parameters.HandleInputs(inputs));
+            if (!step.IsFinalOutput)
+                currentOutputs.Clear();
 
-            var currentOutputs = step.Outputs.Pack(ActionHandlers[step.Action](inputs));
-            if (step.IsFinalOutput)
-                return currentOutputs;
-            else
+            foreach (ApplicationProcessorStep nextStep in step.NextSteps)
             {
-                foreach (ApplicationProcessorStep nextStep in step.NextSteps)
-                {
-                    var childOutputs = EvaluateStep(nextStep, currentOutputs);
-                    if (childOutputs != null)
-                        currentOutputs.Merge(childOutputs);
-                }
+                Dictionary<string, string> childOutputs = EvaluateStep(nextStep, currentOutputs);
+                if (childOutputs != null)
+                    currentOutputs.Merge(childOutputs);
             }
-
             return currentOutputs;
-        }
-        #endregion
-
-        #region Action Handlers
-        public static Dictionary<string, string> HandlePrintAction(Dictionary<string, string> inputs)
-        {
-            MessageBox.Show(inputs["Message"]);
-            return null;
         }
         #endregion
     }

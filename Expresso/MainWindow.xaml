@@ -710,7 +710,7 @@
                                                             <Button Content="Add Subsequent Step" Click="AddProcessorStepSubstepButton_Click" 
                                                                     Visibility="{Binding IsFinalOutput, Converter={StaticResource BooleanToVisibilityConverterInverted}}"
                                                                     Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
-                                                            <CheckBox Content="Is Final Output" IsChecked="{Binding IsFinalOutput}" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+                                                            <CheckBox Content="Is Processor Output" IsChecked="{Binding IsFinalOutput}" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                             <Button Content="Remove Step" Click="RemoveProcessorStepButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
                                                         </StackPanel>
                                                     </StackPanel>
@@ -758,12 +758,25 @@
                                                                         <ComboBox SelectedValue="{Binding Action}" MinWidth="128" ItemsSource="{Binding RowProcessorActionNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
                                                                     </StackPanel>
                                                                 </Border>
-                                                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center"
-                                                                            Margin="8">
-                                                                    <Label Content="{Binding Action}" Margin="0" Padding="0"/>
-                                                                    <Label Content=" Configuration" Margin="0" Padding="0"/>
+                                                                <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="8">
+                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                                                                        <Label Content="{Binding Action}" Margin="0" Padding="0"/>
+                                                                        <Label Content=" Configuration" Margin="0" Padding="0"/>
+                                                                    </StackPanel>
+                                                                    
                                                                 </StackPanel>
-                                                                <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
+                                                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" DataContext="{Binding Parameters}">
+                                                                    <!--Interface Documentation-->
+                                                                    <StackPanel Visibility="{Binding Inputs, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                                        <Label Content="Inputs"/>
+                                                                        <ItemsControl ItemsSource="{Binding Inputs}" HorizontalAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Visibility="{Binding Outputs, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                                                        <Label Content="Outputs"/>
+                                                                        <ItemsControl ItemsSource="{Binding Outputs}" HorizontalAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                </StackPanel>
+                                                                <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}" HorizontalAlignment="Center">
                                                                     <ContentPresenter.Resources>
                                                                         <ResourceDictionary>
                                                                             <ResourceDictionary.MergedDictionaries>

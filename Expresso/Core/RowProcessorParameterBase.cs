@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Csv;
+using System.Text.RegularExpressions;
 
 namespace Expresso.Core
 {
@@ -33,6 +34,10 @@ namespace Expresso.Core
         public static string DisplayName => "No Action";
         #endregion
 
+        #region Handling Procedure
+        public abstract Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs);
+        #endregion
+
         #region Serialization Interface
         public virtual void WriteToStream(BinaryWriter writer)
         {
@@ -40,6 +45,11 @@ namespace Expresso.Core
         public virtual void ReadFromStream(BinaryReader reader)
         {
         }
+        #endregion
+
+        #region Documentation Interface
+        public static string[] Inputs => Array.Empty<string>();
+        public static string[] Outputs => Array.Empty<string>();
         #endregion
     }
 
@@ -64,6 +74,13 @@ namespace Expresso.Core
         public string ReplacementInterpolated => Replacement.InterpolateVariables();
         #endregion
 
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+        {
+            return inputs.ToDictionary(i => i.Key, i => Regex.Replace(i.Value, PatternInterpolated, ReplacementInterpolated));
+        }
+        #endregion
+
         #region Serialization Interface
         public override void WriteToStream(BinaryWriter writer)
         {
@@ -78,12 +95,22 @@ namespace Expresso.Core
             Replacement = reader.ReadString();
         }
         #endregion
+
+        #region Documentation Interface
+        public static new string[] Inputs => new string[] { "Any" };
+        public static new string[] Outputs => new string[] { "Any" };
+        #endregion
     }
 
     public sealed class PassThroughRowProcessorParameterBase : RowProcessorParameterBase
     {
         #region Meta Data
         public static new string DisplayName => "Pass Through";
+        #endregion
+
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+            => inputs;
         #endregion
 
         #region Serialization Interface
@@ -95,6 +122,11 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
         }
+        #endregion
+
+        #region Documentation Interface
+        public static new string[] Inputs => new string[] { "Any" };
+        public static new string[] Outputs => new string[] { "Any" };
         #endregion
     }
 
@@ -112,6 +144,13 @@ namespace Expresso.Core
         #region Data Binding Setup
         public string ProgramPath { get => _ProgramPath; set => SetField(ref _ProgramPath, value); }
         public string ArgumentFormat { get => _ArgumentFormat; set => SetField(ref _ArgumentFormat, value); }
+        #endregion
+
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+        {
+            throw new NotFiniteNumberException();
+        }
         #endregion
 
         #region Serialization Interface
@@ -148,6 +187,13 @@ namespace Expresso.Core
         public string OptionalBody { get => _OptionalBody; set => SetField(ref _OptionalBody, value); }
         #endregion
 
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+        {
+            throw new NotFiniteNumberException();
+        }
+        #endregion
+
         #region Serialization Interface
         public override void WriteToStream(BinaryWriter writer)
         {
@@ -172,6 +218,13 @@ namespace Expresso.Core
         public static new string DisplayName => "Read File Content";
         #endregion
 
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+        {
+            throw new NotFiniteNumberException();
+        }
+        #endregion
+
         #region Serialization Interface
         public override void WriteToStream(BinaryWriter writer)
         {
@@ -181,6 +234,80 @@ namespace Expresso.Core
         {
             base.ReadFromStream(reader);
         }
+        #endregion
+    }
+
+    public sealed class ExpressionEvaluatorRowProcessorParameterBase : RowProcessorParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Expression Evaluation";
+        #endregion
+
+        #region Base Property
+        private string _Expression = string.Empty;
+        #endregion
+
+        #region Data Binding Setup
+        public string Expression { get => _Expression; set => SetField(ref _Expression, value); }
+        #endregion
+
+        #region Accessor
+        public string ExpressionInterpolated => Expression.InterpolateVariables();
+        #endregion
+
+        #region Handling Procedure
+        public override Dictionary<string, string> HandleInputs(Dictionary<string, string> inputs)
+        {
+            if (string.IsNullOrWhiteSpace(Expression)) return PackResult("Missing expression.");
+
+            Dictionary<string, double> parameters = inputs.ToDictionary(
+                i => i.Key,
+                i =>
+                {
+                    if (double.TryParse(i.Value, out double number))
+                        return number;
+                    else return 0;
+                });
+
+            try
+            {
+                var calc = new Sprache.Calc.XtensibleCalculator();
+                var expr = calc.ParseExpression(ExpressionInterpolated, parameters);
+                var func = expr.Compile();
+                var finalResult = func().ToString();
+                return PackResult(finalResult);
+            }
+            catch (Exception e)
+            {
+                return PackResult(e.Message);
+            }
+
+            static Dictionary<string, string> PackResult(string result)
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "Result", result }
+                };
+            }
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(Expression);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            Expression = reader.ReadString();
+        }
+        #endregion
+
+        #region Documentation Interface
+        public static new string[] Inputs => new string[] { "Any" };
+        public static new string[] Outputs => new string[] { "Result" };
         #endregion
     }
 }

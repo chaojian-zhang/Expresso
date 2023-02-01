@@ -374,7 +374,7 @@ namespace Expresso
 
             ApplicationProcessorStep step = new ApplicationProcessorStep()
             {
-                Name = "Root",
+                Name = $"Starting Step {processor.StartingSteps.Count + 1}",
                 Action = RowProcessorActionNames.First()
             };
             processor.StartingSteps.Add(step);
@@ -406,7 +406,8 @@ namespace Expresso
 
             ApplicationProcessorStep nextStep = new ApplicationProcessorStep()
             {
-                Name = "New"
+                Name = $"Substep {step.NextSteps.Count + 1}",
+                Action = RowProcessorActionNames.First()
             };
             step.NextSteps.Add(nextStep);
             processor.ListingOfAllSteps.Add(nextStep);
@@ -453,7 +454,9 @@ namespace Expresso
                     inputs.Add(input.AsName, response);
                 }
             }
-            Evaluation.TestProcessor(processor.StartingSteps, inputs);
+
+            var results = Evaluation.TestProcessor(processor.StartingSteps, inputs);
+            MessageBox.Show(string.Join('\n', results.Select(r => $"{r.Key}: {r.Value}")), "Evaluation Results");
         }
         private void ProcessorTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {

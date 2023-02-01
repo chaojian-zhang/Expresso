@@ -13,4 +13,10 @@
             <TextBox Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
         </StackPanel>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type core:ExpressionEvaluatorRowProcessorParameterBase}">
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Expression"/>
+            <TextBox Text="{Binding Expression, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+        </StackPanel>
+    </DataTemplate>
 </ResourceDictionary>
