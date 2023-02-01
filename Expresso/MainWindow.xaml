@@ -149,7 +149,8 @@
                 </TextBlock>
             </StackPanel>
             <TabControl TabStripPlacement="Left" Margin="0, 0, 0, 10" SelectedIndex="{Binding MainTabControlTabIndex}"
-                        Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        Visibility="{Binding CurrentFilePath, Converter={StaticResource ObjectToVisibilityConverter}}"
+                        SelectionChanged="MainGUITabControl_SelectionChanged">
                 <TabControl.ItemContainerStyle>
                     <Style TargetType="TabItem">
                         <Setter Property="LayoutTransform">
@@ -991,6 +992,10 @@
                             <TextBox DockPanel.Dock="Bottom" IsReadOnly="True"/>
                         </DockPanel>
                     </Grid>
+                </TabItem>
+                <!--Dependency Graph Tab-->
+                <TabItem x:Name="DependencyGraph" Header="Dependency Graph" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <TextBlock x:Name="DependencyGraphStatsTextBlock"/>
                 </TabItem>
             </TabControl>
             <Border x:Name="HelpAboutPanel" HorizontalAlignment="Center" VerticalAlignment="Center"
