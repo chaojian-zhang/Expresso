@@ -30,4 +30,4 @@ Additional notes:
 	* ODBC, Analysis Service: 7-8MB
 	* Microsoft.Data.Sqlite: 9-10MB
 	* ScottPlot: 10-12MB
-	* Python.Net: ???
+	* Python.Net: 12MB-13.5MB
