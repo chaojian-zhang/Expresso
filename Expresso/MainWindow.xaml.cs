@@ -55,7 +55,8 @@ namespace Expresso
             Reader = 3,
             Writer = 4,
             Processor = 5,
-            Workflow = 6
+            Programmer = 6,
+            Workflow = 7
         };
         #endregion
 
@@ -512,6 +513,28 @@ namespace Expresso
         }
         #endregion
 
+        #region Events - Programs
+        private void ProgramScriptAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationScript script = editor.DataContext as ApplicationScript;
+            if (script != null)
+                editor.Text = script.Script;
+        }
+        private void ProgramScriptAvalonTextEditor_Initialized(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationScript script = editor.DataContext as ApplicationScript;
+            editor.Text = script.Script;
+        }
+        private void ProgramScriptAvalonTextEditor_OnTextChanged(object sender, EventArgs e)
+        {
+            TextEditor editor = sender as TextEditor;
+            ApplicationScript script = editor.DataContext as ApplicationScript;
+            script.Script = editor.Text;
+        }
+        #endregion
+
         #region Events - Workflows
         private void AddWorkflowStepButton_Click(object sender, RoutedEventArgs e)
         {
@@ -580,6 +603,23 @@ namespace Expresso
                         FindAndRemoveStep(childStep.NextSteps, stepToRemove);
                 }
             }
+        }
+        private void WorkflowStepCreateProgrammerButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationWorkflowStep step = button.DataContext as ApplicationWorkflowStep;
+            ApplicationWorkflow workflow = button.Tag as ApplicationWorkflow;
+
+            if (ApplicationData.Programs.Count == 0)
+                MessageBox.Show("Expresso is not designed for extensive data processing. The Programmer feature is used to provide preliminary extensibility to the software. Be conservative.", "Usage Advice");
+
+            ApplicationData.Programs.Add(new ApplicationScript()
+            {
+                Name = $"New Script {ApplicationData.Programs.Count + 1}",
+                IOMode = ScriptIOMode.CSV
+            });
+            ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
+            MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Programmer;
         }
         private void WorkflowStepPickActionItemButton_Click(object sender, RoutedEventArgs e)
         {
@@ -760,7 +800,7 @@ namespace Expresso
 
             ApplicationData.Processors.Add(new ApplicationProcessor()
             {
-                Name = "New Processor"
+                Name = $"New Processor {ApplicationData.Processors.Count + 1}"
             });
             ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.Processors));
         }
