@@ -28,9 +28,27 @@ namespace Expresso.Core
         Reader,
         Writer,
         RowProcessor,
+        Programmer,
         Workflow
     }
+    public enum ScriptIOMode
+    {
+        CSV,
+        Structured
+    }
 
+    public class ApplicationScript: BaseNotifyPropertyChanged
+    {
+        private string _Name = string.Empty;
+        private string _Description = string.Empty;
+        private string _Script = string.Empty;
+        private ScriptIOMode _IOMode;
+
+        public string Name { get => _Name; set => SetField(ref _Name, value); }
+        public string Description { get => _Description; set => SetField(ref _Description, value); }
+        public string Script { get => _Script; set => SetField(ref _Script, value); }
+        public ScriptIOMode IOMode { get => _IOMode; set => SetField(ref _IOMode, value); }
+    }
     public class ApplicationExecutionConditional : BaseNotifyPropertyChanged
     {
 
@@ -203,11 +221,12 @@ namespace Expresso.Core
         #endregion
 
         #region Main Configurations
+        private ObservableCollection<ApplicationVariable> _Variables = new();
         private ObservableCollection<ApplicationExecutionConditional> _Conditionals = new();
         private ObservableCollection<ApplicationDataReader> _DataReaders = new();
         private ObservableCollection<ApplicationOutputWriter> _OutputWriters = new();
-        private ObservableCollection<ApplicationVariable> _Variables = new();
         private ObservableCollection<ApplicationProcessor> _Processors = new();
+        private ObservableCollection<ApplicationScript> _Programs = new();
         private ObservableCollection<ApplicationWorkflow> _Workflows = new();
         #endregion
 
@@ -219,10 +238,11 @@ namespace Expresso.Core
         public DateTime CreationTime { get => _CreationTime; set => SetField(ref _CreationTime, value); }
         public DateTime LastModifiedTime { get => _LastModifiedTime; set => SetField(ref _LastModifiedTime, value); }
         public ObservableCollection<ApplicationExecutionConditional> Conditionals { get => _Conditionals; set => SetField(ref _Conditionals, value); }
+        public ObservableCollection<ApplicationVariable> Variables { get => _Variables; set => SetField(ref _Variables, value); }
         public ObservableCollection<ApplicationDataReader> DataReaders { get => _DataReaders; set => SetField(ref _DataReaders, value); }
         public ObservableCollection<ApplicationOutputWriter> OutputWriters { get => _OutputWriters; set => SetField(ref _OutputWriters, value); }
-        public ObservableCollection<ApplicationVariable> Variables { get => _Variables; set => SetField(ref _Variables, value); }
         public ObservableCollection<ApplicationProcessor> Processors { get => _Processors; set => SetField(ref _Processors, value); }
+        public ObservableCollection<ApplicationScript> Programs { get => _Programs; set => SetField(ref _Programs, value); }
         public ObservableCollection<ApplicationWorkflow> Workflows { get => _Workflows; set => SetField(ref _Workflows, value); }
         #endregion
     }

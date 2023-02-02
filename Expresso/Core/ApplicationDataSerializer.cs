@@ -113,6 +113,15 @@ namespace Expresso.Core
                     WriteProcessorStep(writer, step);
             }
 
+            writer.Write(data.Programs.Count);
+            foreach (ApplicationScript script in data.Programs)
+            {
+                writer.Write(script.Name);
+                writer.Write(script.Description);
+                writer.Write(script.Script);
+                writer.Write((byte)script.IOMode);
+            }
+
             writer.Write(data.Workflows.Count);
             foreach (ApplicationWorkflow workflow in data.Workflows)
             {
@@ -169,6 +178,8 @@ namespace Expresso.Core
                 CreationTime = DateTime.Parse(reader.ReadString()),
                 LastModifiedTime = DateTime.Parse(reader.ReadString())
             };
+            if (applicationData.FileVersion != Program.ProgramVersion)
+                throw new FileFormatException($"File format {applicationData.FileVersion} doesn't match program version {Program.ProgramVersion}.");
 
             {
                 var variableCount = reader.ReadInt32();
@@ -270,6 +281,21 @@ namespace Expresso.Core
                         processor.StartingSteps.Add(ReadProcessorStep(reader));
 
                     applicationData.Processors.Add(processor);
+                }
+            }
+
+            {
+                var scriptsCount = reader.ReadInt32();
+                for (int i = 0; i < scriptsCount; i++)
+                {
+                    ApplicationScript script = new()
+                    {
+                        Name = reader.ReadString(),
+                        Description = reader.ReadString(),
+                        Script = reader.ReadString(),
+                        IOMode = (ScriptIOMode)reader.ReadByte(),
+                    };
+                    applicationData.Programs.Add(script);
                 }
             }
 

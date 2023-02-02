@@ -44,6 +44,11 @@
                 <x:Type TypeName="core:WorkflowActionType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="ScriptIOModes" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="core:ScriptIOMode" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
 
         <Style TargetType="Control">
             <Setter Property="ToolTipService.ShowDuration" Value="6000"/>
@@ -817,6 +822,45 @@
                         </TabControl.ContentTemplate>
                     </TabControl>
                 </TabItem>
+                <!--Programmer Tab-->
+                <TabItem Header="Programmer" Visibility="{Binding ApplicationData.Programs, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Programs}">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding Name}"/>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate>
+                                <DockPanel LastChildFill="True">
+                                    <DockPanel DockPanel.Dock="Top">
+                                        <Label DockPanel.Dock="Left" Content="Description"/>
+                                        <ComboBox DockPanel.Dock="Right" Width="80" SelectedValue="{Binding IOMode}" ItemsSource="{Binding Source={StaticResource ScriptIOModes}}">
+                                            <ComboBox.Resources>
+                                                <!--Deals with binding of non-string type-->
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="FontSize" Value="12"/>
+                                                    <Setter Property="Foreground" Value="Black"/>
+                                                </Style>
+                                            </ComboBox.Resources>
+                                        </ComboBox>
+                                        <Label DockPanel.Dock="Right" Content="IO Mode"/>
+                                        <TextBox DockPanel.Dock="Left" Text="{Binding Description}"/>
+                                    </DockPanel>
+                                    <avalonEdit:TextEditor
+                                        DockPanel.Dock="Bottom" Margin="5"
+                                        BorderThickness="2" BorderBrush="Beige"
+                                        ShowLineNumbers="True"
+                                        SyntaxHighlighting="Python" 
+                                        FontSize="10pt" FontFamily="Consolas" 
+                                        DataContextChanged="ProgramScriptAvalonTextEditor_DataContextChanged"
+                                        Initialized="ProgramScriptAvalonTextEditor_Initialized"
+                                        TextChanged="ProgramScriptAvalonTextEditor_OnTextChanged"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
+                </TabItem>
                 <!--Workflow Tab-->
                 <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <TabControl ItemsSource="{Binding ApplicationData.Workflows}">
@@ -935,6 +979,18 @@
                                                 </DockPanel.Style>
                                                 <Label Content="Action" Width="45"/>
                                                 <Button DockPanel.Dock="Right" Content="Pick" Click="WorkflowStepPickActionItemButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type StackPanel}}}"/>
+                                                <Button DockPanel.Dock="Right" Content="Create" Click="WorkflowStepCreateProgrammerButton_Click" Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type StackPanel}}}">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ActionType}" Value="Programmer">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
                                                 <TextBox Text="{Binding ActionItem, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
                                             </DockPanel>
                                         </StackPanel>
