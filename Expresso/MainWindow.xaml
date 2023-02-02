@@ -15,6 +15,13 @@
         DataContext="{Binding RelativeSource={RelativeSource self}}"
         AllowDrop="True" Drop="Window_Drop" Closing="Window_Closing">
     <Window.Resources>
+        <SolidColorBrush x:Key="VariableColor" Color="MediumPurple"/>
+        <SolidColorBrush x:Key="ConditionColor" Color="Yellow"/>
+        <SolidColorBrush x:Key="ReaderColor" Color="IndianRed"/>
+        <SolidColorBrush x:Key="WriterColor" Color="DarkOliveGreen"/>
+        <SolidColorBrush x:Key="RowProcessorColor" Color="RosyBrown"/>
+        <SolidColorBrush x:Key="WorkflowColor" Color="SlateBlue"/>
+
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></conv:BooleanToVisibilityConverter>
         <conv:BooleanToVisibilityConverterInverted x:Key="BooleanToVisibilityConverterInverted"></conv:BooleanToVisibilityConverterInverted>
         <conv:ObjectToBooleanConverter x:Key="ObjectToBooleanConverter"></conv:ObjectToBooleanConverter>
@@ -234,7 +241,9 @@
                     </Grid>
                 </TabItem>
                 <!--Variable Tab-->
-                <TabItem Header="Variable" Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Variable" 
+                         Visibility="{Binding ApplicationData.Variables, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource VariableColor}">
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Bottom">
                             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
@@ -374,7 +383,9 @@
                     </DockPanel>
                 </TabItem>
                 <!--Conditions Tab-->
-                <TabItem Header="Condition" Visibility="{Binding ApplicationData.Conditionals, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Condition" 
+                         Visibility="{Binding ApplicationData.Conditionals, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource ConditionColor}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -443,7 +454,9 @@
                     </Grid>
                 </TabItem>
                 <!--Reader Tab-->
-                <TabItem Header="Reader" Visibility="{Binding ApplicationData.DataReaders, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Reader" 
+                         Visibility="{Binding ApplicationData.DataReaders, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource ReaderColor}">
                     <TabControl ItemsSource="{Binding ApplicationData.DataReaders}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -584,7 +597,9 @@
                     </TabControl>
                 </TabItem>
                 <!--Writer Tab-->
-                <TabItem Header="Writer" Visibility="{Binding ApplicationData.OutputWriters, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Writer" 
+                         Visibility="{Binding ApplicationData.OutputWriters, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource WriterColor}">
                     <TabControl DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.OutputWriters}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -635,7 +650,9 @@
                     </TabControl>
                 </TabItem>
                 <!--Row Processor Tab-->
-                <TabItem Header="Row Processor" Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Row Processor" 
+                         Visibility="{Binding ApplicationData.Processors, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource RowProcessorColor}">
                     <TabControl ItemsSource="{Binding ApplicationData.Processors}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -813,7 +830,9 @@
                     </TabControl>
                 </TabItem>
                 <!--Workflow Tab-->
-                <TabItem Header="Workflow" Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <TabItem Header="Workflow" 
+                         Visibility="{Binding ApplicationData.Workflows, Converter={StaticResource ObjectToVisibilityConverter}}"
+                         Background="{StaticResource WorkflowColor}">
                     <TabControl ItemsSource="{Binding ApplicationData.Workflows}">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
