@@ -22,3 +22,12 @@ Additional notes:
 * Normal (GUI) application evaluates all queries on-demand, while during workflow execution and headless mode, query results are cached.
 * Internally, all intermediate query results (unless transformed within the same in-memory SQLite context) are saved as CSV strings.
 * At the moment of implmenetation, all readers fetch data into csv and all data are treated as string during storage time.
+* Executable size:
+	* Base (Csv, Console Tables): 0-3MB
+	* K4os Compression: 3-4MB
+	* Avalon Edit: 4-6MB
+	* ExcelDataReader: 6-7MB
+	* ODBC, Analysis Service: 7-8MB
+	* Microsoft.Data.Sqlite: 9-10MB
+	* ScottPlot: 10-12MB
+	* Python.Net: ???
