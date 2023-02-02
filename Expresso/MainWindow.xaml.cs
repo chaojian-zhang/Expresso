@@ -124,25 +124,6 @@ namespace Expresso
         }
         private void BackgroundLabel_MouseDoubleClick(object sender, MouseButtonEventArgs e)
             => MenuItemFileOpen_Click(null, null);
-        private void WriterTestButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
-
-            var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
-            MessageBox.Show(result, "Test Result");
-        }
-        private void WriterDeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
-
-            if (ApplicationData.OutputWriters.Remove(writer))
-                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
-
-            if (ApplicationData.OutputWriters.Count == 0)
-                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
-        }
         private void ReaderTransformAvalonTextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             TextEditor editor = sender as TextEditor;
@@ -371,6 +352,42 @@ namespace Expresso
                 ResultPreview = resultCSV.CSVToConsoleTable();
                 ReaderResultsView = resultCSV.CSVToDataView();
             }
+        }
+        #endregion
+
+        #region Events - Writers
+        private void WriterTestButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            var result = writer.Parameters.PerformAction(new List<ParcelDataGrid>());
+            MessageBox.Show(result, "Test Result");
+        }
+        private void WriterDeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            if (ApplicationData.OutputWriters.Remove(writer))
+                ApplicationData.NotifyPropertyChanged(nameof(ApplicationData.OutputWriters));
+
+            if (ApplicationData.OutputWriters.Count == 0)
+                MainTabControlTabIndex = (int)MainTabControlTabIndexMapping.Welcome;
+        }
+        private void WriterOutputServiceProviderHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationOutputWriter writer = button.DataContext as ApplicationOutputWriter;
+
+            if (writer != null)
+            {
+                var documentation = writer.Parameters.GetPlainTextDocumentation();
+                if (documentation != null)
+                    MessageBox.Show(documentation, writer.ServiceProvider);
+                else
+                    MessageBox.Show($"No documentation has been provided on {writer.ServiceProvider} yet.", writer.ServiceProvider);
+            };
         }
         #endregion
 

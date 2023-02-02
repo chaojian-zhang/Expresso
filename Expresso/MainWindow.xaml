@@ -614,8 +614,9 @@
                                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="250"/>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                                                <Label Content="Data Service Provider"/>
+                                                <Label Content="Output Service Provider"/>
                                                 <ComboBox DockPanel.Dock="Top" MinWidth="120" SelectedValue="{Binding ServiceProvider}" ItemsSource="{Binding WriterDataServiceProviderNames, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                <Button Content="Help" Click="WriterOutputServiceProviderHelpButton_Click"/>
                                             </StackPanel>
                                         </StackPanel>
                                         <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding Parameters}">
