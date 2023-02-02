@@ -17,11 +17,8 @@ using System.Collections;
 using System.Windows.Controls;
 using Expresso.PopUps;
 using System.Text;
-using System.Reflection.Metadata;
 using System.Diagnostics;
 using System.Windows.Documents;
-using ExcelLibrary.BinaryFileFormat;
-using System.Windows.Automation;
 
 namespace Expresso
 {
@@ -220,6 +217,16 @@ namespace Expresso
         #endregion
 
         #region Events - Variables
+        private void VariableGeneratePreviewButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            ApplicationVariable variable = button.DataContext as ApplicationVariable;
+            if (variable != null) 
+            {
+                string[] values = variable.EvaluateVariable();
+                MessageBox.Show($"${{{variable.Name}}}" + Environment.NewLine + string.Join(Environment.NewLine, values), "Variable Preview");
+            }
+        }
         private void VariablePickSourceReaderButton_Click(object sender, RoutedEventArgs e)
         {
             string[] readerNames = ApplicationData.DataReaders
@@ -638,6 +645,48 @@ namespace Expresso
         }
         #endregion
 
+        #region Events - Engine
+        private void EnginePageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox comboBox = sender as ComboBox;
+            ApplicationWorkflow workflow = comboBox.SelectedValue as ApplicationWorkflow;
+            if (workflow != null)
+            {
+                List<(string Name, string Value)[]> permutations = ApplicationDataHelper.GatherVariablePermutations();
+                DataTable dataTable = new DataTable();
+                if (permutations.Count != 0)
+                {
+                    var headers = permutations.First().Select(p => p.Name);
+                    foreach (string header in headers)
+                        dataTable.Columns.Add(new DataColumn(header, typeof(string)));
+
+                    foreach (var permutation in permutations)
+                    {
+                        string[] values = permutation.Select(p => p.Value).ToArray();
+
+                        DataRow dataRow = dataTable.NewRow();
+                        dataRow.ItemArray = values;
+                        dataTable.Rows.Add(dataRow);
+                    }
+                }
+
+                EnginePageDataGrid.ItemsSource = new DataView(dataTable);
+            }
+        }
+        private void EnginePageRunWorkflowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (EnginePageComboBox.SelectedValue == null)
+            {
+                MessageBox.Show("Pick a workflow to run.");
+                return;
+            }
+
+            var workflow = ApplicationData.Workflows.SingleOrDefault(w => w == EnginePageComboBox.SelectedValue as ApplicationWorkflow);
+            if (workflow != null)
+                workflow.ExecuteWorkflow(message => EnginePageWorkflowExecutionLog.Text += message + Environment.NewLine);
+        }
+        #endregion
+
         #region Events - About Panel
         private void AboutPageHyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
@@ -805,7 +854,7 @@ namespace Expresso
                 if (pick != null)
                 {
                     var workflow = ApplicationData.Workflows.FirstOrDefault(w => w.Name == pick);
-                    workflow.ExecuteWorkflow(new ConsoleReport());
+                    workflow.ExecuteWorkflow(null);
                 }
             }
         }

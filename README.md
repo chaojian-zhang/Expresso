@@ -16,12 +16,10 @@ Has three launch modes:
 
 ### Expresso Best Practice
 
-**Namving Conventions**
-
-Generally, don''t use space and special symbols in names.
-
-* Variables: Use `lowerCamelCase` for variable names.
-* Readers: Use `CamelCase` for reader names.
+1. Namving Conventions: Generally, don''t use space and special symbols in names.
+	* Variables: Use `lowerCamelCase` for variable names.
+	* Readers: Use `CamelCase` for reader names.
+2. Delete unused variables.
 
 ### Application Workflow Architectures
 

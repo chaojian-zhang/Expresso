@@ -131,9 +131,50 @@ namespace Expresso.Core
         #endregion
 
         #region Evaluators
-        public static void ExecuteWorkflow(this ApplicationWorkflow workflow, IWorkflowStatusReporter statusReporter)
+        public static void ExecuteWorkflow(this ApplicationWorkflow workflow, Action<string> statusReportCallback)
         {
-            throw new NotImplementedException();
+            // Remark-cz: Below is but a functional implementation; Aparently much more optimization can be done.
+
+            // Gather permutations of variables
+            List<(string Name, string Value)[]> variablePermutations = GatherVariablePermutations();
+            if (variablePermutations.Count != 0 && statusReportCallback != null)
+            {
+                statusReportCallback("Variable Permutations: ");
+                statusReportCallback(string.Join(", ", variablePermutations.First().Select(p => p.Name)));
+                foreach (var permutation in variablePermutations)
+                    statusReportCallback(string.Join(", ", permutation.Select(p => p.Value)));
+            }
+        }
+        public static List<(string Name, string Value)[]> GatherVariablePermutations()
+        {
+            if (ExpressoApplicationContext.ApplicationData.Variables.Count == 0)
+                return new List<(string Name, string Value)[]>();
+
+            List<(string Name, string[] Values)> variablePotentialValues = ExpressoApplicationContext.ApplicationData.Variables
+                .Select(v => (v.Name, Values: v.EvaluateVariable()))
+                .Where(v => v.Values.Length != 0)
+                .OrderBy(v => v.Name)
+                .ToList();
+
+            List<(string Name, string Value)[]> variablePermutations = new();
+            foreach (string value in variablePotentialValues.First().Values)
+                IterateNextLevel(new List<string>() { value }, variablePotentialValues, variablePermutations);
+            return variablePermutations;
+
+            static void IterateNextLevel(List<string> currentPermutation, List<(string Name, string[] Values)> variablePotentialValues, List<(string Name, string Value)[]> variablePermutations)
+            {
+                if (currentPermutation.Count == variablePotentialValues.Count)
+                    variablePermutations.Add(currentPermutation.Zip(variablePotentialValues, (v, p) => (p.Name, v)).ToArray());
+                else
+                {
+                    foreach (string item in variablePotentialValues[currentPermutation.Count].Values)
+                    {
+                        var variant = currentPermutation.ToList(); /*Make a copy*/
+                        variant.Add(item);
+                        IterateNextLevel(variant, variablePotentialValues, variablePermutations);
+                    }
+                }
+            }
         }
         public static string InterpolateVariables(this string templateString)
         {
@@ -151,32 +192,48 @@ namespace Expresso.Core
         }
         public static string[] EvaluateVariable(this ApplicationVariable variable)
         {
+            string[] values = EvaluateVariableValues(variable);
             switch (variable.ValueType)
             {
                 case VariableValueType.SingleValue:
-                    return new string[] { variable.DefaultValue };
+                    return values;
                 case VariableValueType.MultiValueArray:
+                    return new string[] { string.Join(variable.ArrayJoinSeparator, values) };
                 case VariableValueType.Iterator:
-                    switch (variable.SourceType)
-                    {
-                        case VariableSourceType.Fixed:
-                        case VariableSourceType.CustomList:
-                            return variable.Source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                        case VariableSourceType.Reader:
-                            var reader = ExpressoApplicationContext.ApplicationData.FindReaderWithName(variable.Source);
-                            if (reader != null)
-                            {
-                                reader.EvaluateTransform(out ParcelDataGrid data, out _);
-                                if (data != null)
-                                    return data.Columns[0].GetDataAs<string>().ToArray();
-                                else return new string[] { };
-                            }
-                            else throw new ApplicationException($"Cannot find reader: {variable.Source}");
-                        default:
-                            throw new ArgumentException($"Invalid source type: {variable.SourceType}.");
-                    }
+                    return values;
                 default:
-                    throw new ArgumentException($"Invalid variable type: {variable.ValueType}.");
+                    throw new ArgumentException($"Invalid variable type: {variable.ValueType}");
+            }
+
+            string[] EvaluateVariableValues(ApplicationVariable variable)
+            {
+                switch (variable.ValueType)
+                {
+                    case VariableValueType.SingleValue:
+                        return new string[] { variable.DefaultValue };
+                    case VariableValueType.MultiValueArray:
+                    case VariableValueType.Iterator:
+                        switch (variable.SourceType)
+                        {
+                            case VariableSourceType.Fixed:
+                            case VariableSourceType.CustomList:
+                                return variable.Source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                            case VariableSourceType.Reader:
+                                var reader = ExpressoApplicationContext.ApplicationData.FindReaderWithName(variable.Source);
+                                if (reader != null)
+                                {
+                                    reader.EvaluateTransform(out ParcelDataGrid data, out _);
+                                    if (data != null)
+                                        return data.Columns[0].GetDataAs<string>().ToArray();
+                                    else return new string[] { };
+                                }
+                                else throw new ApplicationException($"Cannot find reader: {variable.Source}");
+                            default:
+                                throw new ArgumentException($"Invalid source type: {variable.SourceType}.");
+                        }
+                    default:
+                        throw new ArgumentException($"Invalid variable type: {variable.ValueType}.");
+                }
             }
         }
         public static string EvaluateTransform(this ApplicationDataReader reader, out ParcelDataGrid dataGrid, out DataTable table)

@@ -112,6 +112,8 @@ namespace Expresso.Core
 
             // Report unused entities (unused by any workflow).
             // ...
+            // Report unused variables
+            // ...
 
             // Report empty Readers as issue
             // ...
@@ -161,6 +163,8 @@ namespace Expresso.Core
                     }
                 });
             }
+            // Report any entity dependency on variables
+            // ...
 
             // Report and aggregate all external sources, and hardcoded paths.
             // ...

@@ -344,6 +344,9 @@
                                                     <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="SingleValue">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding CurrentSelectedVariable.ValueType}" Value="Iterator">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </DockPanel.Style>
@@ -364,10 +367,12 @@
                                         <Label Content="Default Value" Width="100"/>
                                         <TextBox Text="{Binding CurrentSelectedVariable.DefaultValue, UpdateSourceTrigger=PropertyChanged}"/>
                                     </DockPanel>
+                                    <StackPanel>
+                                        <Button Content="Generate Preview" Click="VariableGeneratePreviewButton_Click" DataContext="{Binding CurrentSelectedVariable}"/>
+                                    </StackPanel>
                                 </StackPanel>
                                 <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Margin="0 1"/>
                                 <StackPanel Grid.Row="2">
-                                    <Label Content="Preview"/>
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -970,19 +975,19 @@
                             <!--Workflow Choice Panel-->
                             <DockPanel Grid.Row="2" LastChildFill="True">
                                 <Label DockPanel.Dock="Top" Content="Pick Workflow"/>
-                                <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Workflows}">
+                                <ComboBox x:Name="EnginePageComboBox" DockPanel.Dock="Top" ItemsSource="{Binding ApplicationData.Workflows}" SelectionChanged="EnginePageComboBox_SelectionChanged">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <Label Content="{Binding Name}"/>
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
-                                <Button DockPanel.Dock="Top" Content="Run!" Width="160" Height="46" Foreground="White" Background="LightSeaGreen" Margin="4"/>
+                                <Button DockPanel.Dock="Top" Content="Run!" Width="160" Height="46" Foreground="White" Background="LightSeaGreen" Margin="4" Click="EnginePageRunWorkflowButton_Click"/>
                                 <!--Workflow Preview-->
                                 <DockPanel LastChildFill="True">
                                     <Label DockPanel.Dock="Top" Content="Configurations Preview" Style="{StaticResource ContextKey}"/>
                                     <Label DockPanel.Dock="Top" Content="The workflow will execute N times for the following configurations."/>
-                                    <DataGrid DockPanel.Dock="Bottom">
+                                    <DataGrid x:Name="EnginePageDataGrid"  DockPanel.Dock="Bottom">
                                     </DataGrid>
                                 </DockPanel>
                             </DockPanel>
@@ -991,7 +996,7 @@
                         <!--Log Panel-->
                         <DockPanel Grid.Column="2" LastChildFill="True">
                             <Label DockPanel.Dock="Top" Content="Logs" Style="{StaticResource ContextKey}"/>
-                            <TextBox DockPanel.Dock="Bottom" IsReadOnly="True"/>
+                            <TextBox x:Name="EnginePageWorkflowExecutionLog" DockPanel.Dock="Bottom" IsReadOnly="True"/>
                         </DockPanel>
                     </Grid>
                 </TabItem>

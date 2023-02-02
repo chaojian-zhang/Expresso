@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Expresso
 {
@@ -134,7 +135,7 @@ namespace Expresso
                 return;
             }
 
-            string workflowName = null;
+            string workflowName = appData.Workflows.First().Name;
             if (parameters.Any(p => p.Key == "workflow"))
             {
                 workflowName = parameters[0].Value;
@@ -144,20 +145,17 @@ namespace Expresso
                     return;
                 }
             }
-            else
+            else if (appData.Workflows.Count != 1)
             {
-                if (appData.Workflows.Count != 1)
-                {
-                    Console.WriteLine("Specify workflow for execution.");
-                    return;
-                }
+                Console.WriteLine("Specify workflow for execution.");
+                return;
             }
             if (workflowName == null)
                 throw new ApplicationException("Workflow cannot be null.");
 
             ExpressoApplicationContext.Context.SetCurrentApplicationData(appData);
             var workflow = appData.Workflows.FirstOrDefault(w => w.Name == workflowName);
-            workflow.ExecuteWorkflow(new ConsoleReport());
+            workflow.ExecuteWorkflow(message => Console.WriteLine(message));
         }
         #endregion
     }
@@ -177,11 +175,4 @@ namespace Expresso
         }
     }
 
-    internal class ConsoleReport : IWorkflowStatusReporter
-    {
-        public void Update(string status)
-        {
-            Console.WriteLine(status);
-        }
-    }
 }
