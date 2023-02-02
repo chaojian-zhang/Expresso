@@ -1,4 +1,5 @@
 ﻿using Expresso.Components;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,6 +12,64 @@ using System.Windows;
 
 namespace Expresso.Core
 {
+    internal static class SQLiteHelper
+    {
+        #region One-Shot Use
+        public static string TransformCSV(string tableName, string csv, string transformQuery, out ParcelDataGrid dataGrid, out DataTable table)
+        {
+            ParcelDataGrid tableGrid = new(tableName, csv, true);
+            try
+            {
+                dataGrid = new ParcelDataGrid[] { tableGrid }.ProcessDataGrids(transformQuery, out table);
+                dataGrid.TableName = table.TableName = tableName;
+                return dataGrid.ToCSV();
+            }
+            catch (Exception err)
+            {
+                dataGrid = null;
+                table = null;
+                return $"Result,Message\nError,\"{err.Message.Replace(Environment.NewLine, " ")}\"";
+            }
+        }
+        #endregion
+
+        #region Rudimentary Interface
+        public static ParcelDataGrid ProcessDataGrids(this IList<ParcelDataGrid> inputTables, string command, out DataTable dataTable)
+        {
+            if (inputTables.Select(t => t.TableName).Distinct().Count() != inputTables.Count)
+                throw new ArgumentException("Missing Data Table names.");
+
+            using SqliteConnection connection = new SqliteConnection("Data Source=:memory:");
+            connection.Open();
+
+            foreach (ParcelDataGrid table in inputTables)
+                connection.PopulateTable(table);
+
+            // Execute
+            string formattedText = command.TrimEnd(';') + ';';
+            for (int i = 0; i < inputTables.Count; i++)
+                formattedText = formattedText.Replace($"@Table{i + 1}", $"'{inputTables[i].TableName}'"); // Table names can't use parameters, so do it manually
+
+            dataTable = new DataTable();
+            dataTable.Load(new SqliteCommand(command, connection).ExecuteReader());
+
+            connection.Close();
+            return new ParcelDataGrid(dataTable);
+        }
+        #endregion
+
+        #region Helpers
+        public static void PopulateTable(this SqliteConnection connection, ParcelDataGrid table)
+        {
+            SqliteCommand cmd = connection.CreateCommand();
+            cmd.CommandText = $"CREATE TABLE '{table.TableName}'({string.Join(',', table.Columns.Select(c => $"\"{c.Header}\""))})";
+            cmd.ExecuteNonQuery();
+
+            InMemorySQLIte.InsertDbData(connection, table.TableName, table);
+        }
+        #endregion
+    }
+
     internal class ExpressoApplicationContext
     {
         #region Singleton
@@ -40,19 +99,7 @@ namespace Expresso.Core
         public void SetCurrentApplicationData(ApplicationData value)
         {
             _ApplicationData = value;
-            _SessionDatabaseContext = new DatabaseContext();
         }
-        #endregion
-
-        #region Data Caching Context
-        /// <summary>
-        /// For caching remote data queries, used by specific data query readers
-        /// </summary>
-        private static DatabaseContext _GlobalDatabaseContext = new DatabaseContext();
-        /// <summary>
-        /// For general management of file-scope readers
-        /// </summary>
-        private static DatabaseContext _SessionDatabaseContext;
         #endregion
     }
 
