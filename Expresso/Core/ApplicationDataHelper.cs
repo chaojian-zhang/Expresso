@@ -1,5 +1,6 @@
 ﻿using Expresso.Components;
 using Microsoft.Data.Sqlite;
+using Python.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -143,6 +144,26 @@ namespace Expresso.Core
                 statusReportCallback(string.Join(", ", variablePermutations.First().Select(p => p.Name)));
                 foreach (var permutation in variablePermutations)
                     statusReportCallback(string.Join(", ", permutation.Select(p => p.Value)));
+            }
+
+            // Test: Execute Python
+            if (workflow.StartingSteps.Count != 0 && workflow.StartingSteps.First().ActionType == WorkflowActionType.Programmer)
+            {
+                Runtime.PythonDLL = "python39.dll";
+                PythonEngine.Initialize();
+                using (Py.GIL())
+                {
+                    using PyModule scope = Py.CreateScope();
+                    scope.Set("input", "Charles");
+
+                    string code = """
+                        output = f"Hello: {input}"
+                        """;
+                    scope.Exec(code);
+                    string output = scope.Get<string>("output");
+                    MessageBox.Show(output, "Output");
+                }
+                PythonEngine.Shutdown();
             }
         }
         public static List<(string Name, string Value)[]> GatherVariablePermutations()

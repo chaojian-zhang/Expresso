@@ -633,7 +633,7 @@ namespace Expresso
             {
                 case WorkflowActionType.Condition:
                     entityNames = currentApplicationData.Conditionals
-                        .Select(r => r.Name).ToArray();
+                        .Select(c => c.Name).ToArray();
                     break;
                 case WorkflowActionType.Reader:
                     entityNames = currentApplicationData.DataReaders
@@ -641,11 +641,15 @@ namespace Expresso
                     break;
                 case WorkflowActionType.Writer:
                     entityNames = currentApplicationData.OutputWriters
-                        .Select(r => r.Name).ToArray();
+                        .Select(w => w.Name).ToArray();
                     break;
                 case WorkflowActionType.RowProcessor:
                     entityNames = currentApplicationData.Processors
-                        .Select(r => r.Name).ToArray();
+                        .Select(p => p.Name).ToArray();
+                    break;
+                case WorkflowActionType.Programmer:
+                    entityNames = currentApplicationData.Programs
+                        .Select(s => s.Name).ToArray();
                     break;
                 case WorkflowActionType.Workflow:
                     entityNames = currentApplicationData.Workflows
