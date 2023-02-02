@@ -55,9 +55,9 @@
             </DockPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="5" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
                 <DockPanel Grid.Column="0">
                     <DockPanel LastChildFill="True">
@@ -108,9 +108,9 @@
             </DockPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="5" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
                 <DockPanel Grid.Column="0">
                     <DockPanel LastChildFill="True">
@@ -161,9 +161,9 @@
             </DockPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="5" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
                 <DockPanel Grid.Column="0">
                     <DockPanel LastChildFill="True">
@@ -201,6 +201,77 @@
                         DataContextChanged="ExcelWriterAvalonTextEditor_DataContextChanged"
                         Initialized="ExcelWriterAvalonTextEditor_Initialized"
                         TextChanged="ExcelWriterAvalonTextEditor_OnTextChanged"/>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type core:OutputWriterPlotWriterParameter}">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" >
+                <DockPanel LastChildFill="True">
+                    <Label Content="File Path"/>
+                    <TextBox DockPanel.Dock="Right" Text="{Binding PlotType, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                    <Label DockPanel.Dock="Right" Content="Plot Type"/>
+                    <Button DockPanel.Dock="Right" Content="Choose" Click="PlotWriterChooseSaveLocationButton_Click"/>
+                    <TextBox DockPanel.Dock="Right" Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                </DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel Grid.Column="0" LastChildFill="True">
+                        <Label Content="X Axis"/>
+                        <TextBox Text="{Binding XAxis, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" LastChildFill="True">
+                        <Label Content="Y Axis"/>
+                        <TextBox Text="{Binding YAxis, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DockPanel>
+                </Grid>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="7*" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel>
+                            <Label Content="Inputs"/>
+                            <StackPanel>
+                                <Button Content="Add" Click="PlotWriterAddInputButton_Click"/>
+                                <Button Content="Pick" Click="PlotWriterReaderNamePickButton_Click"/>
+                                <Button Content="Remove" Click="PlotWriterRemoveInputButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <Border BorderBrush="LightGray" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding InputTableNames}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True">
+                                            <Label DockPanel.Dock="Left" Content="Table Input" />
+                                            <TextBox DockPanel.Dock="Left" Text="{Binding Path=., UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </DockPanel>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Margin="1 0"/>
+                <DockPanel  Grid.Column="2" LastChildFill="True">
+                    <Label DockPanel.Dock="Top" Content="Query"/>
+                    <avalonEdit:TextEditor 
+                        DockPanel.Dock="Bottom" Margin="5"
+                        BorderThickness="2" BorderBrush="Beige"
+                        ShowLineNumbers="True"
+                        SyntaxHighlighting="{Binding SQLSyntaxHighlighting, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
+                        FontSize="10pt" FontFamily="Consolas" WordWrap="True" 
+                        DataContextChanged="PlotWriterAvalonTextEditor_DataContextChanged"
+                        Initialized="PlotWriterAvalonTextEditor_Initialized"
+                        TextChanged="PlotWriterAvalonTextEditor_OnTextChanged"/>
                 </DockPanel>
             </Grid>
         </DockPanel>

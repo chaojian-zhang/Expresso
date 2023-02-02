@@ -52,6 +52,11 @@ namespace Expresso.Core
         #endregion
 
         #region Query Interface
+        /// <remarks>
+        /// When testing in "Readers" tab, the inputs are taken directly from the specified readers.
+        /// </remarks>
+        /// <param name="overwriteInputs">When used in workflows, workflow may feed upstream data tables to this writer.</param>
+        /// <returns>Returns status string that will show in a pop-up (when in GUI mode), or to the log (when in headless mode).</returns>
         public abstract string PerformAction(List<ParcelDataGrid> overwriteInputs);
         #endregion
 
@@ -411,6 +416,70 @@ namespace Expresso.Core
             base.ReadFromStream(reader);
             FilePath = reader.ReadString();
             Transform = reader.ReadString();
+            var inputDataNamesLength = reader.ReadInt32();
+            for (int i = 0; i < inputDataNamesLength; i++)
+                InputTableNames.Add(reader.ReadString());
+        }
+        #endregion
+    }
+
+    public sealed class OutputWriterPlotWriterParameter : WriterParameterBase
+    {
+        #region Meta Data
+        public static new string DisplayName => "Plot to Image (PNG)";
+        #endregion
+
+        #region Base Property
+        private string _FilePath = string.Empty;
+        private string _Transform = string.Empty;
+        private string _PlotType = string.Empty;
+        private string _XAxis = string.Empty;
+        private string _YAxis = string.Empty;
+        private ObservableCollection<string> _InputTableNames = new();
+        #endregion
+
+        #region Data Binding Setup
+        public string FilePath { get => _FilePath; set => SetField(ref _FilePath, value); }
+        public string Transform { get => _Transform; set => SetField(ref _Transform, value); }
+        public string PlotType { get => _PlotType; set => SetField(ref _PlotType, value); }
+        public string XAxis { get => _XAxis; set => SetField(ref _XAxis, value); }
+        public string YAxis { get => _YAxis; set => SetField(ref _YAxis, value); }
+        public ObservableCollection<string> InputTableNames { get => _InputTableNames; set => SetField(ref _InputTableNames, value); }
+        #endregion
+
+        #region Query Interface
+        public override string PerformAction(List<ParcelDataGrid> overwriteInputs)
+        {
+            double[] xs = { 1, 2, 3, 4, 5 };
+            double[] ys = { 1, 4, 9, 16, 25 };
+            var plt = new ScottPlot.Plot(400, 300);
+            plt.AddScatter(xs, ys);
+            plt.SaveFig(FilePath);
+
+            return $"File written to {FilePath}";
+        }
+        #endregion
+
+        #region Serialization Interface
+        public override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(FilePath);
+            writer.Write(Transform);
+            writer.Write(PlotType);
+            writer.Write(XAxis);
+            writer.Write(YAxis);
+            foreach (var item in InputTableNames)
+                writer.Write(item);
+        }
+        public override void ReadFromStream(BinaryReader reader)
+        {
+            base.ReadFromStream(reader);
+            FilePath = reader.ReadString();
+            Transform = reader.ReadString();
+            PlotType = reader.ReadString();
+            XAxis = reader.ReadString();
+            YAxis = reader.ReadString();
             var inputDataNamesLength = reader.ReadInt32();
             for (int i = 0; i < inputDataNamesLength; i++)
                 InputTableNames.Add(reader.ReadString());
