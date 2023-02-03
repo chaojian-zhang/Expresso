@@ -10,7 +10,7 @@ Self-contained, modularized.
 
 ## Issue
 
-* Notice when fetching from Database it's possible that cell values are NULL - at the moment Parcel Data Grid is not capable of handling that. This is especially common with Microsoft Analysis Service when data are not available.
+* Notice when fetching from Database it's possible that cell values are NULL - at the moment Parcel Data Grid is not capable of handling that. This is especially common with Microsoft Analysis Service when data are not available. DO NOT HANDLE IT AT THE SITE OF QUERY - IF THE QUERY RETURNS CELL VALUE AS NULL, THEN IT SHOULD BE NULL. AND MICROSOFT.DATA.DATATABLE WILL CONVERT IT AS DbNull which makes sense and ParcelDataGrid can take this as an object (and at the moment ParcelDataGrid can't really take a null actually). So this issue should be handled only at the site of the end user.
 
 ## Technical Note
 
