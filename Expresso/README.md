@@ -8,6 +8,10 @@ Self-contained, modularized.
 2. V2: Visualization, Algorithms Toolbox (Reader and Processor)
 3. V3: Large numerical data optimization
 
+## Issue
+
+* Notice when fetching from Database it's possible that cell values are NULL - at the moment Parcel Data Grid is not capable of handling that. This is especially common with Microsoft Analysis Service when data are not available.
+
 ## Technical Note
 
 All data transformation generally have the following structure:
