@@ -231,7 +231,24 @@ namespace Expresso.Core
                 switch (variable.ValueType)
                 {
                     case VariableValueType.SingleValue:
-                        return new string[] { variable.DefaultValue };
+                        switch (variable.SourceType)
+                        {
+                            case VariableSourceType.Fixed:
+                            case VariableSourceType.CustomList:
+                                return new string[] { variable.DefaultValue };
+                            case VariableSourceType.Reader:
+                                var reader = ExpressoApplicationContext.ApplicationData.FindReaderWithName(variable.Source);
+                                if (reader != null)
+                                {
+                                    reader.EvaluateTransform(out ParcelDataGrid data, out _);
+                                    if (data != null)
+                                        return data.Columns[0].GetDataAs<object>().Select(v => v.ToString()).Take(1).ToArray();
+                                    else return new string[] { };
+                                }
+                                else throw new ApplicationException($"Cannot find reader: {variable.Source}");
+                            default:
+                                throw new ArgumentException($"Invalid source type: {variable.SourceType}.");
+                        }
                     case VariableValueType.MultiValueArray:
                     case VariableValueType.Iterator:
                         switch (variable.SourceType)
