@@ -967,17 +967,29 @@ namespace Expresso
         private int SaveApplicationDataScripts(ApplicationData applicationData, string destination)
         {
             string fileName = System.IO.Path.GetFileNameWithoutExtension(destination);
-            string title = applicationData.Name;
             int savedItems = 0;
 
             StringBuilder markdownBuilder = new StringBuilder();
-            markdownBuilder.AppendLine($"# {(string.IsNullOrWhiteSpace(title) ? "Analysis" : title)} - {fileName}\n");
+            SaveDocumentProperties(applicationData, markdownBuilder, fileName);
             savedItems += SaveVariables(applicationData, markdownBuilder);
             savedItems += SaveReaders(applicationData, markdownBuilder);
 
             System.IO.File.WriteAllText(destination, markdownBuilder.ToString());
             return savedItems;
 
+            static void SaveDocumentProperties(ApplicationData applicationData, StringBuilder markdownBuilder, string fileName)
+            {
+                if (!string.IsNullOrEmpty(applicationData.Name))
+                    markdownBuilder.AppendLine($"# {applicationData.Name}\n");
+                else
+                    markdownBuilder.AppendLine($"# Analysis - {fileName}\n");
+
+                markdownBuilder.AppendLine($"Iteration: {applicationData.Iteration}  ");
+                markdownBuilder.AppendLine($"Creation Time: {applicationData.CreationTime:yyyy-MM-dd}\n");
+
+                if (!string.IsNullOrWhiteSpace(applicationData.Description))
+                    markdownBuilder.AppendLine(applicationData.Description.TrimEnd() + "\n");
+            }
             static int SaveVariables(ApplicationData applicationData, StringBuilder markdownBuilder)
             {
                 markdownBuilder.AppendLine($"## Variables\n");
