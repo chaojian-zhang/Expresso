@@ -199,42 +199,46 @@
                                 BorderThickness="1" BorderBrush="LightGray" 
                                 Padding="5"
                                 CornerRadius="2" Background="LightBlue">
-                            <StackPanel>
-                                <Label Content="Document Properties"/>
-                                <DockPanel>
-                                    <Label Content="Name" Width="70"/>
-                                    <TextBox Text="{Binding ApplicationData.Name, UpdateSourceTrigger=PropertyChanged}"/>
-                                </DockPanel>
-                                <DockPanel>
+                            <DockPanel LastChildFill="True">
+                                <StackPanel DockPanel.Dock="Top">
+                                    <Label Content="Document Properties"/>
+                                    <DockPanel>
+                                        <Label Content="Name" Width="70"/>
+                                        <TextBox Text="{Binding ApplicationData.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DockPanel>
+                                </StackPanel>
+                                <StackPanel DockPanel.Dock="Bottom">
+                                    <DockPanel>
+                                        <Label Content="Iteration" Width="100"/>
+                                        <Label Content="{Binding ApplicationData.Iteration}">
+                                            <Label.Resources>
+                                                <!--Deals with binding of non-string type-->
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="FontSize" Value="12"/>
+                                                </Style>
+                                            </Label.Resources>
+                                        </Label>
+                                    </DockPanel>
+                                    <DockPanel>
+                                        <Label Content="Creation Time" Width="100"/>
+                                        <Label Content="{Binding ApplicationData.CreationTime}">
+                                            <Label.Resources>
+                                                <!--Deals with binding of non-string type-->
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="FontSize" Value="12"/>
+                                                </Style>
+                                            </Label.Resources>
+                                        </Label>
+                                    </DockPanel>
+                                </StackPanel>
+                                <DockPanel DockPanel.Dock="Top">
                                     <Label Content="Description" Width="70"/>
                                     <TextBox Text="{Binding ApplicationData.Description, UpdateSourceTrigger=PropertyChanged}"
-                                         Height="250"
-                                         TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
-                                         SpellCheck.IsEnabled="True"/>
+                                             VerticalScrollBarVisibility="Auto"
+                                             TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"
+                                             SpellCheck.IsEnabled="True"/>
                                 </DockPanel>
-                                <DockPanel>
-                                    <Label Content="Iteration" Width="100"/>
-                                    <Label Content="{Binding ApplicationData.Iteration}">
-                                        <Label.Resources>
-                                            <!--Deals with binding of non-string type-->
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontSize" Value="12"/>
-                                            </Style>
-                                        </Label.Resources>
-                                    </Label>
-                                </DockPanel>
-                                <DockPanel>
-                                    <Label Content="Creation Time" Width="100"/>
-                                    <Label Content="{Binding ApplicationData.CreationTime}">
-                                        <Label.Resources>
-                                            <!--Deals with binding of non-string type-->
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="FontSize" Value="12"/>
-                                            </Style>
-                                        </Label.Resources>
-                                    </Label>
-                                </DockPanel>
-                            </StackPanel>
+                            </DockPanel>
                         </Border>
                     </Grid>
                 </TabItem>
