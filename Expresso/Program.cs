@@ -31,7 +31,7 @@ namespace Expresso
     {
         #region Signature Engravings
         public static readonly string ProgramVersion = "V1";
-        public static readonly string BuildID = "V2023_01_30-78D8A6103C95";
+        public static readonly string BuildID = "V2023_02_09-69746FA84F66";
         public static readonly string Nickname = "SQL Analyst";
         public static readonly string Catchphrase = "Data analysis in a breeze.";
         #endregion

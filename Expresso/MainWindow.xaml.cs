@@ -967,22 +967,55 @@ namespace Expresso
         {
             string fileName = System.IO.Path.GetFileNameWithoutExtension(destination);
             string title = applicationData.Name;
+            int savedItems = 0;
 
             StringBuilder markdownBuilder = new StringBuilder();
             markdownBuilder.AppendLine($"# {(string.IsNullOrWhiteSpace(title) ? "Analysis" : title)} - {fileName}\n");
-            foreach (ApplicationDataReader reader in applicationData.DataReaders)
-            {
-                markdownBuilder.AppendLine($"## (Reader) {reader.Name}\n");
-                markdownBuilder.AppendLine($"{reader.Description}\n");
-                foreach (ApplicationDataQuery query in reader.DataQueries)
-                {
-                    markdownBuilder.AppendLine($"### {query.ServiceProvider}: {query.Name}\n");
-                    query.Parameters.BuildMarkdown(markdownBuilder);
-                }
-            }
+            savedItems += SaveVariables(applicationData, markdownBuilder);
+            savedItems += SaveReaders(applicationData, markdownBuilder);
 
             System.IO.File.WriteAllText(destination, markdownBuilder.ToString());
-            return applicationData.DataReaders.Count;
+            return savedItems;
+
+            static int SaveVariables(ApplicationData applicationData, StringBuilder markdownBuilder)
+            {
+                markdownBuilder.AppendLine($"## Variables\n");
+
+                foreach (ApplicationVariable variable in applicationData.Variables)
+                {
+                    markdownBuilder.AppendLine($"{nameof(variable.Name)}: {variable.Name}  ");
+                    markdownBuilder.AppendLine($"{nameof(variable.ValueType)}: {variable.ValueType}  ");
+                    markdownBuilder.AppendLine($"{nameof(variable.SourceType)}: {variable.SourceType}  ");
+                    if (!string.IsNullOrWhiteSpace(variable.Source))
+                    {
+                        var sourceLines = variable.Source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        if (sourceLines.Length == 1)
+                            markdownBuilder.AppendLine($"{nameof(variable.Source)}:  `{sourceLines.First()}`  ");
+                        else
+                            markdownBuilder.AppendLine($"{nameof(variable.Source)}:  \n{string.Join("  \n", sourceLines)}  ");
+                    }
+                    if (!string.IsNullOrWhiteSpace(variable.ArrayJoinSeparator))
+                        markdownBuilder.AppendLine($"{nameof(variable.ArrayJoinSeparator)}: `{variable.ArrayJoinSeparator}`  ");
+                    if (!string.IsNullOrWhiteSpace(variable.DefaultValue))
+                        markdownBuilder.AppendLine($"{nameof(variable.DefaultValue)}: `{variable.DefaultValue}`  ");
+                    markdownBuilder.AppendLine();
+                }
+                return applicationData.Variables.Count;
+            }
+            static int SaveReaders(ApplicationData applicationData, StringBuilder markdownBuilder)
+            {
+                foreach (ApplicationDataReader reader in applicationData.DataReaders)
+                {
+                    markdownBuilder.AppendLine($"## (Reader) {reader.Name}\n");
+                    markdownBuilder.AppendLine($"{reader.Description}\n");
+                    foreach (ApplicationDataQuery query in reader.DataQueries)
+                    {
+                        markdownBuilder.AppendLine($"### {query.ServiceProvider}: {query.Name}\n");
+                        query.Parameters.BuildMarkdown(markdownBuilder);
+                    }
+                }
+                return applicationData.DataReaders.Count;
+            }
         }
         private static ApplicationData OpenFile(string filePath)
         {
