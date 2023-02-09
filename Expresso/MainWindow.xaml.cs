@@ -1005,13 +1005,15 @@ namespace Expresso
             }
             static int SaveReaders(ApplicationData applicationData, StringBuilder markdownBuilder)
             {
+                markdownBuilder.AppendLine($"## Readers\n");
+
                 foreach (ApplicationDataReader reader in applicationData.DataReaders)
                 {
-                    markdownBuilder.AppendLine($"## (Reader) {reader.Name}\n");
+                    markdownBuilder.AppendLine($"### {reader.Name}\n");
                     markdownBuilder.AppendLine($"{reader.Description}\n");
                     foreach (ApplicationDataQuery query in reader.DataQueries)
                     {
-                        markdownBuilder.AppendLine($"### {query.ServiceProvider}: {query.Name}\n");
+                        markdownBuilder.AppendLine($"#### ({query.ServiceProvider}) {query.Name}\n");
                         query.Parameters.BuildMarkdown(markdownBuilder);
                     }
                 }
