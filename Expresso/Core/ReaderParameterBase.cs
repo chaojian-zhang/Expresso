@@ -247,7 +247,7 @@ namespace Expresso.Core
             if (!string.IsNullOrWhiteSpace(Query))
             {
                 var current = ExpressoApplicationContext.ApplicationData;
-                string tableName = current.FindReaderFromParameters(this).Name;
+                string tableName = current.FindReaderDataQueryFromParameters(this).Name;
                 return SQLiteHelper.TransformCSV(tableName, csv, QueryInterpolated, out _, out _);
             }
             else return csv;
