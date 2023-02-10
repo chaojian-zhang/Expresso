@@ -92,7 +92,7 @@ namespace Expresso.Core
         private RowProcessorParameterBase _Parameters = null;
         private ObservableCollection<ParameterMapping> _Outputs = new();
         private ObservableCollection<ApplicationProcessorStep> _NextSteps = new();
-        private bool _IsFinalOutput = false;
+        private bool _IsFinalOutput = true;
 
         public string Name { get => _Name; set => SetField(ref _Name, value); }
         public ObservableCollection<ParameterMapping> Inputs { get => _Inputs; set => SetField(ref _Inputs, value); }
