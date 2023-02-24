@@ -1,5 +1,5 @@
-﻿/* Author: Charles Zhang 📧Email: charles_zhang@otpp.com
- * Version: v0.2.4
+﻿/* Author: Charles Zhang 📧Email: charles_zhang@totalimagine.com
+ * Version: v0.2.5
  * ALL MODIFICATIONS MUST INCREMENT VERSION NUMBER.
  * 
  * SQLite in-memory DB. #C# #SQLite In-Memory DB: A powerful single-file library for Oracle (ODBC), Cube (Adomd) and SQLite based SQL processing of data. There is also a python equivalance which is not available under this site yet.
@@ -45,7 +45,8 @@
  * - v0.2.2: Implement DataGrid "compute" interface method (this is equivalent to how Python Pandas Dataframe can create new columns)
  * - v0.2.3: Add optional column selector to DataTable extension method "List<>()"
  * --------- INTERFACE BREAKING CHANGES --------- 
- * -v0.2.4: Refactor/Merge from Expresso project; Add utility functions; Extract out ParcelDataGrid dependancy.
+ * - v0.2.4: Refactor/Merge from Expresso project; Add utility functions; Extract out ParcelDataGrid dependancy.
+ * - v0.2.5 (2023-02-24): Change contact email address.
  */
 
 using ConsoleTables;
