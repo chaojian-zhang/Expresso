@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Collections.ObjectModel;
 using Microsoft.Data.Sqlite;
 using Parcel;
+using InMemoryDB;
 
 namespace Expresso.Core
 {

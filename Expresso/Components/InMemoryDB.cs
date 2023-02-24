@@ -1,6 +1,5 @@
 ﻿using ConsoleTables;
 using Csv;
-using Expresso.Components;
 using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Data.Sqlite;
 using Parcel;
@@ -16,7 +15,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Expresso.Components
+namespace InMemoryDB
 {
     #region Main DB Definition
     public enum DestinationDatabase
