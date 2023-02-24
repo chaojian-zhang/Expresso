@@ -1,4 +1,17 @@
-﻿using Csv;
+﻿/* Author: Charles Zhang 📧Email: charles_zhang@otpp.com
+ * Version: v0.1.0
+ * ALL MODIFICATIONS MUST INCREMENT VERSION NUMBER.
+ *
+ * Parcel Data Grid from Parcel project.
+ * Requires Csv by Steve.
+ * 
+ * # Version Changes
+ * 
+ * - Pre v0.1.0: Draft definition
+ * - v0.1.1 (2023-02-24): PENDING
+ */
+
+using Csv;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Expresso.Components
+namespace Parcel
 {
     #region Alternative Data Grid Construct
     public class ParcelDataColumn
