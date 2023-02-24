@@ -1,4 +1,54 @@
-﻿using ConsoleTables;
+﻿/* Author: Charles Zhang 📧Email: charles_zhang@otpp.com
+ * Version: v0.2.4
+ * ALL MODIFICATIONS MUST INCREMENT VERSION NUMBER.
+ * 
+ * SQLite in-memory DB. #C# #SQLite In-Memory DB: A powerful single-file library for Oracle (ODBC), Cube (Adomd) and SQLite based SQL processing of data. There is also a python equivalance which is not available under this site yet.
+ * This file is provided as a single-file library for in-memory database operations for dealing with daily data processin and transformation tasks.
+ * It contains the following main components:
+ *  1. ~~A DataGrid definition from Parcel~~ (Dependancy extracted since version v0.2.4)
+ *  2. A InMemoryDB class emcapsulating SQLite in-memory DB
+ *  3. Some System.Data.DataTable utility functions
+ *  
+ * This class has the dependancies on those external libraries:
+ *  1. System.Data.SQLite, any version
+ *  2. Csv, any version
+ *  3. Microsoft.AnalysisServices.AdomdClient.NetCore.retail.amd64, version 19.46.0
+ *  4. System.Data.Odbc, any version
+ *  5. ConsoleTables, any version
+ * 
+ * The source code is version controlled here: https://github.otpp.com/gist/zhangc2/8f56df82235a5164c2ee412fa5e123c9
+ * 
+ * # Documentation
+ * 
+ * There are two ways to use this library:
+ * 1. Use InMemoryDB class directly for more custom control
+ * 2. Use ProceduralInMemoryDB for a more streamlined experience
+ * 
+ * The overall workflow is to 1) import data from various (Oracle, Cube, CSV) as SQLite tables; 2) Perform transformation using SQL; 3) Do any additional operations.
+ * 
+ * # Version Changes
+ * 
+ * - Pre v0.1.0: Draft definition
+ * - v0.1.0: Include most utility and basic types
+ * - v0.1.1: Enhance with ProceduralInMemoryDB; Organize code
+ * - v0.1.2: Make query type strongly typed; Add author information
+ * - v0.1.3: Fix bug with importing empty DataTable; Automatically drop table when preparing; Add toggle for suppressing console output; Add error check
+ * - v0.1.4: Add load(), transform() and export() to ProceduralInMemoryDB
+ * - v0.1.5: Add documentation/usage note to ProceduralInMemoryDB; Add interface methods for querying data from InMemorySQLite
+ * - v0.1.6: Add transfer(), push(), migrate() and related database update routines - the interface is a bit too semantically messy now because we are trying to match Python interface
+ * - v0.1.7: Fix bug with Migrate()
+ * --------- INTERFACE BREAKING CHANGES --------- 
+ * - v0.1.8: Provide utility function for executing arbitary MDX queries and return the result as Datagrid; Change "string dsn" paramter to some oracle related functions and provide default value
+ * - v0.1.9: Add DataTable extension methods
+ * - v0.2.0: Add strongly typed unwrapping extension methods for DataTable (from old SQLiteExtension.cs)
+ * - v0.2.1: Refine strongly typed DataTable unwrapping extension methods; Add placeholder definition for function
+ * - v0.2.2: Implement DataGrid "compute" interface method (this is equivalent to how Python Pandas Dataframe can create new columns)
+ * - v0.2.3: Add optional column selector to DataTable extension method "List<>()"
+ * --------- INTERFACE BREAKING CHANGES --------- 
+ * -v0.2.4: Refactor/Merge from Expresso project; Add utility functions; Extract out ParcelDataGrid dependancy.
+ */
+
+using ConsoleTables;
 using Csv;
 using Microsoft.AnalysisServices.AdomdClient;
 using Microsoft.Data.Sqlite;
